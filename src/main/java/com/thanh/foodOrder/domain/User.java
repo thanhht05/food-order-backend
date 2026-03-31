@@ -32,7 +32,7 @@ public class User {
    private long point;
    @Column(name = "created_at")
    private Instant createdAt;
-   private Instant m;
+   private Instant updatedAt;
    String refreshToken;
 
    @ManyToOne()
