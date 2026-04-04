@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Sort;
 
 import org.springframework.data.domain.Pageable;
@@ -100,6 +102,15 @@ public class UserController {
         ResultPaginationDTO users = this.userService.getAllUser(page, size, fullName, email);
         return ResponseEntity.ok().body(users);
 
+    }
+
+    @PostMapping("/users/bulk")
+    @ApiMessage("Create users in bulk")
+    public ResponseEntity<Map<String, Object>> createUserBulk(
+            @RequestBody List<User> users) {
+
+        Map<String, Object> result = userService.createUserBulk(users);
+        return ResponseEntity.ok(result);
     }
 
 }

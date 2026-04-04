@@ -10,7 +10,10 @@ import com.thanh.foodOrder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -71,6 +74,7 @@ public class UserService {
         userDTO.setPhone(user.getPhone());
         userDTO.setCreatedAt(user.getCreatedAt());
         userDTO.setUpdatedAt(user.getUpdatedAt());
+
         roleUser.setId(user.getRole().getId());
         roleUser.setName(user.getRole().getName());
         userDTO.setRoleUser(roleUser);
@@ -167,4 +171,46 @@ public class UserService {
         });
     }
 
+    public Map<String, Object> createUserBulk(List<User> usersBulk) {
+
+        List<ResponseUserDTO> success = new ArrayList<>();
+        List<Map<String, String>> failed = new ArrayList<>();
+
+        for (User u : usersBulk) {
+            try {
+                // check email
+                if (checkExistsByEmail(u.getEmail())) {
+                    Map<String, String> err = new HashMap<>();
+                    err.put("email", u.getEmail());
+                    err.put("error", "Email already exists");
+                    failed.add(err);
+                    continue;
+                }
+
+                // set role
+                if (u.getRole() != null) {
+                    Role role = roleService.getRoleById(u.getRole().getId());
+                    u.setRole(role);
+                }
+
+                u.setPassword(passwordEncoder.encode(u.getPassword()));
+
+                User savedUser = userRepository.save(u);
+                success.add(convertUserToResUserDTO(savedUser));
+
+            } catch (Exception e) {
+                Map<String, String> err = new HashMap<>();
+                err.put("email", u.getEmail());
+                err.put("error", "System error");
+                failed.add(err);
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", success);
+        result.put("failed", failed);
+        result.put("total", usersBulk.size());
+
+        return result;
+    }
 }
