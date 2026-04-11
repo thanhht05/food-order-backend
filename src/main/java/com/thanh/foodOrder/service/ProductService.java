@@ -15,9 +15,12 @@ import org.springframework.stereotype.Service;
 
 import com.thanh.foodOrder.domain.Category;
 import com.thanh.foodOrder.domain.Product;
+import com.thanh.foodOrder.domain.ProductImage;
 import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.respone.product.ResponseProductDTO;
 import com.thanh.foodOrder.domain.respone.role.ResponseRoleDTO;
+import com.thanh.foodOrder.dtos.request.ProductRequestDTO;
+import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
 import com.thanh.foodOrder.repository.ProductRepository;
 import com.thanh.foodOrder.util.exception.CommonException;
 
@@ -45,25 +48,39 @@ public class ProductService {
         });
     }
 
-    public ResponseProductDTO createProduct(Product product) {
+    public ResponseProductDTO createProduct(ProductRequestDTO productReq) {
 
         // 1. Load managed Category from DB first
         Category category = this.categoryService
-                .getCategoryByName(product.getCategory().getName());
+                .getCategoryByName(productReq.getCategoryName());
 
         // 2. Check duplicate using managed Category
         boolean isDuplicate = productRepository.existsByNameAndCategory(
-                product.getName(), category);
+                productReq.getName(), category);
 
         if (isDuplicate) {
             throw new CommonException(
-                    "Product '" + product.getName() + "' already exists in this category");
+                    "Product '" + productReq.getName() + "' already exists in this category");
         }
 
-        // 3. Set managed Category into Product
+        Product product = new Product();
+        product.setName(productReq.getName());
+        product.setPrice(productReq.getPrice());
+        product.setQuantity(productReq.getQuantity());
+        product.setDescription(productReq.getDescription());
         product.setCategory(category);
 
         log.info("Product created successfully");
+
+        // convert list string img -> list entity img
+        List<ProductImage> images = new ArrayList<>();
+        for (String imgName : productReq.getLstImg()) {
+            ProductImage img = new ProductImage();
+            img.setImgName(imgName);
+            img.setProduct(product);
+            images.add(img);
+        }
+        product.setLstImg(images);
 
         // 4. Save Product
 
@@ -74,7 +91,7 @@ public class ProductService {
         return res;
     }
 
-    public ResponseProductDTO updateProduct(Product product) {
+    public ResponseProductDTO updateProduct(ProductUpdateRequestDTO product) {
 
         Product productDb = getProductById(product.getId());
 
@@ -82,18 +99,24 @@ public class ProductService {
         productDb.setPrice(product.getPrice());
         productDb.setDescription(product.getDescription());
 
-        // if (product.getImg() != null) {
-        // productDb.setImg(product.getImg());
-        // }
-        if (product.getCategory() != null && product.getCategory().getId() != 0) {
-            Category cate = categoryService.getCategoryById(product.getCategory().getId());
+        productDb.getLstImg().clear();
+        List<ProductImage> newImgs = new ArrayList<>();
+
+        for (String imgName : product.getLstImg()) {
+            ProductImage img = new ProductImage();
+            img.setImgName(imgName);
+            img.setProduct(productDb);
+            newImgs.add(img);
+        }
+        productDb.getLstImg().addAll(newImgs);
+
+        if (product.getProductCate() != null && product.getProductCate().getId() != 0) {
+            Category cate = categoryService.getCategoryById(product.getProductCate().getId());
             if (cate != null) {
                 productDb.setCategory(cate);
             }
 
         }
-
-        // Category
 
         productRepository.save(productDb);
 
@@ -101,17 +124,36 @@ public class ProductService {
     }
 
     public ResponseProductDTO convertToProductDTO(Product product) {
+
+        // category
         ResponseProductDTO.ProductCate cate = new ResponseProductDTO.ProductCate();
-
-        cate.setId(product.getId());
+        cate.setId(product.getCategory().getId());
         cate.setName(product.getCategory().getName());
-        List<String> images = (product.getLstImg() != null) ? product.getLstImg() : new ArrayList<>();
 
-        ResponseProductDTO res = new ResponseProductDTO(product.getId(), product.getName(),
-                product.getPrice(), images, product.getQuantity(),
-                product.getDescription(), cate, product.getCreatedAt(), product.getUpdatedAt());
+        // convert list image
+        List<ResponseProductDTO.ProductImage> lstImg = new ArrayList<>();
+
+        if (product.getLstImg() != null) {
+            for (ProductImage img : product.getLstImg()) {
+                ResponseProductDTO.ProductImage dtoImg = new ResponseProductDTO.ProductImage();
+                dtoImg.setName(img.getImgName());
+                lstImg.add(dtoImg);
+            }
+        }
+
+        // build response
+        ResponseProductDTO res = new ResponseProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                lstImg,
+                product.getQuantity(),
+                product.getDescription(),
+                cate,
+                product.getCreatedAt(),
+                product.getUpdatedAt());
+
         return res;
-
     }
 
     public ResultPaginationDTO searchProduct(
@@ -170,12 +212,17 @@ public class ProductService {
 
         for (Product p : pages.getContent()) {
             ResponseProductDTO.ProductCate productCate = new ResponseProductDTO.ProductCate();
+            List<ResponseProductDTO.ProductImage> imgsDto = new ArrayList<>();
             productCate.setId(p.getCategory().getId());
             productCate.setName(p.getCategory().getName());
 
-            List<String> images = (p.getLstImg() != null) ? p.getLstImg() : new ArrayList<>();
-
-            ResponseProductDTO res = new ResponseProductDTO(p.getId(), p.getName(), p.getPrice(), images,
+            List<ProductImage> images = (p.getLstImg() != null) ? p.getLstImg() : new ArrayList<>();
+            for (ProductImage i : images) {
+                ResponseProductDTO.ProductImage dtoImg = new ResponseProductDTO.ProductImage();
+                dtoImg.setName(i.getImgName());
+                imgsDto.add(dtoImg);
+            }
+            ResponseProductDTO res = new ResponseProductDTO(p.getId(), p.getName(), p.getPrice(), imgsDto,
                     p.getQuantity(), p.getDescription(), productCate, p.getCreatedAt(), p.getUpdatedAt());
 
             responseProductDTOs.add(res);

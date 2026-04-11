@@ -16,7 +16,7 @@ public class ResponseProductDTO {
     private long id;
     private String name;
     private double price;
-    private List<String> lstImg;
+    private List<ProductImage> lstImg;
     private int quantity;
     private String description;
     private ProductCate productCate;
@@ -27,6 +27,12 @@ public class ResponseProductDTO {
     @Setter
     public static class ProductCate {
         private long id;
+        private String name;
+    }
+
+    @Getter
+    @Setter
+    public static class ProductImage {
         private String name;
     }
 }

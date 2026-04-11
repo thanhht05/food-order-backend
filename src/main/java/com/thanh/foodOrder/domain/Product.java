@@ -8,6 +8,7 @@ import org.hibernate.annotations.ManyToAny;
 import com.thanh.foodOrder.util.JwtUtil;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,8 +40,9 @@ public class Product {
 
     @NotNull
     private Double price;
-    @ElementCollection
-    private List<String> lstImg;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> lstImg;
 
     @NotNull
 

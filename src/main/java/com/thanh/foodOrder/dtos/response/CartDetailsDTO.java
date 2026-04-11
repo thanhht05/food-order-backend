@@ -3,6 +3,8 @@ package com.thanh.foodOrder.dtos.response;
 import java.util.List;
 import java.util.Locale.Category;
 
+import com.thanh.foodOrder.domain.ProductImage;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +27,7 @@ public class CartDetailsDTO {
         private Long id;
         private String name;
         private Double price;
-        private List<String> lstImg;
+        private List<ProductImage> lstImg;
 
     }
 

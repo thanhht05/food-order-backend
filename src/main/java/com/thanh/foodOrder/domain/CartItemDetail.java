@@ -16,7 +16,7 @@ public class CartItemDetail implements Serializable {
     private String productName;
     private double price;
     private int quantity;
-    private List<String> lstImageUrl;
+    private List<ProductImage> lstImageUrl;
 
     @JsonIgnore
     public double getSubtotal() {

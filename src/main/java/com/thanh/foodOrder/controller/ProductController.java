@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanh.foodOrder.domain.Product;
 import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.respone.product.ResponseProductDTO;
+import com.thanh.foodOrder.dtos.request.ProductRequestDTO;
+import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
 import com.thanh.foodOrder.service.ProductService;
 import com.thanh.foodOrder.service.UploadFileService;
 
@@ -37,7 +39,7 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<ResponseProductDTO> handleCreateProduct(@RequestBody Product p) {
+    public ResponseEntity<ResponseProductDTO> handleCreateProduct(@RequestBody ProductRequestDTO p) {
 
         ResponseProductDTO savedProduct = productService.createProduct(p);
 
@@ -46,7 +48,7 @@ public class ProductController {
 
     @PutMapping(value = "/products")
     public ResponseEntity<ResponseProductDTO> handleUpdateProduct(
-            @RequestBody Product product) {
+            @RequestBody ProductUpdateRequestDTO product) {
 
         ResponseProductDTO res = productService.updateProduct(product);
         return ResponseEntity.ok(res);
