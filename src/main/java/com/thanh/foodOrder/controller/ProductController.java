@@ -16,6 +16,9 @@ import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
 import com.thanh.foodOrder.service.ProductService;
 import com.thanh.foodOrder.service.UploadFileService;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -70,12 +73,16 @@ public class ProductController {
     @GetMapping("/products")
     public ResponseEntity<ResultPaginationDTO> getHomePage(
             @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "category", required = false) String categoryName,
-            @RequestParam(name = "page", defaultValue = "1") Integer page,
-            @RequestParam(name = "size", defaultValue = "5") Integer size,
-            @RequestParam(name = "sort", required = false) String sort) {
+            @RequestParam(name = "category", required = false) List<String> category,
+            @RequestParam(name = "from", required = false) BigDecimal from,
+            @RequestParam(name = "to", required = false) BigDecimal to,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", required = false) String sort
 
-        ResultPaginationDTO result = productService.searchProduct(keyword, categoryName, page, size, sort);
+    ) {
+
+        ResultPaginationDTO result = productService.search(keyword, category, from, to, page, size, sort);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

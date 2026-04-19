@@ -35,7 +35,7 @@ public class Product {
     private Long id;
     @NotBlank(message = "Name cannot be empty")
     private String name;
-
+    private int sold;
     private String description;
 
     @NotNull

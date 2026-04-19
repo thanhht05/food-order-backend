@@ -18,6 +18,7 @@ public class ResponseProductDTO {
     private double price;
     private List<ProductImage> lstImg;
     private int quantity;
+    private int sold;
     private String description;
     private ProductCate productCate;
     private Instant createdAt;

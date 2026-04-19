@@ -1,5 +1,6 @@
 package com.thanh.foodOrder.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collector;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.thanh.foodOrder.domain.Category;
@@ -24,6 +26,7 @@ import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
 import com.thanh.foodOrder.repository.ProductRepository;
 import com.thanh.foodOrder.util.exception.CommonException;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -99,6 +102,19 @@ public class ProductService {
         productDb.setPrice(product.getPrice());
         productDb.setDescription(product.getDescription());
 
+        int newSold = product.getSold();
+
+        if (newSold < 0) {
+            throw new CommonException("Sold quantity must be >= 0");
+        }
+
+        // if (newSold > productDb.getQuantity()) {
+        // throw new CommonException("Sold quantity cannot be greater than available
+        // quantity");
+        // }
+
+        productDb.setSold(newSold);
+        productDb.setQuantity(product.getQuantity());
         productDb.getLstImg().clear();
         List<ProductImage> newImgs = new ArrayList<>();
 
@@ -148,6 +164,7 @@ public class ProductService {
                 product.getPrice(),
                 lstImg,
                 product.getQuantity(),
+                product.getSold(),
                 product.getDescription(),
                 cate,
                 product.getCreatedAt(),
@@ -156,48 +173,37 @@ public class ProductService {
         return res;
     }
 
-    public ResultPaginationDTO searchProduct(
+    public ResultPaginationDTO search(
             String keyword,
-            String categoryName,
+            List<String> categoryNames,
+            BigDecimal from,
+            BigDecimal to,
             int page,
             int size, String sort) {
 
         Sort sortObj = Sort.by("updatedAt").descending();
-
         if (sort != null && !sort.isEmpty()) {
             String[] parts = sort.split(",");
-            String feild = parts[0];
-            String direction = parts[1];
 
-            sortObj = direction.equalsIgnoreCase("desc")
-                    ? Sort.by(feild).descending()
-                    : Sort.by(feild).ascending();
+            if (parts.length == 2) {
+                String field = parts[0];
+                String direction = parts[1];
+
+                sortObj = direction.equalsIgnoreCase("desc")
+                        ? Sort.by(field).descending()
+                        : Sort.by(field).ascending();
+            }
         }
 
-        Pageable pageable = PageRequest.of(page - 1, size,
-                sortObj);
-        Page<Product> pages;
+        Pageable pageable = PageRequest.of(page - 1, size, sortObj);
 
-        // 1️ No filter
-        if ((keyword == null || keyword.isBlank()) && categoryName == null) {
-            pages = productRepository.findAll(pageable);
+        Specification<Product> spec = Specification.allOf(
+                ProductSpecification.hasKeyword(keyword),
+                ProductSpecification.hasCategory(categoryNames),
+                ProductSpecification.priceFrom(from),
+                ProductSpecification.priceTo(to));
 
-            // 2️ Name + Category
-        } else if (keyword != null && !keyword.isBlank() && categoryName != null) {
-            pages = productRepository
-                    .findByNameContainingIgnoreCaseAndCategory_name(
-                            keyword, categoryName, pageable);
-
-            // 3️ Only name
-        } else if (keyword != null && !keyword.isBlank()) {
-            pages = productRepository
-                    .findByNameContainingIgnoreCase(keyword, pageable);
-
-            // 4️ Only category
-        } else {
-            pages = productRepository
-                    .findByCategory_name(categoryName, pageable);
-        }
+        Page<Product> pages = productRepository.findAll(spec, pageable);
 
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
@@ -208,25 +214,37 @@ public class ProductService {
         meta.setTotalElements(pages.getTotalElements());
 
         rs.setMeta(meta);
+
         List<ResponseProductDTO> responseProductDTOs = new ArrayList<>();
 
         for (Product p : pages.getContent()) {
             ResponseProductDTO.ProductCate productCate = new ResponseProductDTO.ProductCate();
             List<ResponseProductDTO.ProductImage> imgsDto = new ArrayList<>();
+
             productCate.setId(p.getCategory().getId());
             productCate.setName(p.getCategory().getName());
 
             List<ProductImage> images = (p.getLstImg() != null) ? p.getLstImg() : new ArrayList<>();
+
             for (ProductImage i : images) {
                 ResponseProductDTO.ProductImage dtoImg = new ResponseProductDTO.ProductImage();
                 dtoImg.setName(i.getImgName());
                 imgsDto.add(dtoImg);
             }
-            ResponseProductDTO res = new ResponseProductDTO(p.getId(), p.getName(), p.getPrice(), imgsDto,
-                    p.getQuantity(), p.getDescription(), productCate, p.getCreatedAt(), p.getUpdatedAt());
+
+            ResponseProductDTO res = new ResponseProductDTO(
+                    p.getId(),
+                    p.getName(),
+                    p.getPrice(),
+                    imgsDto,
+                    p.getQuantity(),
+                    p.getSold(),
+                    p.getDescription(),
+                    productCate,
+                    p.getCreatedAt(),
+                    p.getUpdatedAt());
 
             responseProductDTOs.add(res);
-
         }
 
         rs.setResults(responseProductDTOs);

@@ -26,35 +26,35 @@ public class UploadController {
     }
 
     // upload single file
-    // @PostMapping("/upload")
-    // public ResponseEntity<?> uploadFile(
-    // @RequestParam("file") MultipartFile file) {
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFile(
+    @RequestParam("file") MultipartFile file) {
 
-    // String path = uploadFileService.uploadFile(file);
+    String path = uploadFileService.uploadFile(file);
 
-    // Map<String, String> response = new HashMap<>();
-    // response.put("fileName", path);
+    Map<String, String> response = new HashMap<>();
+    response.put("fileName", path);
 
-    // return ResponseEntity.ok(response);
-    // }
+    return ResponseEntity.ok(response);
+    }
 
     // upload multi files
-    @PostMapping("/upload")
-    @ApiMessage("Upload file")
-    public ResponseEntity<?> uploadFiles(
-            @RequestParam("files") MultipartFile[] files) {
+    // @PostMapping("/upload")
+    // @ApiMessage("Upload file")
+    // public ResponseEntity<?> uploadFiles(
+    //         @RequestParam("files") MultipartFile[] files) {
 
-        List<String> paths = new ArrayList<>();
+    //     List<String> paths = new ArrayList<>();
 
-        for (MultipartFile file : files) {
-            String path = uploadFileService.uploadFile(file);
-            paths.add(path);
-        }
+    //     for (MultipartFile file : files) {
+    //         String path = uploadFileService.uploadFile(file);
+    //         paths.add(path);
+    //     }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("fileNames", paths);
+    //     Map<String, Object> response = new HashMap<>();
+    //     response.put("fileNames", paths);
 
-        return ResponseEntity.ok(response);
-    }
+    //     return ResponseEntity.ok(response);
+    // }
 
 }
