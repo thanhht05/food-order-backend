@@ -1,5 +1,6 @@
 package com.thanh.foodOrder.dtos.response;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale.Category;
 
@@ -10,12 +11,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CartDetailsDTO {
+public class CartDetailsResponseDTO {
 
     private int quantity;
     private Double totalPrice;
 
-    private ProductInnerCartDetail productInnerCartDetail;
+    private List<ProductInnerCartDetail> productsInnerCartDetail;
 
     @Getter
     @Setter
@@ -23,6 +24,7 @@ public class CartDetailsDTO {
         private Long id;
         private String name;
         private Double price;
+        private String categoryName;
         private List<ProductImage> lstImg;
 
     }

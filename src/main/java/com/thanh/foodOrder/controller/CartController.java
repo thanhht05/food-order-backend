@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thanh.foodOrder.domain.CartDetail;
 import com.thanh.foodOrder.dtos.request.CartRequestDTO;
 import com.thanh.foodOrder.dtos.response.AddToCartResponseDTO;
-import com.thanh.foodOrder.dtos.response.CartDetailsDTO;
+import com.thanh.foodOrder.dtos.response.CartDetailsResponseDTO;
 import com.thanh.foodOrder.service.CartService;
 
 import java.util.List;
@@ -35,17 +35,16 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(cartService.addProductsToCart(request));
     }
 
-    // @DeleteMapping("/cartDetail/product/{id}")
-    // public ResponseEntity<Void> handleDeleteCartDetail(@PathVariable("id") Long
-    // id) {
-    // this.cartService.removeProductFromCart(id);
-    // return ResponseEntity.status(HttpStatus.OK).body(null);
-    // }
+    @DeleteMapping("/cartDetail/product/{id}")
+    public ResponseEntity<AddToCartResponseDTO> handleDeleteCartDetail(@PathVariable("id") Long id) {
 
-    // @GetMapping("/cartDetails")
-    // public ResponseEntity<List<CartDetailsDTO>> getAllCarts() {
-    // return
-    // ResponseEntity.status(HttpStatus.OK).body(this.cartService.getAllCartDetail());
-    // }
+        return ResponseEntity.status(HttpStatus.OK).body(this.cartService.removeProductFromCart(id));
+    }
+
+    @GetMapping("/cartDetails")
+    public ResponseEntity<CartDetailsResponseDTO> getAllCarts() {
+        CartDetailsResponseDTO res = this.cartService.getAllCartDetail();
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
 
 }

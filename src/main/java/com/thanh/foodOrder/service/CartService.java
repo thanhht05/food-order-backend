@@ -20,9 +20,10 @@ import com.thanh.foodOrder.domain.User;
 import com.thanh.foodOrder.dtos.request.CartItemRequestDTO;
 import com.thanh.foodOrder.dtos.request.CartRequestDTO;
 import com.thanh.foodOrder.dtos.response.AddToCartResponseDTO;
-import com.thanh.foodOrder.dtos.response.CartDetailsDTO;
+import com.thanh.foodOrder.dtos.response.CartDetailsResponseDTO;
 import com.thanh.foodOrder.repository.CartRepository;
 import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodOrder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -82,6 +83,7 @@ public class CartService {
             cart.getCartDetails().add(cartDetail);
 
         }
+        product.setQuantity(product.getQuantity() - request.getQuantity());
 
         cartRepository.save(cart);
         AddToCartResponseDTO res = new AddToCartResponseDTO();
@@ -102,6 +104,23 @@ public class CartService {
 
         for (CartDetail item : items) {
             total += item.getQuantity();
+        }
+
+        return total;
+    }
+
+    public double getTotalPrice(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId);
+
+        if (cart == null) {
+            return 0;
+        }
+
+        double total = 0;
+        List<CartDetail> items = cart.getCartDetails();
+
+        for (CartDetail item : items) {
+            total += item.getPrice() * item.getQuantity();
         }
 
         return total;
@@ -152,91 +171,56 @@ public class CartService {
     // }
     // }
 
-    // public List<CartDetailsDTO> getAllCartDetail() {
-    // String email = JwtUtil.getCurrentUserLogin().orElseThrow();
-    // User user = userService.getUserByEmail(email);
+    public CartDetailsResponseDTO getAllCartDetail() {
+        String email = JwtUtil.getCurrentUserLogin().orElseThrow();
+        User user = userService.getUserByEmail(email);
 
-    // Cart cart = user.getCart();
-    // if (cart == null) {
-    // return List.of();
-    // }
+        Cart cart = user.getCart();
+        if (cart == null) {
+            throw new CommonException("Cart is null");
+        }
+        List<CartDetail> cartDetails = cart.getCartDetails();
 
-    // // 3. Lấy cart details
-    // List<CartDetail> cartDetails = cart.getCartDetails();
+        CartDetailsResponseDTO res = new CartDetailsResponseDTO();
+        int total = getTotalQuantity(user.getId());
+        double totalPrice = getTotalPrice(user.getId());
+        res.setQuantity(total);
+        res.setTotalPrice(totalPrice);
+        List<CartDetailsResponseDTO.ProductInnerCartDetail> lst = new ArrayList<>();
 
-    // // 4. Map Entity -> DTO
-    // List<CartDetailsDTO> result = new ArrayList<>();
+        for (CartDetail cd : cartDetails) {
+            CartDetailsResponseDTO.ProductInnerCartDetail p = new CartDetailsResponseDTO.ProductInnerCartDetail();
+            Product prd = cd.getProduct();
+            p.setId(prd.getId());
+            p.setName(prd.getName());
+            p.setLstImg(prd.getLstImg());
+            p.setPrice(prd.getPrice());
+            p.setCategoryName(prd.getCategory().getName());
+            lst.add(p);
 
-    // for (CartDetail cd : cartDetails) {
-    // CartDetailsDTO dto = new CartDetailsDTO();
-    // dto.setId(cd.getId());
-    // dto.setQuantity(cd.getQuantity());
-    // dto.setPrice(cd.getPrice());
-    // dto.setTotalPrice(cd.getPrice() * cd.getQuantity());
+        }
+        res.setProductsInnerCartDetail(lst);
+        return res;
 
-    // dto.setCartId(cart.getId());
-    // dto.setUserId(user.getId());
+    }
 
-    // // map product
-    // Product p = cd.getProduct();
-    // if (p != null) {
-    // CartDetailsDTO.ProductInnerCartDetail pDto = new
-    // CartDetailsDTO.ProductInnerCartDetail();
-    // pDto.setId(p.getId());
-    // pDto.setName(p.getName());
-    // pDto.setPrice(p.getPrice());
-    // pDto.setImg(p.getImg());
+    public AddToCartResponseDTO removeProductFromCart(Long productId) {
 
-    // dto.setProductInnerCartDetail(pDto);
+        String email = JwtUtil.getCurrentUserLogin().orElseThrow();
+        User user = userService.getUserByEmail(email);
 
-    // CartDetailsDTO.CategoryInnerCartDetail cate = new
-    // CartDetailsDTO.CategoryInnerCartDetail();
-    // cate.setId(p.getCategory().getId());
-    // cate.setName(p.getCategory().getName());
-    // dto.setCategoryInnerCartDetail(cate);
-    // }
+        Cart cart = user.getCart();
+        if (cart == null) {
+            throw new CommonException("Cart not found");
+        }
+        cart.getCartDetails().removeIf(
+                cd -> cd.getProduct().getId().equals(productId));
 
-    // result.add(dto);
-    // }
-
-    // return result;
-    // }
-    // public List<CartDetailsDTO> getAllCartDetail() {
-    // String email = JwtUtil.getCurrentUserLogin().orElseThrow();
-    // User user = userService.getUserByEmail(email);
-
-    // String redisKey = "cart:user:" + user.getId();
-    // HashOperations<String, String, CartItemDetail> hashOps =
-    // redisTemplate.opsForHash();
-
-    // Map<String, CartItemDetail> cartMap = hashOps.entries(redisKey);
-    // // 1️⃣ Redis MISS
-    // if (cartMap == null || cartMap.isEmpty()) {
-    // return List.of();
-    // }
-    // // 2️⃣ Redis HIT → map sang DTO
-    // List<CartDetailsDTO> result = new ArrayList<>();
-    // for (CartItemDetail item : cartMap.values()) {
-
-    // CartDetailsDTO dto = new CartDetailsDTO();
-    // dto.setQuantity(item.getQuantity());
-    // dto.setPrice(item.getPrice());
-    // dto.setTotalPrice(item.getSubtotal());
-
-    // // map product
-    // CartDetailsDTO.ProductInnerCartDetail pDto = new
-    // CartDetailsDTO.ProductInnerCartDetail();
-    // pDto.setId(item.getProductId());
-    // pDto.setName(item.getProductName());
-    // pDto.setPrice(item.getPrice());
-    // pDto.setLstImg(item.getLstImageUrl());
-
-    // dto.setProductInnerCartDetail(pDto);
-
-    // result.add(dto);
-    // }
-
-    // return result;
-    // }
+        cartRepository.save(cart);
+        AddToCartResponseDTO res = new AddToCartResponseDTO();
+        int total = getTotalQuantity(user.getId());
+        res.setTotalQuantity(total);
+        return res;
+    }
 
 }
