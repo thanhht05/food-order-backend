@@ -82,7 +82,7 @@ public class ProductController {
             @RequestParam(name = "sort", required = false) String sort
 
     ) throws InterruptedException {
-        Thread.sleep(3000); // delay 3 giây
+        // Thread.sleep(200); // delay 2 giây
 
         ResultPaginationDTO result = productService.search(keyword, category, from, to, page, size, sort);
         return ResponseEntity.status(HttpStatus.OK).body(result);

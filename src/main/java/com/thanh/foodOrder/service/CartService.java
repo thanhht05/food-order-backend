@@ -1,6 +1,7 @@
 package com.thanh.foodOrder.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,8 +20,10 @@ import com.thanh.foodOrder.domain.Product;
 import com.thanh.foodOrder.domain.User;
 import com.thanh.foodOrder.dtos.request.CartItemRequestDTO;
 import com.thanh.foodOrder.dtos.request.CartRequestDTO;
+import com.thanh.foodOrder.dtos.request.MergeCartRequest;
 import com.thanh.foodOrder.dtos.response.AddToCartResponseDTO;
 import com.thanh.foodOrder.dtos.response.CartDetailsResponseDTO;
+import com.thanh.foodOrder.repository.CartDetailRepository;
 import com.thanh.foodOrder.repository.CartRepository;
 import com.thanh.foodOrder.util.JwtUtil;
 import com.thanh.foodOrder.util.exception.CommonException;
@@ -32,18 +35,20 @@ import lombok.extern.log4j.Log4j2;
 public class CartService {
     private final CartRepository cartRepository;
     private final UserService userService;
+    private final CartDetailRepository cartDetailRepository;
     private final ProductService productService;
 
     public CartService(CartRepository cartRepository,
             UserService userService,
-            ProductService productService) {
+            ProductService productService, CartDetailRepository cartDetailRepository) {
         this.cartRepository = cartRepository;
         this.productService = productService;
         this.userService = userService;
+        this.cartDetailRepository = cartDetailRepository;
     }
 
     @Transactional
-    public AddToCartResponseDTO addProductsToCart(CartRequestDTO request) {
+    public CartDetailsResponseDTO addProductsToCart(CartRequestDTO request) {
 
         String email = JwtUtil.getCurrentUserLogin().orElseThrow();
         User user = userService.getUserByEmail(email);
@@ -86,10 +91,7 @@ public class CartService {
         product.setQuantity(product.getQuantity() - request.getQuantity());
 
         cartRepository.save(cart);
-        AddToCartResponseDTO res = new AddToCartResponseDTO();
-        int total = getTotalQuantity(user.getId());
-        res.setTotalQuantity(total);
-        return res;
+        return mapToResponse(cart);
     }
 
     public int getTotalQuantity(Long userId) {
@@ -124,6 +126,101 @@ public class CartService {
         }
 
         return total;
+    }
+
+    public CartDetailsResponseDTO mergeCart(Long userId, MergeCartRequest request) {
+
+        // 1. Lấy user + cart
+        User user = userService.getUserById(userId);
+
+        Cart cart = cartRepository.findByUserId(userId);
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(user);
+        }
+
+        // 2. Map cart hiện tại
+        Map<Long, CartDetail> dbMap = new HashMap<>();
+        for (CartDetail cd : cart.getCartDetails()) {
+            dbMap.put(cd.getProduct().getId(), cd);
+        }
+
+        // 3. Merge
+        for (CartItemRequestDTO reqItem : request.getItems()) {
+
+            Long productId = reqItem.getProductId();
+            int quantity = reqItem.getQuantity();
+
+            // ❗ validate
+            if (quantity <= 0)
+                continue;
+
+            if (dbMap.containsKey(productId)) {
+                // 👉 đã có → cộng
+                CartDetail existing = dbMap.get(productId);
+                existing.setQuantity(existing.getQuantity() + quantity);
+
+            } else {
+                // 👉 chưa có → thêm mới
+                Product product = productService.getProductById(productId);
+
+                CartDetail newItem = new CartDetail();
+                newItem.setCart(cart);
+                newItem.setProduct(product);
+                newItem.setQuantity(quantity);
+                newItem.setPrice(product.getPrice());
+
+                cart.getCartDetails().add(newItem); // 🔥 quan trọng
+            }
+        }
+
+        // 4. Save 1 lần duy nhất
+        cartRepository.save(cart);
+
+        // 5. Build response
+        return mapToResponse(cart);
+    }
+
+    private CartDetailsResponseDTO mapToResponse(Cart cart) {
+
+        CartDetailsResponseDTO res = new CartDetailsResponseDTO();
+
+        int totalQuantity = 0;
+        double totalPrice = 0;
+
+        List<CartDetailsResponseDTO.ProductInnerCartDetail> items = new ArrayList<>();
+
+        for (CartDetail cd : cart.getCartDetails()) {
+
+            Product p = cd.getProduct();
+
+            CartDetailsResponseDTO.ProductInnerCartDetail item = new CartDetailsResponseDTO.ProductInnerCartDetail();
+
+            item.setId(p.getId());
+            item.setName(p.getName());
+            item.setPrice(p.getPrice());
+            item.setQuantity(cd.getQuantity());
+
+            // tránh null ảnh
+            if (p.getLstImg() != null && !p.getLstImg().isEmpty()) {
+                item.setImg(p.getLstImg().get(0).getImgName());
+            }
+
+            if (p.getCategory() != null) {
+                item.setCategoryName(p.getCategory().getName());
+            }
+
+            items.add(item);
+
+            totalQuantity += cd.getQuantity();
+            totalPrice += cd.getQuantity() * cd.getPrice();
+        }
+
+        res.setQuantity(totalQuantity);
+        res.setTotalPrice(totalPrice);
+        res.setProductsInnerCartDetail(items);
+
+        return res;
     }
     // private String cartKey(Long id) {
     // return "cart:user:" + id;
@@ -177,7 +274,12 @@ public class CartService {
 
         Cart cart = user.getCart();
         if (cart == null) {
-            throw new CommonException("Cart is null");
+            // Return empty data to avoid FrontEnd errors when calling the getcartDetail API
+            // in case user not have cart-cartdetail
+            return new CartDetailsResponseDTO(
+                    0,
+                    0.0,
+                    new ArrayList<>());
         }
         List<CartDetail> cartDetails = cart.getCartDetails();
 
@@ -192,8 +294,9 @@ public class CartService {
             CartDetailsResponseDTO.ProductInnerCartDetail p = new CartDetailsResponseDTO.ProductInnerCartDetail();
             Product prd = cd.getProduct();
             p.setId(prd.getId());
+            p.setQuantity(prd.getQuantity());
             p.setName(prd.getName());
-            p.setLstImg(prd.getLstImg());
+            p.setImg(prd.getLstImg().get(0).getImgName());
             p.setPrice(prd.getPrice());
             p.setCategoryName(prd.getCategory().getName());
             lst.add(p);

@@ -6,11 +6,15 @@ import java.util.Locale.Category;
 
 import com.thanh.foodOrder.domain.ProductImage;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartDetailsResponseDTO {
 
     private int quantity;
@@ -25,7 +29,8 @@ public class CartDetailsResponseDTO {
         private String name;
         private Double price;
         private String categoryName;
-        private List<ProductImage> lstImg;
+        private String img;
+        protected int quantity;
 
     }
 

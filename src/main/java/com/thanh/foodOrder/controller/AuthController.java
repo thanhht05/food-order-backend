@@ -68,7 +68,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(token);
 
         // // set authentication in SecurityContextHolder
-        // SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = this.userService.getUserByEmail(loginDTO.getUsername());
 
