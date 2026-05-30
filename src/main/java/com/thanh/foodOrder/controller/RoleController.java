@@ -3,9 +3,9 @@ package com.thanh.foodOrder.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.respone.role.ResponseRoleDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
+import com.thanh.foodOrder.dtos.response.auth.ResponseRoleDTO;
 import com.thanh.foodOrder.service.RoleService;
 import com.thanh.foodOrder.util.anotation.ApiMessage;
 
@@ -31,7 +31,8 @@ public class RoleController {
 
     @PostMapping("/roles")
     @ApiMessage("Create a new role")
-    public ResponseEntity<ResponseRoleDTO> handleCreateRole(@RequestBody Role role) {
+    public ResponseEntity<ResponseRoleDTO> handleCreateRole(
+            @RequestBody Role role) {
 
         return ResponseEntity.ok().body(this.roleService.createRole(role));
     }

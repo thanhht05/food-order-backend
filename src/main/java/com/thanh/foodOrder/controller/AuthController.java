@@ -3,11 +3,11 @@ package com.thanh.foodOrder.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.ResponseLoginDTO;
 import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.user.ResponseUserDTO;
 import com.thanh.foodOrder.dtos.request.RequestLoginDTO;
 import com.thanh.foodOrder.dtos.request.RequestRegisterDTO;
+import com.thanh.foodOrder.dtos.response.auth.ResponseLoginDTO;
+import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
 import com.thanh.foodOrder.service.UserService;
 import com.thanh.foodOrder.util.JwtUtil;
 import com.thanh.foodOrder.util.anotation.ApiMessage;

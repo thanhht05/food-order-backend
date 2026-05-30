@@ -5,9 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.respone.role.ResponseRoleDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
+import com.thanh.foodOrder.dtos.response.auth.ResponseRoleDTO;
 import com.thanh.foodOrder.repository.RoleRepository;
 import com.thanh.foodOrder.util.exception.CommonException;
 

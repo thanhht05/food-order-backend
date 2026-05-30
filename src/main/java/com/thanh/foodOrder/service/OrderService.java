@@ -2,8 +2,11 @@ package com.thanh.foodOrder.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.catalina.security.SecurityUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +17,13 @@ import com.thanh.foodOrder.domain.OrderDetail;
 import com.thanh.foodOrder.domain.Product;
 import com.thanh.foodOrder.domain.User;
 import com.thanh.foodOrder.domain.Voucher;
-import com.thanh.foodOrder.dtos.OrderItemDTO;
 import com.thanh.foodOrder.dtos.request.CheckoutRequestDTO;
-import com.thanh.foodOrder.dtos.response.AdminOrderResponseDTO;
 import com.thanh.foodOrder.dtos.response.CheckOutResponseDTO;
-import com.thanh.foodOrder.dtos.response.OrderResponseDTO;
+import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderHistoryProjection;
+import com.thanh.foodOrder.dtos.response.order.OrderItemDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
 import com.thanh.foodOrder.enums.OrderStatus;
 import com.thanh.foodOrder.enums.PaymentStatus;
 import com.thanh.foodOrder.enums.TableStatus;
@@ -26,6 +31,7 @@ import com.thanh.foodOrder.repository.CartDetailRepository;
 import com.thanh.foodOrder.repository.CartRepository;
 import com.thanh.foodOrder.repository.OrderDetailRepository;
 import com.thanh.foodOrder.repository.OrderRepository;
+import com.thanh.foodOrder.util.JwtUtil;
 import com.thanh.foodOrder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
@@ -40,16 +46,18 @@ public class OrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final BookingTableService bookingTableService;
     private final ProductService productService;
+    private final UserService userService;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
             OrderDetailRepository orderDetailRepository, BookingTableService bookingTableService,
-            ProductService productService, VoucherService voucherService) {
+            ProductService productService, VoucherService voucherService, UserService userService) {
         this.orderRepository = orderRepository;
         this.voucherService = voucherService;
         this.bookingTableService = bookingTableService;
         this.cartDetailRepository = cartDetailRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.productService = productService;
+        this.userService = userService;
 
     }
 
@@ -290,6 +298,69 @@ public class OrderService {
         List<OrderDetail> odDetails = this.orderDetailRepository.findByOrderId(orderDb.getId());
 
         return mapToOrderResponseDTO(orderDb, odDetails);
+    }
+
+    // get order history
+
+    public OrderHistoryDTO getOrderHistoryByUser() {
+
+        String email = JwtUtil.getCurrentUserLogin()
+                .orElseThrow();
+
+        User user = userService.getUserByEmail(email);
+
+        List<OrderHistoryProjection> rows = orderRepository.findOrderHistoryByUserId(user.getId());
+
+        OrderHistoryDTO response = new OrderHistoryDTO();
+
+        response.setUserId(user.getId());
+        response.setFullName(user.getFullName());
+        response.setCartId(user.getCart().getId());
+
+        if (rows.isEmpty()) {
+            response.setInfoOrders(new ArrayList<>());
+            return response;
+        }
+
+        Map<Long, OrderHistoryDTO.InfoOrder> orderMap = new LinkedHashMap<>();
+
+        for (OrderHistoryProjection row : rows) {
+
+            OrderHistoryDTO.InfoOrder order = orderMap.computeIfAbsent(
+                    row.getOrderId(),
+                    id -> {
+
+                        OrderHistoryDTO.InfoOrder dto = new OrderHistoryDTO.InfoOrder();
+
+                        dto.setOrderId(row.getOrderId());
+                        dto.setOrderDate(row.getOrderDate());
+                        dto.setOrderStatus(
+                                OrderStatus.valueOf(
+                                        row.getOrderStatus()));
+
+                        dto.setTableId(row.getTableId());
+                        dto.setTotalPrice(row.getTotalPrice());
+
+                        dto.setProducts(new ArrayList<>());
+
+                        return dto;
+                    });
+
+            OrderHistoryDTO.ProductInsideOrder product = new OrderHistoryDTO.ProductInsideOrder();
+
+            product.setProductId(row.getProductId());
+            product.setProductName(row.getProductName());
+            product.setPrice(row.getPrice());
+            product.setQuantity(row.getQuantity());
+            product.setImg(row.getImg());
+
+            order.getProducts().add(product);
+        }
+
+        response.setInfoOrders(
+                new ArrayList<>(orderMap.values()));
+
+        return response;
     }
 
 }

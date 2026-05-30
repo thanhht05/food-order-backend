@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thanh.foodOrder.domain.CartDetail;
 import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.CartDetailUserDTO;
 import com.thanh.foodOrder.dtos.request.CartRequestDTO;
 import com.thanh.foodOrder.dtos.request.MergeCartRequest;
-import com.thanh.foodOrder.dtos.response.AddToCartResponseDTO;
-import com.thanh.foodOrder.dtos.response.CartDetailsResponseDTO;
+import com.thanh.foodOrder.dtos.response.cart.AddToCartResponseDTO;
+import com.thanh.foodOrder.dtos.response.cart.CartDetailUserDTO;
+import com.thanh.foodOrder.dtos.response.cart.CartDetailsResponseDTO;
 import com.thanh.foodOrder.service.CartService;
 import com.thanh.foodOrder.service.UserService;
 

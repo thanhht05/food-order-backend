@@ -9,7 +9,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import com.thanh.foodOrder.domain.RestResponse;
+import com.thanh.foodOrder.domain.respone.RestResponse;
 import com.thanh.foodOrder.util.anotation.ApiMessage;
 
 @RestControllerAdvice

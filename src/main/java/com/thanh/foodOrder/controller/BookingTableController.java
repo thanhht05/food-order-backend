@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thanh.foodOrder.domain.BookingTable;
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
 import com.thanh.foodOrder.service.BookingTableService;
 
 import java.util.List;

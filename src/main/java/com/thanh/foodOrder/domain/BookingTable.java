@@ -3,6 +3,7 @@ package com.thanh.foodOrder.domain;
 import java.time.Instant;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thanh.foodOrder.enums.TableStatus;
 import com.thanh.foodOrder.util.JwtUtil;
 
@@ -51,6 +52,7 @@ public class BookingTable {
         this.updatedAt = Instant.now();
     }
 
+    @JsonIgnore
     @OneToMany(mappedBy = "bookingTable")
     private List<Order> orders;
 

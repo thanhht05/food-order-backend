@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.thanh.foodOrder.domain.Category;
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
 import com.thanh.foodOrder.repository.CategoryRepository;
 import com.thanh.foodOrder.specification.CategorySpecification;
 import com.thanh.foodOrder.util.exception.CommonException;

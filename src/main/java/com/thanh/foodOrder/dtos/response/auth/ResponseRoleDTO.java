@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.domain.respone.role;
+package com.thanh.foodOrder.dtos.response.auth;
 
 import java.time.Instant;
 

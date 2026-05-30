@@ -13,7 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.thanh.foodOrder.domain.RestResponse;
+import com.thanh.foodOrder.domain.respone.RestResponse;
 
 import io.jsonwebtoken.ExpiredJwtException;
 

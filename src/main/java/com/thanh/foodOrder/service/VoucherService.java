@@ -12,9 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.User;
 import com.thanh.foodOrder.domain.Voucher;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
 import com.thanh.foodOrder.repository.OrderRepository;
 import com.thanh.foodOrder.repository.VoucherRepository;
 import com.thanh.foodOrder.util.exception.CommonException;

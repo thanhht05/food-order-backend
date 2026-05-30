@@ -7,7 +7,7 @@ import com.thanh.foodOrder.domain.Order;
 import com.thanh.foodOrder.domain.User;
 import com.thanh.foodOrder.dtos.request.CheckoutRequestDTO;
 import com.thanh.foodOrder.dtos.response.CheckOutResponseDTO;
-import com.thanh.foodOrder.dtos.response.OrderResponseDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
 import com.thanh.foodOrder.service.OrderService;
 import com.thanh.foodOrder.service.UserService;
 import com.thanh.foodOrder.util.JwtUtil;

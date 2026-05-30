@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.domain.respone.product;
+package com.thanh.foodOrder.dtos.response.product;
 
 import java.time.Instant;
 import java.util.List;

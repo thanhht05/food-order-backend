@@ -1,9 +1,9 @@
 package com.thanh.foodOrder.service;
 
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.Role;
 import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.user.ResponseUserDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
+import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
 import com.thanh.foodOrder.repository.UserRepository;
 import com.thanh.foodOrder.specification.UserSpecification;
 import com.thanh.foodOrder.util.exception.CommonException;

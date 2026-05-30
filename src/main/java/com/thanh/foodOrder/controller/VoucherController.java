@@ -3,8 +3,8 @@ package com.thanh.foodOrder.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.Voucher;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
 import com.thanh.foodOrder.service.VoucherService;
 import com.thanh.foodOrder.util.anotation.ApiMessage;
 

@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.dtos.response;
+package com.thanh.foodOrder.dtos.response.cart;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,6 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodOrder.dtos.response.auth;
+
+import com.thanh.foodOrder.domain.Role;
 
 import lombok.Getter;
 import lombok.Setter;

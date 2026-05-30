@@ -9,10 +9,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
-import com.thanh.foodOrder.domain.respone.product.ResponseProductDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
 import com.thanh.foodOrder.dtos.request.ProductRequestDTO;
 import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
+import com.thanh.foodOrder.dtos.response.product.ResponseProductDTO;
 import com.thanh.foodOrder.service.ProductService;
 import com.thanh.foodOrder.service.UploadFileService;
 

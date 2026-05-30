@@ -8,7 +8,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thanh.foodOrder.domain.RestResponse;
+import com.thanh.foodOrder.domain.respone.RestResponse;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.thanh.foodOrder.domain.ResponseLoginDTO;
+import com.thanh.foodOrder.dtos.response.auth.ResponseLoginDTO;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

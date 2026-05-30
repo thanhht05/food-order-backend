@@ -1,9 +1,8 @@
-package com.thanh.foodOrder.dtos.response;
+package com.thanh.foodOrder.dtos.response.order;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.thanh.foodOrder.dtos.OrderItemDTO;
 import com.thanh.foodOrder.enums.PaymentStatus;
 
 import lombok.Getter;

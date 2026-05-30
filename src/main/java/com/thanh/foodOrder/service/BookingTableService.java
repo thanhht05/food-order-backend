@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.thanh.foodOrder.domain.BookingTable;
 import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.ResultPaginationDTO;
 import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.user.ResponseUserDTO;
+import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
+import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
 import com.thanh.foodOrder.enums.TableStatus;
 import com.thanh.foodOrder.repository.BookingTableRepository;
 import com.thanh.foodOrder.specification.TableSpecification;

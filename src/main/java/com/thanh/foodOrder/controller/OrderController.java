@@ -4,10 +4,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.dtos.response.AdminOrderResponseDTO;
-import com.thanh.foodOrder.dtos.response.OrderResponseDTO;
+import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
+import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
 import com.thanh.foodOrder.service.OrderService;
 import com.thanh.foodOrder.util.anotation.ApiMessage;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +56,13 @@ public class OrderController {
         // TODO: process PUT request
 
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.updateOrder(order));
+    }
+
+    @GetMapping("/orderHistory")
+    public ResponseEntity<OrderHistoryDTO> getOrderHistory() {
+        OrderHistoryDTO lst = this.orderService.getOrderHistoryByUser();
+
+        return ResponseEntity.status(HttpStatus.OK).body(lst);
     }
 
 }
