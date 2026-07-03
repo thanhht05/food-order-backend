@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.catalina.security.SecurityUtil;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ import com.thanh.foodOrder.repository.CartDetailRepository;
 import com.thanh.foodOrder.repository.CartRepository;
 import com.thanh.foodOrder.repository.OrderDetailRepository;
 import com.thanh.foodOrder.repository.OrderRepository;
+import com.thanh.foodOrder.specification.OrderSpecification;
 import com.thanh.foodOrder.util.JwtUtil;
 import com.thanh.foodOrder.util.exception.CommonException;
 
@@ -64,6 +66,28 @@ public class OrderService {
         this.userService = userService;
         this.emailService = emailService;
 
+    }
+
+    public List<AdminOrderResponseDTO> getAllOrder(OrderStatus orderStatus) {
+        Specification<Order> spec = Specification.allOf(OrderSpecification.hasStatus(orderStatus));
+        List<Order> lstOrders = this.orderRepository.findAll(spec);
+        List<AdminOrderResponseDTO> res = new ArrayList<>();
+
+        for (Order od : lstOrders) {
+            AdminOrderResponseDTO item = new AdminOrderResponseDTO();
+
+            item.setOrderId(od.getId());
+            item.setOrderDate(od.getOrderDate());
+            item.setStatus(od.getOrderStatus().name());
+            item.setTotalPrice(od.getTotalPrice());
+            item.setDiscount(od.getDiscount());
+            item.setTableId(od.getBookingTable().getId());
+            item.setPaymentStatus(od.getPaymentStatus());
+
+            res.add(item);
+        }
+
+        return res;
     }
 
     public Order getOrderById(Long id) {

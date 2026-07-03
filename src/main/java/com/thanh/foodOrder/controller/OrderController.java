@@ -7,6 +7,7 @@ import com.thanh.foodOrder.domain.Order;
 import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
 import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
 import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
+import com.thanh.foodOrder.enums.OrderStatus;
 import com.thanh.foodOrder.service.OrderService;
 import com.thanh.foodOrder.util.anotation.ApiMessage;
 
@@ -35,6 +36,13 @@ public class OrderController {
 
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.getResponseOrderById(id));
 
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<List<AdminOrderResponseDTO>> handleGetAllOrders(
+            @RequestParam(name = "status", required = false) OrderStatus orderStatus) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.getAllOrder(orderStatus));
     }
 
     @GetMapping("/orderDetails/{id}")
