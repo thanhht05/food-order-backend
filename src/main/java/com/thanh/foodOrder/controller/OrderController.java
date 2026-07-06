@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thanh.foodOrder.domain.Order;
+import com.thanh.foodOrder.dtos.request.PaymentConfirmRequest;
 import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
 import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
 import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
@@ -50,11 +51,11 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.getOrderDetail(id));
     }
 
-    @PostMapping("/orders/{id}/pay")
+    @PostMapping("/orders/pay")
     @ApiMessage("Payment order successfully")
-    public ResponseEntity<Void> handlePaymentOrder(@PathVariable("id") Long id) {
+    public ResponseEntity<PaymentConfirmRequest> handlePaymentOrder(@RequestBody PaymentConfirmRequest req) {
 
-        this.orderService.payOrder(id);
+        this.orderService.payOrder(req.getOrderId(), req.getAmount());
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }

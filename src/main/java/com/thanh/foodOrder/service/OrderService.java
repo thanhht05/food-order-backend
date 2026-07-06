@@ -2,12 +2,14 @@ package com.thanh.foodOrder.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,13 +52,13 @@ public class OrderService {
     private final BookingTableService bookingTableService;
     private final ProductService productService;
     private final UserService userService;
-
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final EmailService emailService;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
             OrderDetailRepository orderDetailRepository, BookingTableService bookingTableService,
             ProductService productService, VoucherService voucherService, UserService userService,
-            EmailService emailService) {
+            EmailService emailService, SimpMessagingTemplate simpMessagingTemplate) {
         this.orderRepository = orderRepository;
         this.voucherService = voucherService;
         this.bookingTableService = bookingTableService;
@@ -65,6 +67,7 @@ public class OrderService {
         this.productService = productService;
         this.userService = userService;
         this.emailService = emailService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
 
     }
 
@@ -289,12 +292,6 @@ public class OrderService {
         // 5. Change table status
         bookingTable.setTableStatus(TableStatus.RESERVED);
 
-        // 6. Delete cart
-        String subject = "Hóa đơn đơn hàng #" + orderSaved.getId() + " - Food Order";
-        String htmlContent = buildInvoiceHtml(orderSaved);
-        this.emailService.sendOrderInvoiceEmail("huuthanhht05@gmail.com", subject, htmlContent);
-        cartDetailRepository.deleteAll(cartDetails);
-
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getId());
 
         return mapToOrderResponseDTO(order, orderDetails);
@@ -375,12 +372,22 @@ public class OrderService {
     }
 
     @Transactional
-    public void payOrder(Long id) {
+    public void payOrder(Long id, Double amount) {
         Order order = getOrderById(id);
+        List<Long> ids = order.getOrderDetails()
+                .stream()
+                .map(OrderDetail::getId)
+                .toList();
 
+        List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(ids);
         // 1. Không cho thanh toán lại
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
             throw new CommonException("Order already paid");
+        }
+        if (order.getTotalPrice() != amount) {
+            if (!order.getTotalPrice().equals(amount.doubleValue())) {
+                throw new CommonException("Price is not correct");
+            }
         }
 
         // 2. Validate trạng thái order
@@ -390,13 +397,24 @@ public class OrderService {
 
         // 3. Thanh toán thành công
         order.setPaymentStatus(PaymentStatus.PAID);
-        order.setOrderStatus(OrderStatus.COMPLETED);
+        order.setOrderStatus(OrderStatus.PENDING);
 
-        // 4. Trả bàn
-        BookingTable table = order.getBookingTable();
-        table.setTableStatus(TableStatus.AVAILABLE);
+        // 6. Delete cart
+
+        String subject = "Hóa đơn đơn hàng #" + order.getId() + " - Food Order";
+        String htmlContent = buildInvoiceHtml(order);
+        this.emailService.sendOrderInvoiceEmail("huuthanhht05@gmail.com", subject, htmlContent);
+        cartDetailRepository.deleteAll(cartDetails);
+
+        Map<String, String> payload = new HashMap<>();
+        payload.put("status", "PAID");
+        simpMessagingTemplate.convertAndSend(
+                "/topic/order/" + order.getId(),
+                payload // Spring Boot sẽ tự convert Map này thành {"status":"PAID"}
+        );
     }
 
+    @Transactional
     public OrderResponseDTO updateOrder(Order order) {
         Order orderDb = getOrderById(order.getId());
 
@@ -404,6 +422,8 @@ public class OrderService {
 
         this.orderRepository.save(orderDb);
 
+        BookingTable table = this.bookingTableService.getTableById(orderDb.getBookingTable().getId());
+        table.setTableStatus(TableStatus.AVAILABLE);
         List<OrderDetail> odDetails = this.orderDetailRepository.findByOrderId(orderDb.getId());
 
         return mapToOrderResponseDTO(orderDb, odDetails);

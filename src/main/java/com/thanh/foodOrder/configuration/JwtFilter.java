@@ -31,21 +31,37 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
 
-        String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
+
         try {
+            // 1. Ưu tiên lấy token từ Header (cho các request HTTP thông thường)
+            String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
-                username = jwtUtil.extractUsername(token);// if token invalid throws exception. Because not catch
-                                                          // exception
-                                                          // then Sptring catch and call AuthenticationEntryPoint
             }
+            // 2. Nếu không có ở Header, thử lấy từ Parameter (cho WebSocket
+            // /ws/info?token=...)
+            else if (request.getParameter("token") != null) {
+                token = request.getParameter("token");
+            }
+            // (Tùy chọn) Dự phòng nếu truyền bằng access_token
+            else if (request.getParameter("access_token") != null) {
+                token = request.getParameter("access_token");
+            }
+
+            // 3. Nếu lấy được token, tiến hành extract username
+            if (token != null) {
+                username = jwtUtil.extractUsername(token); // if token invalid throws exception
+            }
+
+            // 4. Validate và set SecurityContext
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 boolean isVailid = jwtUtil.validateToken(token, username);
                 if (isVailid) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
                             null,
                             userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -54,12 +70,11 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) { // catch error
-            logger.warn("Token is invaild: " + e.getMessage());
+            logger.warn("Token is invalid: " + e.getMessage());
             // set authentication null for spring security call JwtAuthenticationEntryPoint
             SecurityContextHolder.clearContext();
-
         }
+
         filterChain.doFilter(request, response);
     }
-
 }
