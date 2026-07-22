@@ -1,6 +1,6 @@
-package com.thanh.foodOrder.repository;
+package com.thanh.foodorder.repository;
 
-import com.thanh.foodOrder.domain.Role;
+import com.thanh.foodorder.domain.Role;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

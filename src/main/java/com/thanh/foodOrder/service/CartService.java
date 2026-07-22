@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,21 +13,21 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thanh.foodOrder.domain.Cart;
-import com.thanh.foodOrder.domain.CartDetail;
-import com.thanh.foodOrder.domain.CartItemDetail;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.dtos.request.CartItemRequestDTO;
-import com.thanh.foodOrder.dtos.request.CartRequestDTO;
-import com.thanh.foodOrder.dtos.request.MergeCartRequest;
-import com.thanh.foodOrder.dtos.response.cart.AddToCartResponseDTO;
-import com.thanh.foodOrder.dtos.response.cart.CartDetailUserDTO;
-import com.thanh.foodOrder.dtos.response.cart.CartDetailsResponseDTO;
-import com.thanh.foodOrder.repository.CartDetailRepository;
-import com.thanh.foodOrder.repository.CartRepository;
-import com.thanh.foodOrder.util.JwtUtil;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Cart;
+import com.thanh.foodorder.domain.CartDetail;
+import com.thanh.foodorder.domain.CartItemDetail;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.CartItemRequestDTO;
+import com.thanh.foodorder.dto.request.CartRequestDTO;
+import com.thanh.foodorder.dto.request.MergeCartRequest;
+import com.thanh.foodorder.dto.response.cart.AddToCartResponseDTO;
+import com.thanh.foodorder.dto.response.cart.CartDetailUserDTO;
+import com.thanh.foodorder.dto.response.cart.CartDetailsResponseDTO;
+import com.thanh.foodorder.repository.CartDetailRepository;
+import com.thanh.foodorder.repository.CartRepository;
+import com.thanh.foodorder.util.JwtUtil;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

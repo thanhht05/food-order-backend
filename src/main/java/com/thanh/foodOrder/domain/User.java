@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.util.JwtUtil;
 
 @Getter
 @Setter

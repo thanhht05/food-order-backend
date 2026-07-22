@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

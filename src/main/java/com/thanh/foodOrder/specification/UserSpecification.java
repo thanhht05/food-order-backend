@@ -1,8 +1,8 @@
-package com.thanh.foodOrder.specification;
+package com.thanh.foodorder.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.thanh.foodOrder.domain.User;
+import com.thanh.foodorder.domain.User;
 
 public class UserSpecification {
     // get all user

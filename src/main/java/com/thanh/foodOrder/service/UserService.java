@@ -1,12 +1,12 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
-import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
-import com.thanh.foodOrder.repository.UserRepository;
-import com.thanh.foodOrder.specification.UserSpecification;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Role;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.response.user.ResponseUserDTO;
+import com.thanh.foodorder.repository.UserRepository;
+import com.thanh.foodorder.specification.UserSpecification;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

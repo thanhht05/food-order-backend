@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,13 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.Voucher;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.repository.OrderRepository;
-import com.thanh.foodOrder.repository.VoucherRepository;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.Voucher;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.repository.OrderRepository;
+import com.thanh.foodorder.repository.VoucherRepository;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

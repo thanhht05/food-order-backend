@@ -1,4 +1,4 @@
-package com.thanh.foodOrder;
+package com.thanh.foodorder;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

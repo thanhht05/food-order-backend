@@ -1,9 +1,9 @@
-package com.thanh.foodOrder.specification;
+package com.thanh.foodorder.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.enums.OrderStatus;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.enums.OrderStatus;
 
 public class OrderSpecification {
     public static Specification<Order> hasStatus(OrderStatus orderStatus) {

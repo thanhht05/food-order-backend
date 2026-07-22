@@ -1,11 +1,11 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.BookingTable;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.service.BookingTableService;
+import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.service.BookingTableService;
 
 import java.util.List;
 

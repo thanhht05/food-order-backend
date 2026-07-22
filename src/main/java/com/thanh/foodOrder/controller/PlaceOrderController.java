@@ -1,18 +1,18 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.dtos.request.BuyNowRequestDTO;
-import com.thanh.foodOrder.dtos.request.CheckoutRequestDTO;
-import com.thanh.foodOrder.dtos.response.CheckOutResponseDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
-import com.thanh.foodOrder.service.EmailService;
-import com.thanh.foodOrder.service.OrderService;
-import com.thanh.foodOrder.service.UserService;
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.BuyNowRequestDTO;
+import com.thanh.foodorder.dto.request.CheckoutRequestDTO;
+import com.thanh.foodorder.dto.response.CheckOutResponseDTO;
+import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
+import com.thanh.foodorder.service.EmailService;
+import com.thanh.foodorder.service.OrderService;
+import com.thanh.foodorder.service.UserService;
+import com.thanh.foodorder.util.JwtUtil;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

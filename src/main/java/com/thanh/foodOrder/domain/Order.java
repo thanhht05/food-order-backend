@@ -1,13 +1,13 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thanh.foodOrder.enums.OrderStatus;
-import com.thanh.foodOrder.enums.PaymentStatus;
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.enums.OrderStatus;
+import com.thanh.foodorder.enums.PaymentStatus;
+import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.annotation.Generated;
 import jakarta.persistence.Column;

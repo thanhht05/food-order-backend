@@ -1,10 +1,10 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.service.CategoryService;
-import com.thanh.foodOrder.service.ProductService;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.service.CategoryService;
+import com.thanh.foodorder.service.ProductService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

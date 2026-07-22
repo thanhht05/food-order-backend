@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.util;
+package com.thanh.foodorder.util;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -9,8 +9,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import com.thanh.foodOrder.domain.respone.RestResponse;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.domain.response.RestResponse;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 
 @RestControllerAdvice
 public class FormatResResponse implements ResponseBodyAdvice {

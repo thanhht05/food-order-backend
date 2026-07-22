@@ -1,4 +1,4 @@
-package com.thanh.foodOrder;
+package com.thanh.foodorder;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.util.exception;
+package com.thanh.foodorder.util.exception;
 
 public class CommonException extends RuntimeException {
     public CommonException(String message) {

@@ -1,11 +1,11 @@
-package com.thanh.foodOrder.specification;
+package com.thanh.foodorder.specification;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.thanh.foodOrder.domain.Product;
+import com.thanh.foodorder.domain.Product;
 
 public class ProductSpecification {
     public static Specification<Product> hasKeyword(String keyword) {

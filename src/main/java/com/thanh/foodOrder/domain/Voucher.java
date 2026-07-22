@@ -1,9 +1,9 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

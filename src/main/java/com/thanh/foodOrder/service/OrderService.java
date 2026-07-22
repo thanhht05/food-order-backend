@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -6,38 +6,41 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.catalina.security.SecurityUtil;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thanh.foodOrder.domain.BookingTable;
-import com.thanh.foodOrder.domain.CartDetail;
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.domain.OrderDetail;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.Voucher;
-import com.thanh.foodOrder.dtos.request.BuyNowRequestDTO;
-import com.thanh.foodOrder.dtos.request.CheckoutRequestDTO;
-import com.thanh.foodOrder.dtos.response.CheckOutResponseDTO;
-import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderHistoryProjection;
-import com.thanh.foodOrder.dtos.response.order.OrderItemDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
-import com.thanh.foodOrder.enums.OrderStatus;
-import com.thanh.foodOrder.enums.PaymentStatus;
-import com.thanh.foodOrder.enums.TableStatus;
-import com.thanh.foodOrder.repository.CartDetailRepository;
-import com.thanh.foodOrder.repository.CartRepository;
-import com.thanh.foodOrder.repository.OrderDetailRepository;
-import com.thanh.foodOrder.repository.OrderRepository;
-import com.thanh.foodOrder.specification.OrderSpecification;
-import com.thanh.foodOrder.util.JwtUtil;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.CartDetail;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.domain.OrderDetail;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.Voucher;
+import com.thanh.foodorder.dto.request.BuyNowRequestDTO;
+import com.thanh.foodorder.dto.request.CheckoutRequestDTO;
+import com.thanh.foodorder.dto.response.CheckOutResponseDTO;
+import com.thanh.foodorder.dto.response.order.AdminOrderResponseDTO;
+import com.thanh.foodorder.dto.response.order.OrderHistoryDTO;
+import com.thanh.foodorder.dto.response.order.OrderHistoryProjection;
+import com.thanh.foodorder.dto.response.order.OrderItemDTO;
+import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
+import com.thanh.foodorder.enums.OrderStatus;
+import com.thanh.foodorder.enums.PaymentStatus;
+import com.thanh.foodorder.enums.TableStatus;
+import com.thanh.foodorder.repository.CartDetailRepository;
+import com.thanh.foodorder.repository.CartRepository;
+import com.thanh.foodorder.repository.OrderDetailRepository;
+import com.thanh.foodorder.repository.OrderRepository;
+import com.thanh.foodorder.specification.OrderSpecification;
+import com.thanh.foodorder.util.JwtUtil;
+import com.thanh.foodorder.util.OrderPaidEvent;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -52,13 +55,12 @@ public class OrderService {
     private final BookingTableService bookingTableService;
     private final ProductService productService;
     private final UserService userService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
             OrderDetailRepository orderDetailRepository, BookingTableService bookingTableService,
             ProductService productService, VoucherService voucherService, UserService userService,
-            EmailService emailService, SimpMessagingTemplate simpMessagingTemplate) {
+            ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.voucherService = voucherService;
         this.bookingTableService = bookingTableService;
@@ -66,8 +68,7 @@ public class OrderService {
         this.orderDetailRepository = orderDetailRepository;
         this.productService = productService;
         this.userService = userService;
-        this.emailService = emailService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.eventPublisher = eventPublisher;
 
     }
 
@@ -77,16 +78,7 @@ public class OrderService {
         List<AdminOrderResponseDTO> res = new ArrayList<>();
 
         for (Order od : lstOrders) {
-            AdminOrderResponseDTO item = new AdminOrderResponseDTO();
-
-            item.setOrderId(od.getId());
-            item.setOrderDate(od.getOrderDate());
-            item.setStatus(od.getOrderStatus().name());
-            item.setTotalPrice(od.getTotalPrice());
-            item.setDiscount(od.getDiscount());
-            item.setTableId(od.getBookingTable().getId());
-            item.setPaymentStatus(od.getPaymentStatus());
-
+            AdminOrderResponseDTO item = AdminOrderResponseDTO.from(od);
             res.add(item);
         }
 
@@ -105,15 +97,7 @@ public class OrderService {
     // get order on screen admin
     public AdminOrderResponseDTO getResponseOrderById(Long id) {
         Order order = getOrderById(id);
-        AdminOrderResponseDTO res = new AdminOrderResponseDTO();
-        res.setOrderId(id);
-        res.setOrderDate(order.getOrderDate());
-        res.setStatus(order.getOrderStatus().name());
-        res.setTotalPrice(order.getTotalPrice());
-        res.setDiscount(order.getDiscount());
-        res.setTableId(order.getBookingTable().getId());
-        res.setPaymentStatus(order.getPaymentStatus());
-
+        AdminOrderResponseDTO res = AdminOrderResponseDTO.from(order);
         return res;
 
     }
@@ -371,47 +355,90 @@ public class OrderService {
 
     }
 
+    // @Transactional
+    // public void payOrder(Long id, Double amount) {
+    // Order order = getOrderById(id);
+    // List<Long> ids = order.getOrderDetails()
+    // .stream()
+    // .map(OrderDetail::getId)
+    // .toList();
+
+    // List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(ids);
+    // // 1. Không cho thanh toán lại
+    // if (order.getPaymentStatus() == PaymentStatus.PAID) {
+    // throw new CommonException("Order already paid");
+    // }
+    // if (order.getTotalPrice() != amount) {
+    // if (!order.getTotalPrice().equals(amount.doubleValue())) {
+    // throw new CommonException("Price is not correct");
+    // }
+    // }
+
+    // // 2. Validate trạng thái order
+    // if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+    // throw new CommonException("Cannot pay cancelled order");
+    // }
+
+    // // 3. Thanh toán thành công
+    // order.setPaymentStatus(PaymentStatus.PAID);
+    // order.setOrderStatus(OrderStatus.PENDING);
+
+    // // 6. Delete cart
+
+    // String subject = "Hóa đơn đơn hàng #" + order.getId() + " - Food Order";
+    // String htmlContent = buildInvoiceHtml(order);
+    // this.emailService.sendOrderInvoiceEmail("huuthanhht05@gmail.com", subject,
+    // htmlContent);
+    // cartDetailRepository.deleteAll(cartDetails);
+
+    // Map<String, String> payload = new HashMap<>();
+    // payload.put("status", "PAID");
+    // simpMessagingTemplate.convertAndSend(
+    // "/topic/order/" + order.getId(),
+    // payload // Spring Boot sẽ tự convert Map này thành {"status":"PAID"}
+    // );
+    // }
     @Transactional
     public void payOrder(Long id, Double amount) {
+
         Order order = getOrderById(id);
+
+        validatePayment(order, amount);
+
+        order.setPaymentStatus(PaymentStatus.PAID);
+        order.setOrderStatus(OrderStatus.PENDING);
+
+        clearCart(order);
+
+        eventPublisher.publishEvent(new OrderPaidEvent(order));
+    }
+
+    private void clearCart(Order order) {
+
         List<Long> ids = order.getOrderDetails()
                 .stream()
                 .map(OrderDetail::getId)
                 .toList();
 
         List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(ids);
-        // 1. Không cho thanh toán lại
+
+        cartDetailRepository.deleteAll(cartDetails);
+
+    }
+
+    private void validatePayment(Order order, Double amount) {
+
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
             throw new CommonException("Order already paid");
         }
-        if (order.getTotalPrice() != amount) {
-            if (!order.getTotalPrice().equals(amount.doubleValue())) {
-                throw new CommonException("Price is not correct");
-            }
+
+        if (!Objects.equals(order.getTotalPrice(), amount)) {
+            throw new CommonException("Price is not correct");
         }
 
-        // 2. Validate trạng thái order
         if (order.getOrderStatus() == OrderStatus.CANCELLED) {
             throw new CommonException("Cannot pay cancelled order");
         }
-
-        // 3. Thanh toán thành công
-        order.setPaymentStatus(PaymentStatus.PAID);
-        order.setOrderStatus(OrderStatus.PENDING);
-
-        // 6. Delete cart
-
-        String subject = "Hóa đơn đơn hàng #" + order.getId() + " - Food Order";
-        String htmlContent = buildInvoiceHtml(order);
-        this.emailService.sendOrderInvoiceEmail("huuthanhht05@gmail.com", subject, htmlContent);
-        cartDetailRepository.deleteAll(cartDetails);
-
-        Map<String, String> payload = new HashMap<>();
-        payload.put("status", "PAID");
-        simpMessagingTemplate.convertAndSend(
-                "/topic/order/" + order.getId(),
-                payload // Spring Boot sẽ tự convert Map này thành {"status":"PAID"}
-        );
     }
 
     @Transactional
@@ -492,44 +519,4 @@ public class OrderService {
         return response;
     }
 
-    private String buildInvoiceHtml(Order order) {
-        StringBuilder itemsHtml = new StringBuilder();
-
-        // Vòng lặp duyệt qua danh sách các món ăn khách đặt để build thành các dòng
-        // trong bảng <tr>
-        for (OrderDetail item : order.getOrderDetails()) {
-            itemsHtml.append("<tr>")
-                    .append("<td style='padding: 8px; border-bottom: 1px solid #ddd;'>")
-                    .append(item.getProduct().getName())
-                    .append("</td>")
-                    .append("<td style='padding: 8px; border-bottom: 1px solid #ddd; text-align: center;'>")
-                    .append(item.getQuantity()).append("</td>")
-                    .append("<td style='padding: 8px; border-bottom: 1px solid #ddd; text-align: right;'>")
-                    .append(item.getPrice()).append("đ</td>")
-                    .append("</tr>");
-        }
-
-        // Toàn bộ khung giao diện hóa đơn HTML
-        return "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;'>"
-                + "  <h2 style='color: #ff4757; text-align: center;'>CẢM ƠN BẠN ĐÃ ĐẶT HÀNG!</h2>"
-                + "  <p>Xin chào <strong>" + order.getUser().getFullName() + "</strong>,</p>"
-                + "  <p>Đơn hàng <strong>#" + order.getId()
-                + "</strong> của bạn đã được tiếp nhận thành công. Dưới đây là thông tin chi tiết hóa đơn:</p>"
-                + "  <table style='width: 100%; border-collapse: collapse; margin-top: 20px;'>"
-                + "    <thead>"
-                + "      <tr style='background-color: #f2f2f2;'>"
-                + "        <th style='padding: 8px; text-align: left;'>Món ăn</th>"
-                + "        <th style='padding: 8px; text-align: center;'>SL</th>"
-                + "        <th style='padding: 8px; text-align: right;'>Giá</th>"
-                + "      </tr>"
-                + "    </thead>"
-                + "    <tbody>"
-                + itemsHtml.toString()
-                + "    </tbody>"
-                + "  </table>"
-                + "  <h3 style='text-align: right; margin-top: 20px; color: #ff4757;'>Tổng thanh toán: "
-                + order.getTotalPrice() + "đ</h3>"
-                + "  <p style='margin-top: 30px; font-size: 12px; color: #777; text-align: center;'>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 1900xxxx. Chúc bạn ngon miệng!</p>"
-                + "</div>";
-    }
 }

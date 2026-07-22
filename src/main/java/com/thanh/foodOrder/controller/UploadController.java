@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.thanh.foodOrder.service.UploadFileService;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.service.UploadFileService;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 
 @RestController
 @RequestMapping("/api/v1")

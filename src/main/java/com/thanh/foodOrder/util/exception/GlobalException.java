@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.util.exception;
+package com.thanh.foodorder.util.exception;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.thanh.foodOrder.domain.respone.RestResponse;
+import com.thanh.foodorder.domain.response.RestResponse;
 
 import io.jsonwebtoken.ExpiredJwtException;
 

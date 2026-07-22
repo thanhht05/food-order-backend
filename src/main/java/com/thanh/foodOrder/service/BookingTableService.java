@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.BookingTable;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
-import com.thanh.foodOrder.enums.TableStatus;
-import com.thanh.foodOrder.repository.BookingTableRepository;
-import com.thanh.foodOrder.specification.TableSpecification;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.response.user.ResponseUserDTO;
+import com.thanh.foodorder.enums.TableStatus;
+import com.thanh.foodorder.repository.BookingTableRepository;
+import com.thanh.foodorder.specification.TableSpecification;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

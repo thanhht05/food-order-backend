@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.configuration;
+package com.thanh.foodorder.configuration;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

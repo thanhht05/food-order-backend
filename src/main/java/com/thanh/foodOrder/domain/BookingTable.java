@@ -1,11 +1,11 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thanh.foodOrder.enums.TableStatus;
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.enums.TableStatus;
+import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

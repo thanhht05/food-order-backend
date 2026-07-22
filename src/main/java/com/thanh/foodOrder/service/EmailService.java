@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;

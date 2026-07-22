@@ -1,17 +1,17 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.dtos.request.RequestLoginDTO;
-import com.thanh.foodOrder.dtos.request.RequestRegisterDTO;
-import com.thanh.foodOrder.dtos.response.auth.ResponseLoginDTO;
-import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
-import com.thanh.foodOrder.service.UserService;
-import com.thanh.foodOrder.util.JwtUtil;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.RequestLoginDTO;
+import com.thanh.foodorder.dto.request.RequestRegisterDTO;
+import com.thanh.foodorder.dto.response.auth.ResponseLoginDTO;
+import com.thanh.foodorder.dto.response.user.ResponseUserDTO;
+import com.thanh.foodorder.service.UserService;
+import com.thanh.foodorder.util.JwtUtil;
+import com.thanh.foodorder.util.annotation.ApiMessage;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

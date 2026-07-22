@@ -1,15 +1,15 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.response.auth.ResponseRoleDTO;
-import com.thanh.foodOrder.repository.RoleRepository;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Role;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.response.auth.ResponseRoleDTO;
+import com.thanh.foodorder.repository.RoleRepository;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

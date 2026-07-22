@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,16 +15,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.Category;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.ProductImage;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.request.ProductRequestDTO;
-import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
-import com.thanh.foodOrder.dtos.response.product.ResponseProductDTO;
-import com.thanh.foodOrder.repository.ProductRepository;
-import com.thanh.foodOrder.specification.ProductSpecification;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Category;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.ProductImage;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.request.ProductRequestDTO;
+import com.thanh.foodorder.dto.request.ProductUpdateRequestDTO;
+import com.thanh.foodorder.dto.response.product.ResponseProductDTO;
+import com.thanh.foodorder.repository.ProductRepository;
+import com.thanh.foodorder.specification.ProductSpecification;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.log4j.Log4j2;

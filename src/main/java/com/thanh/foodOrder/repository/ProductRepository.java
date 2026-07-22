@@ -1,15 +1,17 @@
-package com.thanh.foodOrder.repository;
+package com.thanh.foodorder.repository;
 
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.thanh.foodOrder.domain.Category;
-import com.thanh.foodOrder.domain.Product;
+import com.thanh.foodorder.domain.Category;
+import com.thanh.foodorder.domain.Product;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
@@ -25,5 +27,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> findByCategory_NameIn(List<String> categoryNames, Pageable pageable);
 
     long countByCategory_Id(Long id);
+
+    List<Product> findByNameContainingIgnoreCase(String name);
 
 }

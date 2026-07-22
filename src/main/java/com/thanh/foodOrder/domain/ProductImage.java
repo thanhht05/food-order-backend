@@ -1,5 +1,5 @@
 
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.util;
+package com.thanh.foodorder.util;
 
 import java.security.Key;
 import java.util.Date;
@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.thanh.foodOrder.dtos.response.auth.ResponseLoginDTO;
+import com.thanh.foodorder.dto.response.auth.ResponseLoginDTO;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,10 +1,10 @@
-package com.thanh.foodOrder.specification;
+package com.thanh.foodorder.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.thanh.foodOrder.domain.BookingTable;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.User;
+import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.User;
 
 public class TableSpecification {
 

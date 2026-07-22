@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.repository;
+package com.thanh.foodorder.repository;
 
 import java.util.List;
 
@@ -8,10 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.Voucher;
-import com.thanh.foodOrder.dtos.response.order.OrderHistoryProjection;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.Voucher;
+import com.thanh.foodorder.dto.response.order.OrderHistoryProjection;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {

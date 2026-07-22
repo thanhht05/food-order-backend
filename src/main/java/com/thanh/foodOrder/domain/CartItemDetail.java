@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import java.io.Serializable;
 import java.util.List;

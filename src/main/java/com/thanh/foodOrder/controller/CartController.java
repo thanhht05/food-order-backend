@@ -1,17 +1,17 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.CartDetail;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.dtos.request.CartRequestDTO;
-import com.thanh.foodOrder.dtos.request.MergeCartRequest;
-import com.thanh.foodOrder.dtos.response.cart.AddToCartResponseDTO;
-import com.thanh.foodOrder.dtos.response.cart.CartDetailUserDTO;
-import com.thanh.foodOrder.dtos.response.cart.CartDetailsResponseDTO;
-import com.thanh.foodOrder.service.CartService;
-import com.thanh.foodOrder.service.UserService;
+import com.thanh.foodorder.domain.CartDetail;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.CartRequestDTO;
+import com.thanh.foodorder.dto.request.MergeCartRequest;
+import com.thanh.foodorder.dto.response.cart.AddToCartResponseDTO;
+import com.thanh.foodorder.dto.response.cart.CartDetailUserDTO;
+import com.thanh.foodorder.dto.response.cart.CartDetailsResponseDTO;
+import com.thanh.foodorder.service.CartService;
+import com.thanh.foodorder.service.UserService;
 
 import java.util.List;
 

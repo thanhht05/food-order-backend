@@ -1,12 +1,12 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.Voucher;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.service.VoucherService;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.domain.Voucher;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.service.VoucherService;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

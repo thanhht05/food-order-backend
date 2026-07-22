@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.repository;
+package com.thanh.foodorder.repository;
 
 import java.util.Optional;
 
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.thanh.foodOrder.domain.BookingTable;
+import com.thanh.foodorder.domain.BookingTable;
 
 @Repository
 public interface BookingTableRepository

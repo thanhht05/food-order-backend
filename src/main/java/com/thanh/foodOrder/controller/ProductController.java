@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -8,13 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thanh.foodOrder.domain.Product;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.request.ProductRequestDTO;
-import com.thanh.foodOrder.dtos.request.ProductUpdateRequestDTO;
-import com.thanh.foodOrder.dtos.response.product.ResponseProductDTO;
-import com.thanh.foodOrder.service.ProductService;
-import com.thanh.foodOrder.service.UploadFileService;
+import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.request.ProductRequestDTO;
+import com.thanh.foodorder.dto.request.ProductUpdateRequestDTO;
+import com.thanh.foodorder.dto.response.product.ResponseProductDTO;
+import com.thanh.foodorder.service.ProductService;
+import com.thanh.foodorder.service.UploadFileService;
 
 import java.math.BigDecimal;
 import java.util.List;

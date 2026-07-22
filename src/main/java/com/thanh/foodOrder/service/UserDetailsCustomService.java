@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class UserDetailsCustomService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.thanh.foodOrder.domain.User user = this.userService.getUserByEmail(username);
+        com.thanh.foodorder.domain.User user = this.userService.getUserByEmail(username);
         List<GrantedAuthority> authorities = new ArrayList<>();
         User user2 = new User(user.getEmail(), user.getPassword(), authorities);
         return user2;

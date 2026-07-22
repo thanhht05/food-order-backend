@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.util.List;
 
@@ -7,11 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.thanh.foodOrder.domain.Category;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.repository.CategoryRepository;
-import com.thanh.foodOrder.specification.CategorySpecification;
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.domain.Category;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.repository.CategoryRepository;
+import com.thanh.foodorder.specification.CategorySpecification;
+import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
 

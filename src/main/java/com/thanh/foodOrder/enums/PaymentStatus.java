@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.enums;
+package com.thanh.foodorder.enums;
 
 public enum PaymentStatus {
     UNPAID, // chưa thanh toán

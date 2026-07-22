@@ -1,16 +1,16 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.Order;
-import com.thanh.foodOrder.dtos.request.PaymentConfirmRequest;
-import com.thanh.foodOrder.dtos.response.order.AdminOrderResponseDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderHistoryDTO;
-import com.thanh.foodOrder.dtos.response.order.OrderResponseDTO;
-import com.thanh.foodOrder.enums.OrderStatus;
-import com.thanh.foodOrder.service.OrderService;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.domain.Order;
+import com.thanh.foodorder.dto.request.PaymentConfirmRequest;
+import com.thanh.foodorder.dto.response.order.AdminOrderResponseDTO;
+import com.thanh.foodorder.dto.response.order.OrderHistoryDTO;
+import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
+import com.thanh.foodorder.enums.OrderStatus;
+import com.thanh.foodorder.service.OrderService;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 
 import java.util.List;
 

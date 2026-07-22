@@ -1,14 +1,14 @@
-package com.thanh.foodOrder.util;
+package com.thanh.foodorder.util;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.service.RoleService;
-import com.thanh.foodOrder.service.UserService;
+import com.thanh.foodorder.domain.Role;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.service.RoleService;
+import com.thanh.foodorder.service.UserService;
 
 @Configuration
 public class DataInitializer {

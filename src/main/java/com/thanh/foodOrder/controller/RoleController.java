@@ -1,13 +1,13 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.response.auth.ResponseRoleDTO;
-import com.thanh.foodOrder.service.RoleService;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.domain.Role;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.response.auth.ResponseRoleDTO;
+import com.thanh.foodorder.service.RoleService;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

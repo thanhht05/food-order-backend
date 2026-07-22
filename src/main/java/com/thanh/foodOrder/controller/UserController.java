@@ -1,12 +1,12 @@
-package com.thanh.foodOrder.controller;
+package com.thanh.foodorder.controller;
 
-import com.thanh.foodOrder.domain.Role;
-import com.thanh.foodOrder.domain.User;
-import com.thanh.foodOrder.domain.respone.ResultPaginationDTO;
-import com.thanh.foodOrder.dtos.response.user.ResponseUserDTO;
-import com.thanh.foodOrder.service.RoleService;
-import com.thanh.foodOrder.service.UserService;
-import com.thanh.foodOrder.util.anotation.ApiMessage;
+import com.thanh.foodorder.domain.Role;
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.response.user.ResponseUserDTO;
+import com.thanh.foodorder.service.RoleService;
+import com.thanh.foodorder.service.UserService;
+import com.thanh.foodorder.util.annotation.ApiMessage;
 import jakarta.validation.Valid;
 
 import java.util.ArrayList;

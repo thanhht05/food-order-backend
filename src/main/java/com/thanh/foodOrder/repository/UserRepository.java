@@ -1,6 +1,6 @@
-package com.thanh.foodOrder.repository;
+package com.thanh.foodorder.repository;
 
-import com.thanh.foodOrder.domain.User;
+import com.thanh.foodorder.domain.User;
 
 import java.util.List;
 import java.util.Optional;

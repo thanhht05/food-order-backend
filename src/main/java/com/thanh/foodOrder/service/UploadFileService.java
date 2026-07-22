@@ -1,4 +1,4 @@
-package com.thanh.foodOrder.service;
+package com.thanh.foodorder.service;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.thanh.foodOrder.util.exception.CommonException;
+import com.thanh.foodorder.util.exception.CommonException;
 
 @Service
 public class UploadFileService {

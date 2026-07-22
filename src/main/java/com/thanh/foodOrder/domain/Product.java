@@ -1,11 +1,11 @@
-package com.thanh.foodOrder.domain;
+package com.thanh.foodorder.domain;
 
 import java.time.Instant;
 import java.util.List;
 
 import org.hibernate.annotations.ManyToAny;
 
-import com.thanh.foodOrder.util.JwtUtil;
+import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
