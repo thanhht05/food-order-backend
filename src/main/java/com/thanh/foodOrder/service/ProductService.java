@@ -19,6 +19,8 @@ import com.thanh.foodorder.domain.Category;
 import com.thanh.foodorder.domain.Product;
 import com.thanh.foodorder.domain.ProductImage;
 import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.AI.ProductAiResponse;
+import com.thanh.foodorder.dto.AI.ProductSearchCriteria;
 import com.thanh.foodorder.dto.request.ProductRequestDTO;
 import com.thanh.foodorder.dto.request.ProductUpdateRequestDTO;
 import com.thanh.foodorder.dto.response.product.ResponseProductDTO;
@@ -275,6 +277,43 @@ public class ProductService {
             throw new CommonException(
                     "Product " + product.getId() + " does not have enough stock");
         }
+    }
+
+    public List<ProductAiResponse> search(ProductSearchCriteria criteria) {
+
+        return productRepository.searchForAi(
+                normalize(criteria.keyword()),
+                normalize(criteria.category()),
+                criteria.price())
+                .stream()
+                .limit(10)
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ProductAiResponse toResponse(Product product) {
+        return new ProductAiResponse(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                getProductImage(product));
+    }
+
+    private String getProductImage(Product product) {
+        if (product.getLstImg() == null
+                || product.getLstImg().isEmpty()) {
+            return null;
+        }
+
+        return product.getLstImg().get(0).getImgName();
+    }
+
+    private String normalize(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
     }
 
 }

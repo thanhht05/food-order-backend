@@ -1,5 +1,6 @@
 package com.thanh.foodorder.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -29,5 +30,21 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     long countByCategory_Id(Long id);
 
     List<Product> findByNameContainingIgnoreCase(String name);
+
+    @org.springframework.data.jpa.repository.Query("""
+                SELECT p
+                FROM Product p
+                WHERE (:keyword IS NULL
+                       OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                       OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                  AND (:category IS NULL
+                       OR LOWER(p.category.name) = LOWER(:category))
+                  AND (:price IS NULL OR p.price <= :price)
+                ORDER BY p.price ASC
+            """)
+    List<Product> searchForAi(
+            @Param("keyword") String keyword,
+            @Param("category") String category,
+            @Param("price") Double price);
 
 }
