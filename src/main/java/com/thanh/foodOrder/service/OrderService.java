@@ -1,5 +1,6 @@
 package com.thanh.foodorder.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,10 +171,11 @@ public class OrderService {
         }
     }
 
-    private double caculateTotalPrice(List<CartDetail> cartDetails) {
-        double totalPrice = 0;
+    private BigDecimal caculateTotalPrice(List<CartDetail> cartDetails) {
+        BigDecimal totalPrice = BigDecimal.ZERO;
         for (CartDetail cd : cartDetails) {
-            totalPrice += cd.getQuantity() * cd.getPrice();
+            BigDecimal amount = cd.getPrice().multiply(BigDecimal.valueOf(cd.getQuantity()));
+            totalPrice.add(amount);
         }
         return totalPrice;
     }
@@ -187,18 +189,23 @@ public class OrderService {
         validBeforePlaceOrder(dto, curUser, cartDetails, bookingTable);
 
         // 2. Caculate price
-        double totalPrice = caculateTotalPrice(cartDetails);
-        double discount = 0;
-        double finalPrice = totalPrice;
+        BigDecimal totalPrice = caculateTotalPrice(cartDetails);
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal finalPrice = totalPrice;
 
         // 3. If have an voucher then CHECK
         if (dto.getVoucherCode() != null) {
             Voucher voucher = voucherService.getVoucherByCode(dto.getVoucherCode());
             voucherService.checkVoucherBeforeApply(voucher, curUser);
+            BigDecimal percent = BigDecimal.valueOf(voucher.getPercentDiscount());
 
-            double discountByPercent = totalPrice * voucher.getPercentDiscount() / 100;
-            discount = Math.min(discountByPercent, voucher.getMaxDiscount());
-            finalPrice = totalPrice - discount;
+            // totalPrice * percent / 100
+            BigDecimal discountByPercent = totalPrice
+                    .multiply(percent)
+                    .divide(BigDecimal.valueOf(100));
+            // Lấy số nhỏ hơn giữa giảm theo % và maxDiscount
+            discount = discountByPercent.min(BigDecimal.valueOf(voucher.getMaxDiscount()));
+            finalPrice = totalPrice.subtract(discount);
         }
 
         // 4. Retuen preview for user
@@ -225,18 +232,21 @@ public class OrderService {
         validBeforePlaceOrder(dto, curUser, cartDetails, bookingTable);
 
         // 2. Caculate price
-        double totalPrice = caculateTotalPrice(cartDetails);
+        BigDecimal totalPrice = caculateTotalPrice(cartDetails);
 
         Voucher voucher = null;
-        double discount = 0;
+        BigDecimal discount = BigDecimal.ZERO;
 
         if (dto.getVoucherCode() != null) {
             voucher = voucherService.getVoucherByCode(dto.getVoucherCode());
             voucherService.checkVoucherBeforeApply(voucher, curUser);
 
-            double discountByPercent = totalPrice * voucher.getPercentDiscount() / 100;
-            discount = Math.min(discountByPercent, voucher.getMaxDiscount());
+            BigDecimal percent = BigDecimal.valueOf(voucher.getPercentDiscount());
 
+            BigDecimal discountByPercent = totalPrice
+                    .multiply(percent)
+                    .divide(BigDecimal.valueOf(100));
+            discount = discountByPercent.min(BigDecimal.valueOf(voucher.getMaxDiscount()));
             // Update voucher usage
             voucher.setUsageLimit(voucher.getUsageLimit() - 1);
         }
@@ -297,7 +307,8 @@ public class OrderService {
             throw new CommonException("Item quantity is invalid");
 
         }
-        double totalPrice = product.getPrice() * req.getQuantity();
+
+        BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
 
         // 3. Create Order
         Order order = new Order();

@@ -1,5 +1,6 @@
 package com.thanh.foodorder.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,18 +111,19 @@ public class CartService {
         return total;
     }
 
-    public double getTotalPrice(Long userId) {
+    public BigDecimal getTotalPrice(Long userId) {
         Cart cart = cartRepository.findByUserId(userId);
 
         if (cart == null) {
-            return 0;
+            return BigDecimal.ZERO;
         }
 
-        double total = 0;
+        BigDecimal total = BigDecimal.ZERO;
         List<CartDetail> items = cart.getCartDetails();
 
         for (CartDetail item : items) {
-            total += item.getPrice() * item.getQuantity();
+            BigDecimal amount = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            total = total.add(amount);
         }
 
         return total;
@@ -185,7 +187,7 @@ public class CartService {
         CartDetailsResponseDTO res = new CartDetailsResponseDTO();
 
         int totalQuantity = 0;
-        double totalPrice = 0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
         List<CartDetailsResponseDTO.ProductInnerCartDetail> items = new ArrayList<>();
 
@@ -212,7 +214,8 @@ public class CartService {
             items.add(item);
 
             totalQuantity += cd.getQuantity();
-            totalPrice += cd.getQuantity() * cd.getPrice();
+            BigDecimal amount = cd.getPrice().multiply(BigDecimal.valueOf(cd.getQuantity()));
+            totalPrice.add(amount);
         }
 
         res.setQuantity(totalQuantity);

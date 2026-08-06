@@ -1,5 +1,6 @@
 package com.thanh.foodorder.dto.response.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.thanh.foodorder.domain.Order;
@@ -18,7 +19,7 @@ public class AdminOrderResponseDTO {
     private LocalDateTime orderDate;
     private OrderStatus status;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     private Long tableId;
     private PaymentStatus paymentStatus;

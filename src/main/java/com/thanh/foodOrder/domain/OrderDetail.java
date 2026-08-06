@@ -1,5 +1,6 @@
 package com.thanh.foodorder.domain;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -22,7 +23,7 @@ public class OrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int quantity;
-    private Double price;
+    private BigDecimal price;
     private String note;
 
     @ManyToOne

@@ -1,5 +1,6 @@
 package com.thanh.foodorder.domain;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,9 +42,9 @@ public class Order {
     private Long id;
 
     private LocalDateTime orderDate;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
     @Column(nullable = true)
-    private Double discount;
+    private BigDecimal discount;
     private String note;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

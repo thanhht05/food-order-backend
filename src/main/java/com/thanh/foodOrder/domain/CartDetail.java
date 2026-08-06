@@ -1,5 +1,7 @@
 package com.thanh.foodorder.domain;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +21,7 @@ public class CartDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int quantity;
-    private Double price;
+    private BigDecimal price;
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;

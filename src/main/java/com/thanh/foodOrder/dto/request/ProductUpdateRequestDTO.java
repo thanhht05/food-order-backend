@@ -1,5 +1,6 @@
 package com.thanh.foodorder.dto.request;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Setter;
 public class ProductUpdateRequestDTO {
     private Long id;
     private String name;
-    private Double price;
+    private BigDecimal price;
     private Integer quantity;
     private int sold;
     private List<String> lstImg;

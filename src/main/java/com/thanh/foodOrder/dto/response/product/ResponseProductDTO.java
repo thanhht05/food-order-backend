@@ -1,5 +1,6 @@
 package com.thanh.foodorder.dto.response.product;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import lombok.Setter;
 public class ResponseProductDTO {
     private long id;
     private String name;
-    private double price;
+    private BigDecimal price;
     private List<ProductImage> lstImg;
     private int quantity;
     private int sold;

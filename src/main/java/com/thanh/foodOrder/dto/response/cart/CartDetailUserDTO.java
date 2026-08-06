@@ -1,5 +1,7 @@
 package com.thanh.foodorder.dto.response.cart;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +17,7 @@ public class CartDetailUserDTO {
     public static class ProductInnerCartDetail {
         private Long id;
         private String name;
-        private Double price;
+        private BigDecimal price;
         private String categoryName;
         private String img;
         protected int quantity;

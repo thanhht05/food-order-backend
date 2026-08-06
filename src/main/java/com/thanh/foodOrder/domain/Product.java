@@ -1,5 +1,6 @@
 package com.thanh.foodorder.domain;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class Product {
     private String description;
 
     @NotNull
-    private Double price;
+    private BigDecimal price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> lstImg;
