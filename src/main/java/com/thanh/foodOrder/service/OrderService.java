@@ -175,7 +175,7 @@ public class OrderService {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (CartDetail cd : cartDetails) {
             BigDecimal amount = cd.getPrice().multiply(BigDecimal.valueOf(cd.getQuantity()));
-            totalPrice.add(amount);
+            totalPrice = totalPrice.add(amount);
         }
         return totalPrice;
     }
@@ -410,7 +410,7 @@ public class OrderService {
     // );
     // }
     @Transactional
-    public void payOrder(Long id, Double amount) {
+    public void payOrder(Long id, BigDecimal amount) {
 
         Order order = getOrderById(id);
 
@@ -421,6 +421,7 @@ public class OrderService {
 
         clearCart(order);
 
+        // Phát sự kiện
         eventPublisher.publishEvent(new OrderPaidEvent(order));
     }
 
@@ -437,16 +438,15 @@ public class OrderService {
 
     }
 
-    private void validatePayment(Order order, Double amount) {
+    private void validatePayment(Order order, BigDecimal amount) {
 
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
             throw new CommonException("Order already paid");
         }
 
-        if (!Objects.equals(order.getTotalPrice(), amount)) {
+        if (order.getTotalPrice() == null || amount == null || order.getTotalPrice().compareTo(amount) != 0) {
             throw new CommonException("Price is not correct");
         }
-
         if (order.getOrderStatus() == OrderStatus.CANCELLED) {
             throw new CommonException("Cannot pay cancelled order");
         }

@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.service.UserService;
 import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.servlet.FilterChain;
@@ -21,10 +23,12 @@ import lombok.extern.log4j.Log4j2;
 public class JwtFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final UserService userService;
 
-    public JwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public JwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil, UserService userService) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.userService = userService;
     }
 
     @Override
@@ -58,7 +62,9 @@ public class JwtFilter extends OncePerRequestFilter {
             // 4. Validate và set SecurityContext
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                boolean isVailid = jwtUtil.validateToken(token, username);
+                User user = userService.getUserByEmail(username);
+
+                boolean isVailid = jwtUtil.validateToken(token, username, user.getTokenVersion());
                 if (isVailid) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,

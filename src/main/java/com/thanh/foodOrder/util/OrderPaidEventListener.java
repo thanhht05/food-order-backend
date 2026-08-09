@@ -14,6 +14,7 @@ import com.thanh.foodorder.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
 
+// Lắng nghe sự kiện
 @Component
 @RequiredArgsConstructor
 public class OrderPaidEventListener {

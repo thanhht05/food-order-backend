@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.thanh.foodorder.service.UserService;
 import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,8 +45,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public JwtFilter jwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
-        return new JwtFilter(userDetailsService, jwtUtil);
+    public JwtFilter jwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil, UserService userService) {
+        return new JwtFilter(userDetailsService, jwtUtil, userService);
     }
 
     @Bean

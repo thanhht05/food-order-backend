@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.ChangePasswordRequest;
 import com.thanh.foodorder.dto.request.RequestLoginDTO;
 import com.thanh.foodorder.dto.request.RequestRegisterDTO;
 import com.thanh.foodorder.dto.response.auth.ResponseLoginDTO;
@@ -39,14 +40,11 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil,
-            PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/auth/register")
@@ -80,10 +78,10 @@ public class AuthController {
         userLogin.setId(user.getId());
         userLogin.setRole(user.getRole());
         res.setUserLogin(userLogin);
-        String accessToken = jwtUtil.generateToken(loginDTO.getUsername(), res);
+        String accessToken = jwtUtil.generateToken(user, res);
 
         // generate refreshToken
-        String refreshToken = jwtUtil.generateRefreshToken(loginDTO.getUsername(), res);
+        String refreshToken = jwtUtil.generateRefreshToken(user, res);
 
         // update user with refreshToken
         this.userService.updateUserRefreshToken(loginDTO.getUsername(), refreshToken);
@@ -119,17 +117,16 @@ public class AuthController {
     public ResponseEntity<ResponseLoginDTO> handleRefreshToken(
             @CookieValue(name = "refreshToken", defaultValue = "defaultToken") String refreshToken,
             HttpServletResponse response) {
+        String email = jwtUtil.extractUsername(refreshToken);
+
+        User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
         if (refreshToken.equals("defaultToken")) {
             throw new CommonException("Cookie is not exists");
         }
 
-        if (!jwtUtil.validRefreshToken(refreshToken)) {
+        if (!jwtUtil.validRefreshToken(refreshToken, userDb.getTokenVersion())) {
             throw new CommonException("Refresh token invalid or expired");
         }
-
-        String email = jwtUtil.extractUsername(refreshToken);
-
-        User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
 
         // create new token
         ResponseLoginDTO res = new ResponseLoginDTO();
@@ -141,10 +138,10 @@ public class AuthController {
         userLogin.setRole(userDb.getRole());
 
         res.setUserLogin(userLogin);
-        String accessToken = jwtUtil.generateToken(userDb.getEmail(), res);
+        String accessToken = jwtUtil.generateToken(userDb, res);
         res.setAccessToken(accessToken);
 
-        String newRefreshToken = jwtUtil.generateRefreshToken(userDb.getEmail(), res);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userDb, res);
 
         this.userService.updateUserRefreshToken(email, newRefreshToken);
 
@@ -165,5 +162,11 @@ public class AuthController {
 
     // return ResponseEntity.ok("Logged out");
     // }
+
+    @PostMapping("/auth/changePassword")
+    public ResponseEntity<ResponseLoginDTO> postMethodName(@RequestBody ChangePasswordRequest req) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.userChangePassword(req));
+    }
 
 }

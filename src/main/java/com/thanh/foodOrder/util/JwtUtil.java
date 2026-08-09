@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.dto.response.auth.ResponseLoginDTO;
 
 import io.jsonwebtoken.Claims;
@@ -30,15 +31,16 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username, ResponseLoginDTO res) {
+    public String generateToken(User user, ResponseLoginDTO res) {
         ResponseLoginDTO.UserInsideToken userInsideToken = new ResponseLoginDTO.UserInsideToken();
         userInsideToken.setEmail(res.getUserLogin().getEmail());
         userInsideToken.setFullName(res.getUserLogin().getFullname());
         userInsideToken.setId(res.getUserLogin().getId());
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getEmail())
                 .claim("user", userInsideToken)
+                .claim("tokenVersion", user.getTokenVersion())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION)) // now + expiration
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -46,14 +48,15 @@ public class JwtUtil {
 
     }
 
-    public String generateRefreshToken(String username, ResponseLoginDTO res) {
+    public String generateRefreshToken(User user, ResponseLoginDTO res) {
         ResponseLoginDTO.UserInsideToken userInsideToken = new ResponseLoginDTO.UserInsideToken();
         userInsideToken.setEmail(res.getUserLogin().getEmail());
         userInsideToken.setFullName(res.getUserLogin().getFullname());
         userInsideToken.setId(res.getUserLogin().getId());
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getEmail())
                 .claim("user", userInsideToken)
+                .claim("tokenVersion", user.getTokenVersion())
 
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESHTOKEN_EXPIRATION))
@@ -62,13 +65,27 @@ public class JwtUtil {
 
     }
 
-    public boolean validateToken(String token, String username) {
+    public boolean validateToken(
+            String token,
+            String username,
+            Integer currentTokenVersion) {
+
         String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
+        Integer tokenVersion = extractTokenVersion(token);
+
+        return extractedUsername.equals(username)
+                && !isTokenExpired(token)
+                && tokenVersion.equals(currentTokenVersion);
     }
 
-    public boolean validRefreshToken(String token) {
-        return !isTokenExpired(token);
+    public boolean validRefreshToken(
+            String token,
+            Integer currentTokenVersion) {
+
+        Integer tokenVersion = extractTokenVersion(token);
+
+        return !isTokenExpired(token)
+                && tokenVersion.equals(currentTokenVersion);
     }
 
     private boolean isTokenExpired(String token) {
@@ -77,6 +94,10 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public Integer extractTokenVersion(String token) {
+        return getClaims(token).get("tokenVersion", Integer.class);
     }
 
     private Claims getClaims(String token) {

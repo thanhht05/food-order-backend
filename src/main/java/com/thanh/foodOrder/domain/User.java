@@ -34,6 +34,8 @@ public class User {
    private Instant createdAt;
    private Instant updatedAt;
    String refreshToken;
+   @Column(nullable = false)
+   private Integer tokenVersion = 0;
 
    @ManyToOne()
    @JoinColumn(name = "role_id")

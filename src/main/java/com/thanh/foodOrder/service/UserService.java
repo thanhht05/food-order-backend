@@ -3,9 +3,12 @@ package com.thanh.foodorder.service;
 import com.thanh.foodorder.domain.Role;
 import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.domain.response.ResultPaginationDTO;
+import com.thanh.foodorder.dto.request.ChangePasswordRequest;
+import com.thanh.foodorder.dto.response.auth.ResponseLoginDTO;
 import com.thanh.foodorder.dto.response.user.ResponseUserDTO;
 import com.thanh.foodorder.repository.UserRepository;
 import com.thanh.foodorder.specification.UserSpecification;
+import com.thanh.foodorder.util.JwtUtil;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
@@ -225,5 +228,30 @@ public class UserService {
         result.put("total", usersBulk.size());
 
         return result;
+    }
+
+    public ResponseLoginDTO userChangePassword(ChangePasswordRequest req) {
+        String email = JwtUtil.getCurrentUserLogin().orElse("");
+        User user = getUserByEmail(email);
+
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new CommonException("Old password incorrect");
+        }
+        if (!req.getConfirmPassword().equals(req.getNewPassword())) {
+            throw new CommonException("Confirm password incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        this.userRepository.save(user);
+
+        ResponseLoginDTO res = new ResponseLoginDTO();
+        ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
+        userLogin.setEmail(user.getEmail());
+        userLogin.setFullname(user.getFullName());
+        userLogin.setId(user.getId());
+        userLogin.setRole(user.getRole());
+        res.setUserLogin(userLogin);
+        return res;
     }
 }
