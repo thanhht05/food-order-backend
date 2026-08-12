@@ -23,6 +23,7 @@ import com.thanh.foodorder.domain.OrderDetail;
 import com.thanh.foodorder.domain.Product;
 import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.domain.Voucher;
+import com.thanh.foodorder.dto.CreateOrderData;
 import com.thanh.foodorder.dto.request.BuyNowRequestDTO;
 import com.thanh.foodorder.dto.request.CheckoutRequestDTO;
 import com.thanh.foodorder.dto.response.CheckOutResponseDTO;
@@ -252,18 +253,58 @@ public class OrderService {
         }
 
         // 3. Create Order
-        Order order = new Order();
-        order.setUser(curUser);
-        order.setOrderDate(LocalDateTime.now());
-        order.setTotalPrice(totalPrice);
-        order.setDiscount(discount);
-        order.setOrderStatus(OrderStatus.PENDING);
-        order.setPaymentStatus(PaymentStatus.UNPAID);
-        order.setBookingTable(bookingTable);
-        order.setVoucher(voucher);
-        order.setNote(dto.getNote() != null ? dto.getNote() : "");
 
+        CreateOrderData data = CreateOrderData.builder()
+                .user(curUser)
+                .orderDate(LocalDateTime.now())
+                .totalPrice(totalPrice)
+                .discount(discount)
+                .orderStatus(OrderStatus.PENDING)
+                .paymentStatus(PaymentStatus.UNPAID)
+                .bookingTable(bookingTable)
+                .voucher(voucher)
+                .note(dto.getNote() != null ? dto.getNote() : "").build();
+
+        Order order = createOrder(data);
         Order orderSaved = orderRepository.save(order);
+
+        // 4. Create OrderDetail
+
+        List<OrderDetail> orderDetailsToSave = createOrderDetal(orderSaved, cartDetails, dto.getNote());
+        List<OrderDetail> savedOrderDetails = orderDetailRepository.saveAll(orderDetailsToSave);
+        orderSaved.setOrderDetails(savedOrderDetails);
+
+        // 5. Change table status
+        bookingTable.setTableStatus(TableStatus.RESERVED);
+
+        // if (dto.getPaymentMethod().equals("CASH")) { // this may have error NPE
+        // clearCart(orderSaved);
+        // }
+        // fix
+        if ("CASH".equals(dto.getPaymentMethod())) {
+            cartDetailRepository.deleteAll(cartDetails);
+        }
+
+        return mapToOrderResponseDTO(order, savedOrderDetails);
+    }
+
+    private Order createOrder(CreateOrderData data) {
+        Order order = new Order();
+
+        order.setUser(data.getUser());
+        order.setOrderDate(data.getOrderDate());
+        order.setTotalPrice(data.getTotalPrice());
+        order.setDiscount(data.getDiscount());
+        order.setOrderStatus(data.getOrderStatus());
+        order.setPaymentStatus(data.getPaymentStatus());
+        order.setBookingTable(data.getBookingTable());
+        order.setVoucher(data.getVoucher());
+        order.setNote(data.getNote());
+
+        return order;
+    }
+
+    private List<OrderDetail> createOrderDetal(Order orderSaved, List<CartDetail> cartDetails, String note) {
         List<OrderDetail> orderDetailsToSave = new ArrayList<>();
         // 4. Create OrderDetail
         for (CartDetail cd : cartDetails) {
@@ -272,7 +313,7 @@ public class OrderService {
             od.setProduct(cd.getProduct());
             od.setQuantity(cd.getQuantity());
             od.setPrice(cd.getPrice());
-            od.setNote(dto.getNote());
+            od.setNote(note);
 
             orderDetailRepository.save(od);
             // Update inventory
@@ -280,15 +321,7 @@ public class OrderService {
             p.setQuantity(p.getQuantity() - cd.getQuantity());
             orderDetailsToSave.add(od);
         }
-        List<OrderDetail> savedOrderDetails = orderDetailRepository.saveAll(orderDetailsToSave);
-        orderSaved.setOrderDetails(savedOrderDetails);
-
-        // 5. Change table status
-        bookingTable.setTableStatus(TableStatus.RESERVED);
-
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getId());
-
-        return mapToOrderResponseDTO(order, orderDetails);
+        return orderDetailsToSave;
     }
 
     @Transactional
@@ -366,49 +399,6 @@ public class OrderService {
 
     }
 
-    // @Transactional
-    // public void payOrder(Long id, Double amount) {
-    // Order order = getOrderById(id);
-    // List<Long> ids = order.getOrderDetails()
-    // .stream()
-    // .map(OrderDetail::getId)
-    // .toList();
-
-    // List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(ids);
-    // // 1. Không cho thanh toán lại
-    // if (order.getPaymentStatus() == PaymentStatus.PAID) {
-    // throw new CommonException("Order already paid");
-    // }
-    // if (order.getTotalPrice() != amount) {
-    // if (!order.getTotalPrice().equals(amount.doubleValue())) {
-    // throw new CommonException("Price is not correct");
-    // }
-    // }
-
-    // // 2. Validate trạng thái order
-    // if (order.getOrderStatus() == OrderStatus.CANCELLED) {
-    // throw new CommonException("Cannot pay cancelled order");
-    // }
-
-    // // 3. Thanh toán thành công
-    // order.setPaymentStatus(PaymentStatus.PAID);
-    // order.setOrderStatus(OrderStatus.PENDING);
-
-    // // 6. Delete cart
-
-    // String subject = "Hóa đơn đơn hàng #" + order.getId() + " - Food Order";
-    // String htmlContent = buildInvoiceHtml(order);
-    // this.emailService.sendOrderInvoiceEmail("huuthanhht05@gmail.com", subject,
-    // htmlContent);
-    // cartDetailRepository.deleteAll(cartDetails);
-
-    // Map<String, String> payload = new HashMap<>();
-    // payload.put("status", "PAID");
-    // simpMessagingTemplate.convertAndSend(
-    // "/topic/order/" + order.getId(),
-    // payload // Spring Boot sẽ tự convert Map này thành {"status":"PAID"}
-    // );
-    // }
     @Transactional
     public void payOrder(Long id, BigDecimal amount) {
 
@@ -425,17 +415,16 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderPaidEvent(order));
     }
 
-    private void clearCart(Order order) {
+    public void clearCart(Order order) {
 
-        List<Long> ids = order.getOrderDetails()
+        List<Long> productIds = order.getOrderDetails()
                 .stream()
-                .map(OrderDetail::getId)
+                .map(detail -> detail.getProduct().getId())
                 .toList();
 
-        List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(ids);
+        Long userId = order.getUser().getId();
 
-        cartDetailRepository.deleteAll(cartDetails);
-
+        cartDetailRepository.deleteByCartUserIdAndProductIdIn(userId, productIds);
     }
 
     private void validatePayment(Order order, BigDecimal amount) {
