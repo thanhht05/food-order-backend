@@ -41,7 +41,8 @@ import com.thanh.foodorder.repository.OrderDetailRepository;
 import com.thanh.foodorder.repository.OrderRepository;
 import com.thanh.foodorder.specification.OrderSpecification;
 import com.thanh.foodorder.util.JwtUtil;
-import com.thanh.foodorder.util.OrderPaidEvent;
+import com.thanh.foodorder.util.event.OrderCreatedEvent;
+import com.thanh.foodorder.util.event.OrderPaidEvent;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
@@ -284,6 +285,8 @@ public class OrderService {
         if ("CASH".equals(dto.getPaymentMethod())) {
             cartDetailRepository.deleteAll(cartDetails);
         }
+        eventPublisher.publishEvent(
+                new OrderCreatedEvent(orderSaved));
 
         return mapToOrderResponseDTO(order, savedOrderDetails);
     }

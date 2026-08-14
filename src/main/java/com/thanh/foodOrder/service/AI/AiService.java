@@ -45,7 +45,7 @@ public class AiService {
         public AiChatResponse getChatResponse(String userMessage) {
 
                 try {
-                        ProductSearchCriteria criteria = extractCriteria(userMessage); // convert user message to json
+                        ProductSearchCriteria criteria = extractCriteria(userMessage); // convert user message to DTO
 
                         List<ProductAiResponse> products = productService.search(criteria); // get product from db
 
@@ -147,7 +147,8 @@ public class AiService {
                 return content;
         }
 
-        private ProductSearchCriteria extractCriteria(String userMessage) { // Nhờ AI chuyển từ user prompt sang JSON
+        private ProductSearchCriteria extractCriteria(String userMessage) { // Nhờ AI chuyển từ user prompt DTO
+                                                                            // SeatchCriteria
 
                 String systemPrompt = """
                                 Bạn có nhiệm vụ phân tích yêu cầu tìm món ăn.
@@ -195,6 +196,7 @@ public class AiService {
                                 .content();
 
                 try {
+                        // objectMapper.readValue dùng để chuyển dữ liệu JSON thành Java Object.
                         return objectMapper.readValue(
                                         json,
                                         ProductSearchCriteria.class);

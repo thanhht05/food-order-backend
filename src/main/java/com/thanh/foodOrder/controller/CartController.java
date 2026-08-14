@@ -9,7 +9,7 @@ import com.thanh.foodorder.dto.request.CartRequestDTO;
 import com.thanh.foodorder.dto.request.MergeCartRequest;
 import com.thanh.foodorder.dto.response.cart.AddToCartResponseDTO;
 import com.thanh.foodorder.dto.response.cart.CartDetailUserDTO;
-import com.thanh.foodorder.dto.response.cart.CartDetailsResponseDTO;
+import com.thanh.foodorder.dto.response.cart.CartResponeDTO;
 import com.thanh.foodorder.service.CartService;
 import com.thanh.foodorder.service.UserService;
 
@@ -40,7 +40,7 @@ public class CartController {
     }
 
     @PostMapping("/carts")
-    public ResponseEntity<CartDetailsResponseDTO> addProcutToCart(@RequestBody CartRequestDTO request) {
+    public ResponseEntity<CartResponeDTO> addProcutToCart(@RequestBody CartRequestDTO request) {
 
         return ResponseEntity.status(HttpStatus.OK).body(cartService.addProductsToCart(request));
     }
@@ -58,28 +58,21 @@ public class CartController {
     // }
 
     @PutMapping("/cartDetails")
-    public ResponseEntity<CartDetailsResponseDTO> handeUpdateCartDetail(@RequestBody CartRequestDTO req) {
+    public ResponseEntity<CartResponeDTO> handeUpdateCartDetail(@RequestBody CartRequestDTO req) {
 
         return ResponseEntity.status(HttpStatus.OK).body(this.cartService.updateCartItem(req));
     }
 
-    @PostMapping("/cartMerge")
-    public ResponseEntity<?> mergeCart(
-            @RequestBody MergeCartRequest request,
-            @AuthenticationPrincipal UserDetails userdDetail) {
-        User user = this.userService.getUserByEmail(userdDetail.getUsername());
-        return ResponseEntity.ok(cartService.mergeCart(user.getId(), request));
-    }
-
-    @DeleteMapping("/cartsDetails/{id}")
-    public String handleDeleteCartItem(@RequestBody String entity) {
-        // TODO: process POST request
-
-        return entity;
-    }
+    // @PostMapping("/cartMerge")
+    // public ResponseEntity<?> mergeCart(
+    // @RequestBody MergeCartRequest request,
+    // @AuthenticationPrincipal UserDetails userdDetail) {
+    // User user = this.userService.getUserByEmail(userdDetail.getUsername());
+    // return ResponseEntity.ok(cartService.mergeCart(user.getId(), request));
+    // }
 
     @GetMapping("/cartDetailUser")
-    public ResponseEntity<List<CartDetailUserDTO>> handleGetCartDetailByUser() {
+    public ResponseEntity<CartResponeDTO> handleGetCartDetailByUser() {
         return ResponseEntity.ok(this.cartService.getCartDetailsByUser());
     }
 

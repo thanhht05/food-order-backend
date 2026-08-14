@@ -1,4 +1,4 @@
-package com.thanh.foodorder.util;
+package com.thanh.foodorder.util.event;
 
 import com.thanh.foodorder.domain.Order;
 

@@ -1,4 +1,4 @@
-package com.thanh.foodorder.util;
+package com.thanh.foodorder.util.event;
 
 import java.util.Map;
 
@@ -33,6 +33,7 @@ public class OrderPaidEventListener {
         notifyAdmin(order);
     }
 
+    // thông báo cho khách hàng khi thanh toán thành công
     private void notifyCustomer(Order order) {
 
         Map<String, String> payload = Map.of(
@@ -43,6 +44,7 @@ public class OrderPaidEventListener {
                 payload);
     }
 
+    // Thông báo cho admin khi có đơn hàng mới
     private void notifyAdmin(Order order) {
 
         AdminOrderResponseDTO response = AdminOrderResponseDTO.from(order);
