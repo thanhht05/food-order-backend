@@ -63,6 +63,7 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs/**",
+                "/ws/**"
         };
         http
                 .csrf(csrf -> csrf.disable())
