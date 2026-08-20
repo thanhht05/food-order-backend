@@ -43,6 +43,10 @@ public class ConversationService {
                 .orElseGet(() -> createConversation(userId));
     }
 
+    public Conversation getConversationById(Long id) {
+        return conversationRepository.findById(id).orElse(null);
+    }
+
     private Conversation createConversation(Long userId) {
 
         User user = userService.getUserById(userId);
@@ -62,6 +66,7 @@ public class ConversationService {
         conversation.setStatus(ConversationStatus.CLOSED);
 
         Conversation update = conversationRepository.save(conversation);
+
         ConversationResponse res = ConversationResponse.from(update);
         return res;
     }

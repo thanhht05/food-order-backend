@@ -32,10 +32,12 @@ public class MessageController {
     }
 
     @PutMapping("/conversations/{conversationId}/messages")
-    public ResponseEntity<Void> updateMessageStatus(@PathVariable(value = "conversationId") Long conversationId) {
+    public ResponseEntity<Void> markMessageIsRead(@PathVariable(value = "conversationId") Long conversationId) {
         // TODO: process PUT request
+        String email = JwtUtil.getCurrentUserLogin().orElse("");
+        User user = this.userService.getUserByEmail(email);
 
-        messageService.markMessagesAsRead(conversationId);
+        messageService.markMessagesAsRead(conversationId, user);
         return ResponseEntity.noContent().build();
 
     }

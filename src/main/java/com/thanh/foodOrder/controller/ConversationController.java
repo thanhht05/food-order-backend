@@ -51,9 +51,8 @@ public class ConversationController {
     @PutMapping("conversations/{conversationId}")
     public ResponseEntity<ConversationResponse> putMethodName(
             @PathVariable(value = "conversationId") Long conversationId) {
-        String email = JwtUtil.getCurrentUserLogin().orElse("");
-        User user = this.userService.getUserByEmail(email);
-        Conversation conversation = conversationService.getOrCreateConversation(user.getId());
+
+        Conversation conversation = conversationService.getConversationById(conversationId);
 
         return ResponseEntity.ok(this.conversationService.updateStatus(conversation));
     }

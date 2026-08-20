@@ -9,19 +9,31 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.thanh.foodorder.domain.Message;
+import com.thanh.foodorder.enums.SenderRole;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    List<Message> findByConversationIdOrderByCreatedAtAsc(
-            Long conversationId);
+        List<Message> findByConversationIdOrderByCreatedAtAsc(
+                        Long conversationId);
 
-    @Modifying
-    @Query("""
-                UPDATE Message m
-                SET m.isRead = true
-                WHERE m.conversation.id = :conversationId
-                  AND m.senderRole = 'USER'
-            """)
-    void markUserMessagesAsRead(
-            @Param("conversationId") Long conversationId);
+        // @Modifying
+        // @Query("""
+        // UPDATE Message m
+        // SET m.isRead = true
+        // WHERE m.conversation.id = :conversationId
+        // AND m.senderRole = 'USER'
+        // """)
+        // void markUserMessagesAsRead(
+        // @Param("conversationId") Long conversationId);
+        @Modifying
+        @Query("""
+                            UPDATE Message m
+                            SET m.isRead = true
+                            WHERE m.conversation.id = :conversationId
+                              AND m.senderRole = :senderRole
+                              AND m.isRead = false
+                        """)
+        void markMessagesAsRead(
+                        @Param("conversationId") Long conversationId,
+                        @Param("senderRole") SenderRole senderRole);
 }

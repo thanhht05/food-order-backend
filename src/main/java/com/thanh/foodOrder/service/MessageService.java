@@ -15,7 +15,9 @@ import com.thanh.foodorder.dto.response.MessageResponse;
 import com.thanh.foodorder.enums.SenderRole;
 import com.thanh.foodorder.repository.ConversationRepository;
 import com.thanh.foodorder.repository.MessageRepository;
+import com.thanh.foodorder.util.JwtUtil;
 import com.thanh.foodorder.util.event.MessageCreatedEvent;
+import com.thanh.foodorder.util.event.MessageReadEvent;
 
 @Service
 
@@ -35,9 +37,15 @@ public class MessageService {
     }
 
     @Transactional
-    public void markMessagesAsRead(Long conversationId) {
+    public void markMessagesAsRead(Long conversationId, User user) {
+        if (user.getRole().getName().equals("ADMIN")) {
 
-        messageRepository.markUserMessagesAsRead(conversationId);
+            messageRepository.markMessagesAsRead(conversationId, SenderRole.USER);
+        } else {
+            messageRepository.markMessagesAsRead(conversationId, SenderRole.ADMIN);
+
+        }
+        eventPublisher.publishEvent(new MessageReadEvent(conversationId));
     }
 
     @Transactional(readOnly = true)
