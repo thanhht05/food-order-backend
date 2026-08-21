@@ -224,6 +224,10 @@ public class OrderService {
         return res;
     }
 
+    public void updateSoldQuantity(CartDetail cd) {
+        cd.getProduct().setSold(cd.getProduct().getSold() + 1);
+    }
+
     @Transactional
     public OrderResponseDTO placeOrder(CheckoutRequestDTO dto, User curUser) {
 
@@ -274,6 +278,12 @@ public class OrderService {
         List<OrderDetail> orderDetailsToSave = createOrderDetal(orderSaved, cartDetails, dto.getNote());
         List<OrderDetail> savedOrderDetails = orderDetailRepository.saveAll(orderDetailsToSave);
         orderSaved.setOrderDetails(savedOrderDetails);
+
+        // update sold
+        for (CartDetail cd : cartDetails) {
+
+            updateSoldQuantity(cd);
+        }
 
         // 5. Change table status
         bookingTable.setTableStatus(TableStatus.RESERVED);

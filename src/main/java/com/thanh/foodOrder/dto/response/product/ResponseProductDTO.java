@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
+import com.thanh.foodorder.enums.ProductStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,7 @@ public class ResponseProductDTO {
     private ProductCate productCate;
     private Instant createdAt;
     private Instant updatedAt;
+    private ProductStatus productStatus;
 
     @Getter
     @Setter

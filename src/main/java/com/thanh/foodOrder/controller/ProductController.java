@@ -57,6 +57,13 @@ public class ProductController {
         return ResponseEntity.ok(res);
     }
 
+    @PutMapping("/products/{productId}/status")
+    public ResponseEntity<Void> putMethodName(@PathVariable(value = "productId") Long productId) {
+        this.productService.updateProductStatus(productId);
+
+        return ResponseEntity.ok(null);
+    }
+
     @DeleteMapping("/products/{id}")
     public ResponseEntity<Void> handleDeletProduct(@PathVariable(value = "id") Long id) {
 

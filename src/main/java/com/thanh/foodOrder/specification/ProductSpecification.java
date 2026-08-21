@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.enums.ProductStatus;
 
 public class ProductSpecification {
     public static Specification<Product> hasKeyword(String keyword) {
@@ -45,6 +46,16 @@ public class ProductSpecification {
                 return null;
             }
             return cb.lessThanOrEqualTo(root.get("price"), to);
+        };
+    }
+
+    public static Specification<Product> status(ProductStatus status) {
+        return (root, query, cb) -> {
+            if (status == null) {
+                return null;
+            }
+
+            return cb.equal(root.get("status"), status);
         };
     }
 }

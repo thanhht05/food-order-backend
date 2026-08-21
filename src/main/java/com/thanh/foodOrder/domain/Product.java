@@ -6,12 +6,15 @@ import java.util.List;
 
 import org.hibernate.annotations.ManyToAny;
 
+import com.thanh.foodorder.enums.ProductStatus;
 import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,6 +41,8 @@ public class Product {
     private String name;
     private int sold;
     private String description;
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
 
     @NotNull
     private BigDecimal price;
@@ -57,7 +62,6 @@ public class Product {
     private List<OrderDetail> orderDetails;
     private String createdBy;
     private String updatedBy;
-    private long point;
     private Instant createdAt;
     private Instant updatedAt;
 

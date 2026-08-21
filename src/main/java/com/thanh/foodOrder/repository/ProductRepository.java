@@ -13,38 +13,39 @@ import org.springframework.stereotype.Repository;
 
 import com.thanh.foodorder.domain.Category;
 import com.thanh.foodorder.domain.Product;
+import com.thanh.foodorder.enums.ProductStatus;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
-    boolean existsByNameAndCategory(String name, Category category);
+        boolean existsByNameAndCategory(String name, Category category);
 
-    // List<Product> findByCategory(Category cate);
+        // List<Product> findByCategory(Category cate);
 
-    Page<Product> findByNameContainingIgnoreCaseAndCategory_NameIn(String name, List<String> categoryNames,
-            Pageable pageable);
+        Page<Product> findByNameContainingIgnoreCaseAndCategory_NameIn(String name, List<String> categoryNames,
+                        Pageable pageable);
 
-    Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
+        Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    Page<Product> findByCategory_NameIn(List<String> categoryNames, Pageable pageable);
+        Page<Product> findByCategory_NameIn(List<String> categoryNames, Pageable pageable);
 
-    long countByCategory_Id(Long id);
+        long countByCategory_Id(Long id);
 
-    List<Product> findByNameContainingIgnoreCase(String name);
+        List<Product> findByNameContainingIgnoreCase(String name);
 
-    @org.springframework.data.jpa.repository.Query("""
-                SELECT p
-                FROM Product p
-                WHERE (:keyword IS NULL
-                       OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                       OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
-                  AND (:category IS NULL
-                       OR LOWER(p.category.name) = LOWER(:category))
-                  AND (:price IS NULL OR p.price <= :price)
-                ORDER BY p.price ASC
-            """)
-    List<Product> searchForAi(
-            @Param("keyword") String keyword,
-            @Param("category") String category,
-            @Param("price") Double price);
+        @org.springframework.data.jpa.repository.Query("""
+                            SELECT p
+                            FROM Product p
+                            WHERE (:keyword IS NULL
+                                   OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                                   OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                              AND (:category IS NULL
+                                   OR LOWER(p.category.name) = LOWER(:category))
+                              AND (:price IS NULL OR p.price <= :price)
+                            ORDER BY p.price ASC
+                        """)
+        List<Product> searchForAi(
+                        @Param("keyword") String keyword,
+                        @Param("category") String category,
+                        @Param("price") Double price);
 
 }

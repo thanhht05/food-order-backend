@@ -18,14 +18,17 @@ import org.springframework.stereotype.Service;
 import com.thanh.foodorder.domain.Category;
 import com.thanh.foodorder.domain.Product;
 import com.thanh.foodorder.domain.ProductImage;
+import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.domain.response.ResultPaginationDTO;
 import com.thanh.foodorder.dto.AI.ProductAiResponse;
 import com.thanh.foodorder.dto.AI.ProductSearchCriteria;
 import com.thanh.foodorder.dto.request.ProductRequestDTO;
 import com.thanh.foodorder.dto.request.ProductUpdateRequestDTO;
 import com.thanh.foodorder.dto.response.product.ResponseProductDTO;
+import com.thanh.foodorder.enums.ProductStatus;
 import com.thanh.foodorder.repository.ProductRepository;
 import com.thanh.foodorder.specification.ProductSpecification;
+import com.thanh.foodorder.util.JwtUtil;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import jakarta.persistence.criteria.Predicate;
@@ -36,10 +39,13 @@ import lombok.extern.log4j.Log4j2;
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final UserService userService;
 
-    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+    public ProductService(ProductRepository productRepository, CategoryService categoryService,
+            UserService userService) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.userService = userService;
     }
 
     public void saveProduct(Product product) {
@@ -170,12 +176,13 @@ public class ProductService {
                 product.getDescription(),
                 cate,
                 product.getCreatedAt(),
-                product.getUpdatedAt());
+                product.getUpdatedAt(), product.getStatus());
 
         return res;
     }
 
     public ResultPaginationDTO search(
+
             String keyword,
             List<String> categoryNames,
             BigDecimal from,
@@ -198,12 +205,28 @@ public class ProductService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size, sortObj);
+        Specification<Product> spec = null;
 
-        Specification<Product> spec = Specification.allOf(
-                ProductSpecification.hasKeyword(keyword),
-                ProductSpecification.hasCategory(categoryNames),
-                ProductSpecification.priceFrom(from),
-                ProductSpecification.priceTo(to));
+        String email = JwtUtil.getCurrentUserLogin().orElse("");
+        User user = this.userService.getUserByEmail(email);
+        if (user != null && user.getRole().getId() == 1) {
+
+            spec = Specification.allOf(
+                    ProductSpecification.hasKeyword(keyword),
+                    ProductSpecification.hasCategory(categoryNames),
+                    ProductSpecification.priceFrom(from),
+                    ProductSpecification.priceTo(to));
+        } else {
+
+            spec = Specification.allOf(
+                    ProductSpecification.hasKeyword(keyword),
+                    ProductSpecification.hasCategory(categoryNames),
+                    ProductSpecification.priceFrom(from),
+                    ProductSpecification.priceTo(to),
+                    ProductSpecification.status(ProductStatus.ACTIVE))
+
+            ;
+        }
 
         Page<Product> pages = productRepository.findAll(spec, pageable);
 
@@ -244,7 +267,7 @@ public class ProductService {
                     p.getDescription(),
                     productCate,
                     p.getCreatedAt(),
-                    p.getUpdatedAt());
+                    p.getUpdatedAt(), p.getStatus());
 
             responseProductDTOs.add(res);
         }
@@ -314,6 +337,19 @@ public class ProductService {
         }
 
         return value.trim();
+    }
+
+    public void updateProductStatus(Long productId) {
+        Product product = getProductById(productId);
+
+        if (product.getStatus().equals(ProductStatus.ACTIVE)) {
+            product.setStatus(ProductStatus.INACTIVE);
+        } else {
+            product.setStatus(ProductStatus.ACTIVE);
+
+        }
+        this.productRepository.save(product);
+
     }
 
 }
