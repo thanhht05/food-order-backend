@@ -32,6 +32,7 @@ import com.thanh.foodorder.dto.response.order.OrderHistoryDTO;
 import com.thanh.foodorder.dto.response.order.OrderHistoryProjection;
 import com.thanh.foodorder.dto.response.order.OrderItemDTO;
 import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
+import com.thanh.foodorder.dto.statistic.LatestOrderResponse;
 import com.thanh.foodorder.enums.OrderStatus;
 import com.thanh.foodorder.enums.PaymentStatus;
 import com.thanh.foodorder.enums.TableStatus;
