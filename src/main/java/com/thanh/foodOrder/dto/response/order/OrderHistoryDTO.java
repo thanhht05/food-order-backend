@@ -25,7 +25,6 @@ public class OrderHistoryDTO {
         private long orderId;
         private Instant orderDate;
         private OrderStatus orderStatus;
-        private long tableId;
         private double totalPrice;
 
         private List<ProductInsideOrder> products;

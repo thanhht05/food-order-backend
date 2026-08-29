@@ -2,6 +2,8 @@ package com.thanh.foodorder.dto.request;
 
 import java.util.List;
 
+import com.thanh.foodorder.domain.Address;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,5 +14,5 @@ public class CheckoutRequestDTO {
     private String voucherCode;
     private String note;
     private String paymentMethod;
-    private Long tableId;
+    private Address shippingAddress;
 }

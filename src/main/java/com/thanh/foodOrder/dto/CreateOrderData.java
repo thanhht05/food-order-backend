@@ -3,7 +3,7 @@ package com.thanh.foodorder.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.Address;
 import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.domain.Voucher;
 import com.thanh.foodorder.enums.OrderStatus;
@@ -24,8 +24,8 @@ public class CreateOrderData {
     private BigDecimal discount;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
-    private BookingTable bookingTable;
     private Voucher voucher;
     private String note;
+    private Address address;
 
 }

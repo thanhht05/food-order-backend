@@ -58,12 +58,15 @@ public class PlaceOrderController {
     // return entity;
     // }
 
-    @PostMapping("orders/buy-now")
-    public ResponseEntity<OrderResponseDTO> handleBuyNow(@RequestBody BuyNowRequestDTO dto) {
-        String email = JwtUtil.getCurrentUserLogin().orElse("");
-        User curUser = this.userService.getUserByEmail(email);
+    // @PostMapping("orders/buy-now")
+    // public ResponseEntity<OrderResponseDTO> handleBuyNow(@RequestBody
+    // BuyNowRequestDTO dto) {
+    // String email = JwtUtil.getCurrentUserLogin().orElse("");
+    // User curUser = this.userService.getUserByEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.handleBuyNow(dto, curUser));
-    }
+    // return
+    // ResponseEntity.status(HttpStatus.OK).body(this.orderService.handleBuyNow(dto,
+    // curUser));
+    // }
 
 }

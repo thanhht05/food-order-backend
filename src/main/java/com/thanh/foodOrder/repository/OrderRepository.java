@@ -32,7 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                 o.id AS orderId,
                 o.order_date AS orderDate,
                 o.order_status AS orderStatus,
-                o.booking_table_id AS tableId,
+
                 o.total_price AS totalPrice,
 
                 p.id AS productId,

@@ -12,6 +12,7 @@ import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -54,6 +55,8 @@ public class Order {
     private Instant updatedAt;
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+    @Embedded
+    private Address address;
 
     @PrePersist
     public void handleBeforeCreated() {
@@ -78,9 +81,5 @@ public class Order {
 
     @OneToMany(mappedBy = "order")
     List<OrderDetail> orderDetails;
-
-    @ManyToOne
-    @JoinColumn(name = "bookingTable_id")
-    private BookingTable bookingTable;
 
 }

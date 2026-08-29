@@ -16,7 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thanh.foodorder.domain.BookingTable;
+import com.thanh.foodorder.domain.Address;
 import com.thanh.foodorder.domain.CartDetail;
 import com.thanh.foodorder.domain.Order;
 import com.thanh.foodorder.domain.OrderDetail;
@@ -56,18 +56,16 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartDetailRepository cartDetailRepository;
     private final OrderDetailRepository orderDetailRepository;
-    private final BookingTableService bookingTableService;
     private final ProductService productService;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
-            OrderDetailRepository orderDetailRepository, BookingTableService bookingTableService,
+            OrderDetailRepository orderDetailRepository,
             ProductService productService, VoucherService voucherService, UserService userService,
             ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.voucherService = voucherService;
-        this.bookingTableService = bookingTableService;
         this.cartDetailRepository = cartDetailRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.productService = productService;
@@ -126,7 +124,6 @@ public class OrderService {
         dto.setStatus(order.getOrderStatus().name());
         dto.setTotalPrice(order.getTotalPrice());
         dto.setDiscount(order.getDiscount());
-        dto.setTableId(order.getBookingTable().getId());
         dto.setPaymentStatus(order.getPaymentStatus());
 
         // Order items
@@ -146,14 +143,8 @@ public class OrderService {
         return dto;
     }
 
-    private void validBeforePlaceOrder(CheckoutRequestDTO dto, User curUser, List<CartDetail> cartDetails,
-            BookingTable bookingTable) {
+    private void validBeforePlaceOrder(CheckoutRequestDTO dto, User curUser, List<CartDetail> cartDetails) {
 
-        // check available table
-        if (!this.bookingTableService.checkingTableStatus(bookingTable)) {
-            throw new CommonException("This table is busy");
-
-        }
         // If no items are available for checkout, stop the process
         if (cartDetails.isEmpty()) {
             throw new CommonException("No available items to place order");
@@ -185,11 +176,10 @@ public class OrderService {
 
     public CheckOutResponseDTO handleCheckOut(CheckoutRequestDTO dto, User curUser) {
 
-        BookingTable bookingTable = bookingTableService.getTableById(dto.getTableId());
         List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(dto.getCartDetailIds());
 
         // 1. Validate
-        validBeforePlaceOrder(dto, curUser, cartDetails, bookingTable);
+        validBeforePlaceOrder(dto, curUser, cartDetails);
 
         // 2. Caculate price
         BigDecimal totalPrice = caculateTotalPrice(cartDetails);
@@ -219,7 +209,6 @@ public class OrderService {
         }
         res.setTotalPrice(totalPrice);
         res.setDiscount(discount);
-        res.setTableId(dto.getTableId());
         res.setFinalPrice(finalPrice);
 
         return res;
@@ -232,11 +221,10 @@ public class OrderService {
     @Transactional
     public OrderResponseDTO placeOrder(CheckoutRequestDTO dto, User curUser) {
 
-        BookingTable bookingTable = bookingTableService.getTableById(dto.getTableId());
         List<CartDetail> cartDetails = cartDetailRepository.findByIdIn(dto.getCartDetailIds());
 
         // 1. Validate again
-        validBeforePlaceOrder(dto, curUser, cartDetails, bookingTable);
+        validBeforePlaceOrder(dto, curUser, cartDetails);
 
         // 2. Caculate price
         BigDecimal totalPrice = caculateTotalPrice(cartDetails);
@@ -260,6 +248,11 @@ public class OrderService {
 
         // 3. Create Order
 
+        Address address = Address.builder().recipientName(dto.getShippingAddress().getRecipientName())
+                .phone(dto.getShippingAddress().getPhone())
+                .province(dto.getShippingAddress().getProvince()).ward(dto.getShippingAddress().getWard())
+                .addressDetail(dto.getShippingAddress().getAddressDetail()).build();
+
         CreateOrderData data = CreateOrderData.builder()
                 .user(curUser)
                 .orderDate(LocalDateTime.now())
@@ -267,9 +260,9 @@ public class OrderService {
                 .discount(discount)
                 .orderStatus(OrderStatus.PENDING)
                 .paymentStatus(PaymentStatus.UNPAID)
-                .bookingTable(bookingTable)
                 .voucher(voucher)
-                .note(dto.getNote() != null ? dto.getNote() : "").build();
+                .note(dto.getNote() != null ? dto.getNote() : "")
+                .address(address).build();
 
         Order order = createOrder(data);
         Order orderSaved = orderRepository.save(order);
@@ -285,9 +278,6 @@ public class OrderService {
 
             updateSoldQuantity(cd);
         }
-
-        // 5. Change table status
-        bookingTable.setTableStatus(TableStatus.RESERVED);
 
         // if (dto.getPaymentMethod().equals("CASH")) { // this may have error NPE
         // clearCart(orderSaved);
@@ -311,9 +301,9 @@ public class OrderService {
         order.setDiscount(data.getDiscount());
         order.setOrderStatus(data.getOrderStatus());
         order.setPaymentStatus(data.getPaymentStatus());
-        order.setBookingTable(data.getBookingTable());
         order.setVoucher(data.getVoucher());
         order.setNote(data.getNote());
+        order.setAddress(data.getAddress());
 
         return order;
     }
@@ -338,80 +328,77 @@ public class OrderService {
         return orderDetailsToSave;
     }
 
-    @Transactional
-    public OrderResponseDTO handleBuyNow(BuyNowRequestDTO req, User curUser) {
-        BookingTable table = this.bookingTableService.getTableById(req.getTableId());
-        if (table == null) {
-            throw new CommonException("This table is busy");
+    // @Transactional
+    // public OrderResponseDTO handleBuyNow(BuyNowRequestDTO req, User curUser) {
 
-        }
-        Product product = this.productService.getProductById(req.getProductId());
-        if (product == null) {
-            throw new CommonException("No available product");
+    // Product product = this.productService.getProductById(req.getProductId());
+    // if (product == null) {
+    // throw new CommonException("No available product");
 
-        }
-        if (req.getQuantity() <= 0) {
-            throw new CommonException("Item quantity is invalid");
+    // }
+    // if (req.getQuantity() <= 0) {
+    // throw new CommonException("Item quantity is invalid");
 
-        }
+    // }
 
-        BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
+    // BigDecimal totalPrice =
+    // product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
 
-        // 3. Create Order
-        Order order = new Order();
-        order.setUser(curUser);
-        order.setOrderDate(LocalDateTime.now());
-        order.setTotalPrice(totalPrice);
-        order.setDiscount(null);
-        order.setOrderStatus(OrderStatus.PENDING);
+    // // 3. Create Order
+    // Order order = new Order();
+    // order.setUser(curUser);
+    // order.setOrderDate(LocalDateTime.now());
+    // order.setTotalPrice(totalPrice);
+    // order.setDiscount(null);
+    // order.setOrderStatus(OrderStatus.PENDING);
 
-        // handle payment
-        order.setPaymentStatus(PaymentStatus.UNPAID);
+    // // handle payment
+    // order.setPaymentStatus(PaymentStatus.UNPAID);
 
-        order.setBookingTable(table);
-        order.setVoucher(null);
-        order.setNote(null);
+    // order.setBookingTable(table);
+    // order.setVoucher(null);
+    // order.setNote(null);
 
-        orderRepository.save(order);
-        // 4. Create OrderDetail
-        OrderDetail od = new OrderDetail();
-        od.setOrder(order);
-        od.setProduct(product);
-        od.setQuantity(req.getQuantity());
-        od.setPrice(product.getPrice());
-        od.setNote(null);
+    // orderRepository.save(order);
+    // // 4. Create OrderDetail
+    // OrderDetail od = new OrderDetail();
+    // od.setOrder(order);
+    // od.setProduct(product);
+    // od.setQuantity(req.getQuantity());
+    // od.setPrice(product.getPrice());
+    // od.setNote(null);
 
-        orderDetailRepository.save(od);
-        // Update inventory
-        product.setQuantity(product.getQuantity() - req.getQuantity());
+    // orderDetailRepository.save(od);
+    // // Update inventory
+    // product.setQuantity(product.getQuantity() - req.getQuantity());
 
-        // 5. Change table status
-        table.setTableStatus(TableStatus.RESERVED);
+    // // 5. Change table status
+    // table.setTableStatus(TableStatus.RESERVED);
 
-        OrderResponseDTO res = new OrderResponseDTO();
+    // OrderResponseDTO res = new OrderResponseDTO();
 
-        res.setOrderId(order.getId());
-        res.setOrderDate(order.getOrderDate());
-        res.setStatus(order.getOrderStatus().name());
-        res.setTotalPrice(order.getTotalPrice());
-        res.setDiscount(order.getDiscount());
-        res.setTableId(table.getId());
-        res.setPaymentStatus(order.getPaymentStatus());
+    // res.setOrderId(order.getId());
+    // res.setOrderDate(order.getOrderDate());
+    // res.setStatus(order.getOrderStatus().name());
+    // res.setTotalPrice(order.getTotalPrice());
+    // res.setDiscount(order.getDiscount());
+    // res.setTableId(table.getId());
+    // res.setPaymentStatus(order.getPaymentStatus());
 
-        List<OrderItemDTO> lst = new ArrayList<>();
+    // List<OrderItemDTO> lst = new ArrayList<>();
 
-        OrderItemDTO item = new OrderItemDTO();
-        item.setProductId(product.getId());
-        item.setPrice(product.getPrice());
-        item.setProductName(product.getName());
-        item.setQuantity(req.getQuantity());
+    // OrderItemDTO item = new OrderItemDTO();
+    // item.setProductId(product.getId());
+    // item.setPrice(product.getPrice());
+    // item.setProductName(product.getName());
+    // item.setQuantity(req.getQuantity());
 
-        lst.add(item);
+    // lst.add(item);
 
-        res.setItems(lst);
-        return res;
+    // res.setItems(lst);
+    // return res;
 
-    }
+    // }
 
     @Transactional
     public void payOrder(Long id, BigDecimal amount) {
@@ -463,8 +450,6 @@ public class OrderService {
 
         this.orderRepository.save(orderDb);
 
-        BookingTable table = this.bookingTableService.getTableById(orderDb.getBookingTable().getId());
-        table.setTableStatus(TableStatus.AVAILABLE);
         List<OrderDetail> odDetails = this.orderDetailRepository.findByOrderId(orderDb.getId());
 
         return mapToOrderResponseDTO(orderDb, odDetails);
@@ -508,7 +493,6 @@ public class OrderService {
                                 OrderStatus.valueOf(
                                         row.getOrderStatus()));
 
-                        dto.setTableId(row.getTableId());
                         dto.setTotalPrice(row.getTotalPrice());
 
                         dto.setProducts(new ArrayList<>());

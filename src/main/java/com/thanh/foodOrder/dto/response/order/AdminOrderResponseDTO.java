@@ -30,7 +30,6 @@ public class AdminOrderResponseDTO {
                 .orderDate(order.getOrderDate())
                 .status(order.getOrderStatus())
                 .totalPrice(order.getTotalPrice())
-                .tableId(order.getBookingTable().getId())
                 .paymentStatus(order.getPaymentStatus())
                 .build();
 

@@ -19,7 +19,6 @@ public class OrderResponseDTO {
 
     private BigDecimal totalPrice;
     private BigDecimal discount;
-    private Long tableId;
     private PaymentStatus paymentStatus;
 
     private List<OrderItemDTO> items;
