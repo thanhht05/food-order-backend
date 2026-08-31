@@ -51,22 +51,4 @@ public class PlaceOrderController {
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.placeOrder(dto, curUser));
     }
 
-    // @GetMapping("orders/updateStatus/{id}")
-    // public String handleUpdateOrderStatus(@PathVariable("id") Long id) {
-    // //TODO: process POST request
-
-    // return entity;
-    // }
-
-    // @PostMapping("orders/buy-now")
-    // public ResponseEntity<OrderResponseDTO> handleBuyNow(@RequestBody
-    // BuyNowRequestDTO dto) {
-    // String email = JwtUtil.getCurrentUserLogin().orElse("");
-    // User curUser = this.userService.getUserByEmail(email);
-
-    // return
-    // ResponseEntity.status(HttpStatus.OK).body(this.orderService.handleBuyNow(dto,
-    // curUser));
-    // }
-
 }

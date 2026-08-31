@@ -26,6 +26,8 @@ import vn.payos.model.webhooks.ConfirmWebhookResponse;
 import vn.payos.model.webhooks.WebhookData;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -68,15 +70,6 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.getOrderDetail(id));
     }
 
-    @PostMapping("/orders/pay")
-    @ApiMessage("Payment order successfully")
-    public ResponseEntity<PaymentConfirmRequest> handlePaymentOrder(@RequestBody PaymentConfirmRequest req) {
-
-        this.orderService.payOrder(req.getOrderId(), req.getAmount());
-
-        return ResponseEntity.status(HttpStatus.OK).body(null);
-    }
-
     @PutMapping("/orders")
     public ResponseEntity<OrderResponseDTO> handleUpdateOrder(@RequestBody Order order) {
         // TODO: process PUT request
@@ -96,9 +89,7 @@ public class OrderController {
             @RequestBody CreatePaymentRequest requestBody) {
         try {
             Order order = this.orderService.getOrderById(requestBody.getOrderId());
-            if (order.getPaymentStatus() == PaymentStatus.PAID) {
-                throw new RuntimeException("Order already paid");
-            }
+
             // Tạo orderCode cho PayOS
 
             long orderCode = System.currentTimeMillis() / 1000;
@@ -114,15 +105,13 @@ public class OrderController {
                     .item(item)
                     .returnUrl("http://localhost:5173/payment/success")
                     .cancelUrl("http://localhost:5173/payment/cancel")
+                    .expiredAt(Instant.now()
+                            .plus(30, ChronoUnit.MINUTES)
+                            .getEpochSecond())
                     .build();
             CreatePaymentLinkResponse data = payOS.paymentRequests().create(paymentData);
 
-            // 6. Lưu thông tin PayOS vào Order
-            order.setOrderCode(orderCode);
-            order.setPaymentLinkId(data.getPaymentLinkId());
-            order.setPaymentStatus(PaymentStatus.PENDING);
-
-            this.orderService.save(order);
+            this.orderService.handleCreatePaymetLink(order, orderCode, data);
 
             return ResponseEntity.status(HttpStatus.OK).body(data);
 
@@ -133,23 +122,6 @@ public class OrderController {
         }
 
     }
-
-    // @PostMapping("/payos_transfer_handler")
-    // public ResponseEntity<WebhookData> payosTransferHandler(@RequestBody Object
-    // body)
-    // throws JsonProcessingException, IllegalArgumentException {
-    // System.out.println("===== PAYOS WEBHOOK =====");
-    // System.out.println(body);
-    // try {
-    // WebhookData data = payOS.webhooks().verify(body);
-
-    // return ResponseEntity.ok(data);
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-
-    // }
-    // }
 
     @PostMapping("/confirm-webhook")
     public ResponseEntity<ConfirmWebhookResponse> confirmWebhook(
@@ -162,6 +134,33 @@ public class OrderController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    // if want to check webhook URL then enable this code
+    // @PostMapping("/payos_transfer_handler")
+    // public ResponseEntity<Object> payosTransferHandler(
+    // @RequestBody Object body) {
+
+    // try {
+    // // 1. Verify webhook từ PayOS
+    // WebhookData data = payOS.webhooks().verify(body);
+
+    // return ResponseEntity.ok().body(data);
+
+    // } catch (CommonException e) {
+
+    // return ResponseEntity
+    // .badRequest()
+    // .body(e.getMessage());
+
+    // } catch (Exception e) {
+
+    // e.printStackTrace();
+
+    // return ResponseEntity
+    // .badRequest()
+    // .body("Invalid webhook");
+    // }
+    // }
 
     @PostMapping("/payos_transfer_handler")
     public ResponseEntity<Object> payosTransferHandler(

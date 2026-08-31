@@ -11,6 +11,7 @@ import com.thanh.foodorder.util.JwtUtil;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,6 +41,7 @@ public class Product {
     @NotBlank(message = "Name cannot be empty")
     private String name;
     private int sold;
+    @Column(columnDefinition = "TEXT")
     private String description;
     @Enumerated(EnumType.STRING)
     private ProductStatus status;

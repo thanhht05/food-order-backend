@@ -44,6 +44,9 @@ public class User {
    @Column(name = "created_at")
    private Instant createdAt;
    private Instant updatedAt;
+
+   @Column(columnDefinition = "TEXT")
+
    String refreshToken;
    @Column(nullable = false)
    private Integer tokenVersion = 0;

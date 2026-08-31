@@ -57,9 +57,12 @@ public class Order {
     private PaymentStatus paymentStatus;
     @Embedded
     private Address address;
+    private String paymentMethod;
 
     private String paymentLinkId;
     private Long orderCode;
+    @Column(name = "expired_at")
+    private Long expiredAt;
 
     @PrePersist
     public void handleBeforeCreated() {

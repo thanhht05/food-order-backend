@@ -1,5 +1,7 @@
 package com.thanh.foodorder.util.event;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -28,31 +30,31 @@ public class OrderPaidEventListener {
 
         sendEmail(order);
 
-        notifyCustomer(order);
+        // notifyCustomer(order);
 
-        notifyAdmin(order);
+        // notifyAdmin(order);
     }
 
-    // thông báo cho khách hàng khi thanh toán thành công
-    private void notifyCustomer(Order order) {
+    // // thông báo cho khách hàng khi thanh toán thành công
+    // private void notifyCustomer(Order order) {
 
-        Map<String, String> payload = Map.of(
-                "status", "PAID");
+    // Map<String, String> payload = Map.of(
+    // "status", "PAID");
 
-        messagingTemplate.convertAndSend(
-                "/topic/order/" + order.getId(),
-                payload);
-    }
+    // messagingTemplate.convertAndSend(
+    // "/topic/order/" + order.getId(),
+    // payload);
+    // }
 
     // Thông báo cho admin khi có đơn hàng mới
-    private void notifyAdmin(Order order) {
+    // private void notifyAdmin(Order order) {
 
-        AdminOrderResponseDTO response = AdminOrderResponseDTO.from(order);
+    // AdminOrderResponseDTO response = AdminOrderResponseDTO.from(order);
 
-        messagingTemplate.convertAndSend(
-                "/topic/admin/orders",
-                response);
-    }
+    // messagingTemplate.convertAndSend(
+    // "/topic/admin/orders",
+    // response);
+    // }
 
     private void sendEmail(Order order) {
 
@@ -79,7 +81,9 @@ public class OrderPaidEventListener {
                     .append("<td style='padding: 8px; border-bottom: 1px solid #ddd; text-align: center;'>")
                     .append(item.getQuantity()).append("</td>")
                     .append("<td style='padding: 8px; border-bottom: 1px solid #ddd; text-align: right;'>")
-                    .append(item.getPrice()).append("đ</td>")
+                    .append(NumberFormat.getInstance(new Locale("vi", "VN"))
+                            .format(order.getTotalPrice()))
+                    .append("đ</td>")
                     .append("</tr>");
         }
 
@@ -102,8 +106,10 @@ public class OrderPaidEventListener {
                 + "    </tbody>"
                 + "  </table>"
                 + "  <h3 style='text-align: right; margin-top: 20px; color: #ff4757;'>Tổng thanh toán: "
-                + order.getTotalPrice() + "đ</h3>"
-                + "  <p style='margin-top: 30px; font-size: 12px; color: #777; text-align: center;'>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 1900xxxx. Chúc bạn ngon miệng!</p>"
+                + NumberFormat.getInstance(new Locale("vi", "VN"))
+                        .format(order.getTotalPrice())
+                + "đ</h3>"
+                + "  <p style='margin-top: 30px; font-size: 12px; color: #777; text-align: center;'>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 0898173004"
                 + "</div>";
     }
 }

@@ -33,8 +33,17 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                 o.id AS orderId,
                 o.order_date AS orderDate,
                 o.order_status AS orderStatus,
+                o.payment_method as paymentMethod,
+                o.payment_status as paymentStatus,
 
                 o.total_price AS totalPrice,
+                o.recipient_name as recipientName,
+                o.phone as phone,
+                o.province as province,
+                o.ward as ward,
+                o.address_detail as addressDetail,
+
+
 
                 p.id AS productId,
                 p.name AS productName,

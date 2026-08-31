@@ -48,6 +48,7 @@ import com.thanh.foodorder.util.event.OrderPaidEvent;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.webhooks.WebhookData;
 
 @Service
@@ -120,6 +121,17 @@ public class OrderService {
     }
 
     @Transactional
+    public void handleCreatePaymetLink(Order order, Long orderCode, CreatePaymentLinkResponse data) {
+
+        order.setOrderCode(orderCode);
+        order.setPaymentLinkId(data.getPaymentLinkId());
+        order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setExpiredAt(data.getExpiredAt());
+
+        save(order);
+    }
+
+    @Transactional
     public void handlePayment(Long orderCode, WebhookData data) {
 
         Order order = getOrderByOrderCode(orderCode);
@@ -141,10 +153,10 @@ public class OrderService {
         // Cập nhật payment status
         order.setPaymentStatus(PaymentStatus.PAID);
 
-        // Cập nhật order status
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-
-        save(order);
+        Order orderSaved = this.orderRepository.save(order);
+        eventPublisher.publishEvent(
+                new OrderPaidEvent(orderSaved));
+        clearCart(order);
     }
 
     public void save(Order order) {
@@ -307,6 +319,7 @@ public class OrderService {
                 .discount(discount)
                 .orderStatus(OrderStatus.PENDING)
                 .paymentStatus(PaymentStatus.UNPAID)
+                .paymentMethod(dto.getPaymentMethod())
                 .voucher(voucher)
                 .note(dto.getNote() != null ? dto.getNote() : "")
                 .address(address).build();
@@ -326,10 +339,6 @@ public class OrderService {
             updateSoldQuantity(cd);
         }
 
-        // if (dto.getPaymentMethod().equals("CASH")) { // this may have error NPE
-        // clearCart(orderSaved);
-        // }
-        // fix
         if ("CASH".equals(dto.getPaymentMethod())) {
             cartDetailRepository.deleteAll(cartDetails);
         }
@@ -351,6 +360,7 @@ public class OrderService {
         order.setVoucher(data.getVoucher());
         order.setNote(data.getNote());
         order.setAddress(data.getAddress());
+        order.setPaymentMethod(data.getPaymentMethod());
 
         return order;
     }
@@ -375,94 +385,6 @@ public class OrderService {
         return orderDetailsToSave;
     }
 
-    // @Transactional
-    // public OrderResponseDTO handleBuyNow(BuyNowRequestDTO req, User curUser) {
-
-    // Product product = this.productService.getProductById(req.getProductId());
-    // if (product == null) {
-    // throw new CommonException("No available product");
-
-    // }
-    // if (req.getQuantity() <= 0) {
-    // throw new CommonException("Item quantity is invalid");
-
-    // }
-
-    // BigDecimal totalPrice =
-    // product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
-
-    // // 3. Create Order
-    // Order order = new Order();
-    // order.setUser(curUser);
-    // order.setOrderDate(LocalDateTime.now());
-    // order.setTotalPrice(totalPrice);
-    // order.setDiscount(null);
-    // order.setOrderStatus(OrderStatus.PENDING);
-
-    // // handle payment
-    // order.setPaymentStatus(PaymentStatus.UNPAID);
-
-    // order.setBookingTable(table);
-    // order.setVoucher(null);
-    // order.setNote(null);
-
-    // orderRepository.save(order);
-    // // 4. Create OrderDetail
-    // OrderDetail od = new OrderDetail();
-    // od.setOrder(order);
-    // od.setProduct(product);
-    // od.setQuantity(req.getQuantity());
-    // od.setPrice(product.getPrice());
-    // od.setNote(null);
-
-    // orderDetailRepository.save(od);
-    // // Update inventory
-    // product.setQuantity(product.getQuantity() - req.getQuantity());
-
-    // // 5. Change table status
-    // table.setTableStatus(TableStatus.RESERVED);
-
-    // OrderResponseDTO res = new OrderResponseDTO();
-
-    // res.setOrderId(order.getId());
-    // res.setOrderDate(order.getOrderDate());
-    // res.setStatus(order.getOrderStatus().name());
-    // res.setTotalPrice(order.getTotalPrice());
-    // res.setDiscount(order.getDiscount());
-    // res.setTableId(table.getId());
-    // res.setPaymentStatus(order.getPaymentStatus());
-
-    // List<OrderItemDTO> lst = new ArrayList<>();
-
-    // OrderItemDTO item = new OrderItemDTO();
-    // item.setProductId(product.getId());
-    // item.setPrice(product.getPrice());
-    // item.setProductName(product.getName());
-    // item.setQuantity(req.getQuantity());
-
-    // lst.add(item);
-
-    // res.setItems(lst);
-    // return res;
-
-    // }
-
-    @Transactional
-    public void payOrder(Long id, BigDecimal amount) {
-
-        Order order = getOrderById(id);
-
-        validatePayment(order, amount);
-
-        order.setPaymentStatus(PaymentStatus.PAID);
-        order.setOrderStatus(OrderStatus.PENDING);
-
-        clearCart(order);
-
-        // Phát sự kiện
-        eventPublisher.publishEvent(new OrderPaidEvent(order));
-    }
-
     public void clearCart(Order order) {
 
         List<Long> productIds = order.getOrderDetails()
@@ -473,20 +395,6 @@ public class OrderService {
         Long userId = order.getUser().getId();
 
         cartDetailRepository.deleteByCartUserIdAndProductIdIn(userId, productIds);
-    }
-
-    private void validatePayment(Order order, BigDecimal amount) {
-
-        if (order.getPaymentStatus() == PaymentStatus.PAID) {
-            throw new CommonException("Order already paid");
-        }
-
-        if (order.getTotalPrice() == null || amount == null || order.getTotalPrice().compareTo(amount) != 0) {
-            throw new CommonException("Price is not correct");
-        }
-        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
-            throw new CommonException("Cannot pay cancelled order");
-        }
     }
 
     @Transactional
@@ -541,6 +449,14 @@ public class OrderService {
                                         row.getOrderStatus()));
 
                         dto.setTotalPrice(row.getTotalPrice());
+                        dto.setPaymentMethod(row.getPaymentMethod());
+                        // dto.setPaymentStatus(PaymentStatus.valueOf(row.getPaymentStatus()));
+                        dto.setPaymentStatus(PaymentStatus.valueOf(row.getPaymentStatus()));
+                        dto.setAddressDetail(row.getAddressDetail());
+                        dto.setPhone(row.getPhone());
+                        dto.setProvince(row.getProvince());
+                        dto.setWard(row.getWard());
+                        dto.setRecipientName(row.getRecipientName());
 
                         dto.setProducts(new ArrayList<>());
 

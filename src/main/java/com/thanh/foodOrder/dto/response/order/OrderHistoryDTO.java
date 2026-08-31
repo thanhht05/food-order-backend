@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import com.thanh.foodorder.enums.OrderStatus;
+import com.thanh.foodorder.enums.PaymentStatus;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,14 @@ public class OrderHistoryDTO {
         private Instant orderDate;
         private OrderStatus orderStatus;
         private double totalPrice;
+        private String paymentMethod;
+        private PaymentStatus paymentStatus;
+
+        private String phone;
+        private String province;
+        private String recipientName;
+        private String ward;
+        private String addressDetail;
 
         private List<ProductInsideOrder> products;
     }

@@ -15,7 +15,9 @@ public interface OrderHistoryProjection {
 
     String getOrderStatus();
 
-    Long getTableId();
+    String getPaymentMethod();
+
+    String getPaymentStatus();
 
     Double getTotalPrice();
 
@@ -28,4 +30,15 @@ public interface OrderHistoryProjection {
     Long getQuantity();
 
     String getImg();
+
+    String getRecipientName();
+
+    String getPhone();
+
+    String getProvince();
+
+    String getWard();
+
+    String getAddressDetail();
+
 }

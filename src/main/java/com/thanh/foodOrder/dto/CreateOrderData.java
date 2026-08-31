@@ -24,6 +24,7 @@ public class CreateOrderData {
     private BigDecimal discount;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
+    private String paymentMethod;
     private Voucher voucher;
     private String note;
     private Address address;
