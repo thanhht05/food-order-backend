@@ -63,7 +63,9 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs/**",
-                "/ws/**"
+                "/ws/**",
+                "/api/v1/payos_transfer_handler",
+                "/api/v1/confirm-webhook"
         };
         http
                 .csrf(csrf -> csrf.disable())

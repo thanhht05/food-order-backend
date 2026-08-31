@@ -58,6 +58,9 @@ public class Order {
     @Embedded
     private Address address;
 
+    private String paymentLinkId;
+    private Long orderCode;
+
     @PrePersist
     public void handleBeforeCreated() {
         this.createdAt = Instant.now();

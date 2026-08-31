@@ -32,11 +32,28 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        boolean skip = path.equals("/api/v1/confirm-webhook");
+
+        System.out.println("URI = " + request.getRequestURI());
+        System.out.println("SERVLET PATH = " + path);
+        System.out.println("SKIP JWT = " + skip);
+
+        return path.equals("/api/v1/confirm-webhook") || path.equals(
+                "/api/v1/payos_transfer_handler");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
 
         String token = null;
         String username = null;
+        System.out.println("URI = " + request.getRequestURI());
+        System.out.println("SERVLET PATH = " + request.getServletPath());
 
         try {
             // 1. Ưu tiên lấy token từ Header (cho các request HTTP thông thường)

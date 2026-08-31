@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -180,11 +181,21 @@ public class UserService {
         this.userRepository.save(user);
     }
 
-    public User fetchUserByEmailAndRefreshToken(String email, String refrehToken) {
-        return this.userRepository.findByEmailAndRefreshToken(email, refrehToken).orElseThrow(() -> {
-            log.warn("User  with email and refreshToen not found");
-            return new CommonException("User  with email and refreshToen not found");
-        });
+    public User fetchUserByEmailAndRefreshToken(String email, String refreshToken) {
+        // Breakpoint 1: Kiểm tra giá trị email và refreshToken truyền vào hàm
+        Optional<User> userOptional = this.userRepository.findByEmailAndRefreshToken(email, refreshToken);
+
+        // Breakpoint 2: Kiểm tra xem DB có tìm thấy bản ghi không
+        // (userOptional.isPresent())
+        boolean isPresent = userOptional.isPresent();
+        if (!isPresent) {
+            log.warn("User with email: {} and refreshToken not found", email);
+            throw new CommonException("User with email and refreshToken not found");
+        }
+
+        // Breakpoint 3: Xem toàn bộ object user lấy ra từ DB
+        User user = userOptional.get();
+        return user;
     }
 
     public Map<String, Object> createUserBulk(List<User> usersBulk) {

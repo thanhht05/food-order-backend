@@ -3,6 +3,7 @@ package com.thanh.foodorder.repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -79,4 +80,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("endDate") LocalDateTime endDate,
             @Param("paymentStatus") PaymentStatus paymentStatus,
             @Param("cancelledStatus") OrderStatus cancelledStatus);
+
+    Optional<Order> findByOrderCode(Long orderCode);
 }

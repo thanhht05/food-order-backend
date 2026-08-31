@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ import com.thanh.foodorder.util.event.OrderPaidEvent;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import lombok.extern.log4j.Log4j2;
+import vn.payos.model.webhooks.WebhookData;
 
 @Service
 @Log4j2
@@ -96,12 +98,57 @@ public class OrderService {
 
     }
 
+    public Order getOrderByOrderCode(Long orderCode) {
+        return orderRepository.findByOrderCode(orderCode).orElseThrow(() -> {
+            log.warn("Order with order code: {} not found", orderCode);
+            return new CommonException("Order order code " + orderCode + " not found");
+
+        });
+
+    }
+
     // get order on screen admin
     public AdminOrderResponseDTO getResponseOrderById(Long id) {
         Order order = getOrderById(id);
         AdminOrderResponseDTO res = AdminOrderResponseDTO.from(order);
         return res;
 
+    }
+
+    private boolean isPayment(Order order) {
+        return order.getPaymentStatus() == PaymentStatus.PAID;
+    }
+
+    @Transactional
+    public void handlePayment(Long orderCode, WebhookData data) {
+
+        Order order = getOrderByOrderCode(orderCode);
+
+        if (order == null) {
+            throw new CommonException("Order not found");
+        }
+
+        // Kiểm tra đã thanh toán
+        if (isPayment(order)) {
+            throw new CommonException("Order already paid");
+        }
+
+        // Kiểm tra số tiền
+        if (order.getTotalPrice().longValue() != data.getAmount()) {
+            throw new CommonException("Price invalid");
+        }
+
+        // Cập nhật payment status
+        order.setPaymentStatus(PaymentStatus.PAID);
+
+        // Cập nhật order status
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+
+        save(order);
+    }
+
+    public void save(Order order) {
+        this.orderRepository.save(order);
     }
 
     public OrderResponseDTO getOrderDetail(Long id) {

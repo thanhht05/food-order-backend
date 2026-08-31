@@ -208,15 +208,34 @@ public class ProductService {
         Specification<Product> spec = null;
 
         String email = JwtUtil.getCurrentUserLogin().orElse("");
-        User user = this.userService.getUserByEmail(email);
-        if (user != null && user.getRole().getId() == 1) {
+        if (email != "") {
 
-            spec = Specification.allOf(
-                    ProductSpecification.hasKeyword(keyword),
-                    ProductSpecification.hasCategory(categoryNames),
-                    ProductSpecification.priceFrom(from),
-                    ProductSpecification.priceTo(to));
+            User user = this.userService.getUserByEmail(email);
+
+            if (user != null && user.getRole().getId() == 1) {
+                // ADMIN xem sản all phẩm
+
+                spec = Specification.allOf(
+                        ProductSpecification.hasKeyword(keyword),
+                        ProductSpecification.hasCategory(categoryNames),
+                        ProductSpecification.priceFrom(from),
+                        ProductSpecification.priceTo(to));
+            } else {
+
+                // USER // → chỉ xem sản phẩm ACTIVE
+
+                spec = Specification.allOf(
+                        ProductSpecification.hasKeyword(keyword),
+                        ProductSpecification.hasCategory(categoryNames),
+                        ProductSpecification.priceFrom(from),
+                        ProductSpecification.priceTo(to),
+                        ProductSpecification.status(ProductStatus.ACTIVE))
+
+                ;
+            }
+
         } else {
+            // Chưa đăng nhập → chỉ xem sản phẩm ACTIVE
 
             spec = Specification.allOf(
                     ProductSpecification.hasKeyword(keyword),

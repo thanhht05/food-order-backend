@@ -25,6 +25,7 @@ repositories {
 }
 
 dependencies {
+	implementation ("vn.payos:payos-java:2.0.1")
 
  	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
 	implementation("org.springframework.boot:spring-boot-starter-websocket")

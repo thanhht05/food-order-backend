@@ -117,34 +117,45 @@ public class AuthController {
     public ResponseEntity<ResponseLoginDTO> handleRefreshToken(
             @CookieValue(name = "refreshToken", defaultValue = "defaultToken") String refreshToken,
             HttpServletResponse response) {
-        String email = jwtUtil.extractUsername(refreshToken);
 
-        User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
-        if (refreshToken.equals("defaultToken")) {
-            throw new CommonException("Cookie is not exists");
+        // 1. Kiểm tra cookie hợp lệ trước tiên
+        if (refreshToken == null || refreshToken.isBlank() || "defaultToken".equals(refreshToken)) {
+            throw new CommonException("Cookie does not exist");
         }
 
+        // 2. Trích xuất email (cần đảm bảo jwtUtil xử lý parse an toàn)
+        String email = jwtUtil.extractUsername(refreshToken);
+        if (email == null) {
+            throw new CommonException("Invalid refresh token");
+        }
+
+        // 3. Tìm user trong DB và kiểm tra null
+        User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
+        if (userDb == null) {
+            throw new CommonException("User not found or refresh token revoked");
+        }
+
+        // 4. Validate token version & hạn sử dụng
         if (!jwtUtil.validRefreshToken(refreshToken, userDb.getTokenVersion())) {
             throw new CommonException("Refresh token invalid or expired");
         }
 
-        // create new token
+        // 5. Tạo response & cập nhật token mới
         ResponseLoginDTO res = new ResponseLoginDTO();
         ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
-
         userLogin.setEmail(userDb.getEmail());
         userLogin.setId(userDb.getId());
         userLogin.setFullname(userDb.getFullName());
         userLogin.setRole(userDb.getRole());
-
         res.setUserLogin(userLogin);
+
         String accessToken = jwtUtil.generateToken(userDb, res);
         res.setAccessToken(accessToken);
 
         String newRefreshToken = jwtUtil.generateRefreshToken(userDb, res);
-
         this.userService.updateUserRefreshToken(email, newRefreshToken);
 
+        // 6. Set lại cookie mới
         Cookie cookie = new Cookie("refreshToken", newRefreshToken);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -153,7 +164,6 @@ public class AuthController {
         response.addCookie(cookie);
 
         return ResponseEntity.ok().body(res);
-
     }
 
     // api in CustomLogoutSuccessHandler
