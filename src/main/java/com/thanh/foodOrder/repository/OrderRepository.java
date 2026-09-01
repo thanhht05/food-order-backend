@@ -42,6 +42,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                 o.province as province,
                 o.ward as ward,
                 o.address_detail as addressDetail,
+                o.payment_link_id as paymentLinkId,
 
 
 
@@ -68,7 +69,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             LEFT JOIN product_image im
                 ON im.product_id = p.id
 
-            WHERE u.id = :userId
+            WHERE u.id = :userId AND im.is_primary=1
 
             ORDER BY o.order_date DESC, o.id DESC
             """, nativeQuery = true)
@@ -91,4 +92,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("cancelledStatus") OrderStatus cancelledStatus);
 
     Optional<Order> findByOrderCode(Long orderCode);
+
+    Optional<Order> findByPaymentLinkId(String id);
 }

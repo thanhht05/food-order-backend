@@ -35,6 +35,7 @@ public class OrderHistoryDTO {
         private String recipientName;
         private String ward;
         private String addressDetail;
+        private String paymentLinkId;
 
         private List<ProductInsideOrder> products;
     }

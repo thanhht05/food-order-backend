@@ -41,4 +41,5 @@ public interface OrderHistoryProjection {
 
     String getAddressDetail();
 
+    String getPaymentLinkId();
 }

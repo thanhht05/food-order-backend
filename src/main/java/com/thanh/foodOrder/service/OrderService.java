@@ -159,6 +159,24 @@ public class OrderService {
         clearCart(order);
     }
 
+    public Order getOrderByPaymentLink(String id) {
+        return orderRepository.findByPaymentLinkId(id).orElseThrow(() -> {
+            log.warn("Order with paymentLinkId: {} not found", id);
+            return new CommonException("Order with " + id + " not found");
+
+        });
+    }
+
+    @Transactional
+    public void handelCancelPayment(Long id) {
+        Order order = getOrderByOrderCode(id);
+
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setPaymentStatus(PaymentStatus.CANCELLED);
+
+        this.orderRepository.save(order);
+    }
+
     public void save(Order order) {
         this.orderRepository.save(order);
     }
@@ -457,6 +475,7 @@ public class OrderService {
                         dto.setProvince(row.getProvince());
                         dto.setWard(row.getWard());
                         dto.setRecipientName(row.getRecipientName());
+                        dto.setPaymentLinkId(row.getPaymentLinkId());
 
                         dto.setProducts(new ArrayList<>());
 

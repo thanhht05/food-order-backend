@@ -123,6 +123,14 @@ public class OrderController {
 
     }
 
+    @PostMapping("/payment-requests/{id}/cancel")
+    public ResponseEntity<?> handleCancelPayment(@PathVariable("id") Long id) {
+
+        this.orderService.handelCancelPayment(id);
+
+        return ResponseEntity.ok().body("OK");
+    }
+
     @PostMapping("/confirm-webhook")
     public ResponseEntity<ConfirmWebhookResponse> confirmWebhook(
             @RequestBody Map<String, String> requestBody) {
