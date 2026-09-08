@@ -36,7 +36,7 @@ import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
 import com.thanh.foodorder.dto.statistic.LatestOrderResponse;
 import com.thanh.foodorder.enums.OrderStatus;
 import com.thanh.foodorder.enums.PaymentStatus;
-import com.thanh.foodorder.enums.TableStatus;
+
 import com.thanh.foodorder.repository.CartDetailRepository;
 import com.thanh.foodorder.repository.CartRepository;
 import com.thanh.foodorder.repository.OrderDetailRepository;

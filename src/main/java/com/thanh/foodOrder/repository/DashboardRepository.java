@@ -17,72 +17,72 @@ import com.thanh.foodorder.dto.statistic.TopProductResponse;
 @Repository
 public interface DashboardRepository extends JpaRepository<Order, Long> {
 
-        @Query("""
-                        SELECT new com.thanh.foodorder.dto.statistic.OrderStatusStatistic(o.orderStatus, COUNT(o))
-                        FROM Order o
-                        GROUP BY o.orderStatus
+    @Query("""
+            SELECT new com.thanh.foodorder.dto.statistic.OrderStatusStatistic(o.orderStatus, COUNT(o))
+            FROM Order o
+            GROUP BY o.orderStatus
 
-                        """)
-        List<OrderStatusStatistic> countByOrderStatus();
+            """)
+    List<OrderStatusStatistic> countByOrderStatus();
 
-        @Query(value = """
-                        SELECT
-                            (SELECT COUNT(*)
-                             FROM food_order.orders) AS total_order,
+    @Query(value = """
+            SELECT
+                (SELECT COUNT(*)
+                 FROM food_order.orders) AS total_order,
 
-                            (SELECT COALESCE(SUM(total_price), 0)
-                             FROM food_order.orders
-                             WHERE order_status = 'CONFIRMED') AS total_revenue,
+                (SELECT COALESCE(SUM(total_price), 0)
+                 FROM food_order.orders
+                 WHERE order_status = 'COMPLETED') AS total_revenue,
 
-                            (SELECT COUNT(*)
-                             FROM food_order.users) AS total_user,
+                (SELECT COUNT(*)
+                 FROM food_order.users) AS total_user,
 
-                            (SELECT COUNT(*)
-                             FROM food_order.orders
-                             WHERE order_status = 'PENDING') AS pending_order
-                        """, nativeQuery = true)
-        DashboardOverviewResponse getStatisticOverview();
+                (SELECT COUNT(*)
+                 FROM food_order.orders
+                 WHERE order_status = 'PENDING') AS pending_order
+            """, nativeQuery = true)
+    DashboardOverviewResponse getStatisticOverview();
 
-        @Query("""
-                            SELECT new com.thanh.foodorder.dto.statistic.LatestOrderResponse(
-                                o.id,
-                                 u.fullName,
-                                o.totalPrice,
-                                o.createdAt,
-                                o.orderStatus
-                            )
-                            FROM Order o
-                            JOIN o.user u
+    @Query("""
+                SELECT new com.thanh.foodorder.dto.statistic.LatestOrderResponse(
+                    o.id,
+                     u.fullName,
+                    o.totalPrice,
+                    o.createdAt,
+                    o.orderStatus
+                )
+                FROM Order o
+                JOIN o.user u
 
-                            ORDER BY o.createdAt DESC
-                        """)
-        List<LatestOrderResponse> findLatestdOrders(Pageable pageable);
+                ORDER BY o.createdAt DESC
+            """)
+    List<LatestOrderResponse> findLatestdOrders(Pageable pageable);
 
-        @Query("""
-                            SELECT new com.thanh.foodorder.dto.statistic.TopProductResponse(
-                                p.name,
-                                p.sold,
-                                 i.imgName
+    @Query("""
+                SELECT new com.thanh.foodorder.dto.statistic.TopProductResponse(
+                    p.name,
+                    p.sold,
+                     i.imgName
 
-                            )
-                            FROM Product p
-                            JOIN p.lstImg i
-                            WHERE i.is_primary=true
+                )
+                FROM Product p
+                JOIN p.lstImg i
+                WHERE i.is_primary=true
 
-                            ORDER BY p.sold DESC
-                        """)
-        List<TopProductResponse> findTopProducts(Pageable pageable);
+                ORDER BY p.sold DESC
+            """)
+    List<TopProductResponse> findTopProducts(Pageable pageable);
 
-        @Query("""
-                            SELECT new com.thanh.foodorder.dto.statistic.RevenueByMonthResponse(
-                                MONTH(o.createdAt),
-                                SUM(o.totalPrice)
-                            )
-                            FROM Order o
-                            WHERE o.orderStatus = 'CONFIRMED'
-                              AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)
-                            GROUP BY MONTH(o.createdAt)
-                            ORDER BY MONTH(o.createdAt)
-                        """)
-        List<RevenueByMonthResponse> getRevenueByMonth();
+    @Query("""
+                SELECT new com.thanh.foodorder.dto.statistic.RevenueByMonthResponse(
+                    MONTH(o.createdAt),
+                    SUM(o.totalPrice)
+                )
+                FROM Order o
+                WHERE o.orderStatus = 'COMPLETED'
+                  AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)
+                GROUP BY MONTH(o.createdAt)
+                ORDER BY MONTH(o.createdAt)
+            """)
+    List<RevenueByMonthResponse> getRevenueByMonth();
 }
