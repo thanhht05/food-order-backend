@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.thanh.foodorder.domain.Address;
 import com.thanh.foodorder.enums.PaymentStatus;
 
 import lombok.Getter;
@@ -12,6 +13,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderResponseDTO {
+    private String customerName;
+    private String email;
 
     private Long orderId;
     private LocalDateTime orderDate;
@@ -22,4 +25,6 @@ public class OrderResponseDTO {
     private PaymentStatus paymentStatus;
 
     private List<OrderItemDTO> items;
+
+    private Address address;
 }

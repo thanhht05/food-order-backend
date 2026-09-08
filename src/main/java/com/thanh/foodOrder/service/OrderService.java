@@ -202,6 +202,9 @@ public class OrderService {
         dto.setTotalPrice(order.getTotalPrice());
         dto.setDiscount(order.getDiscount());
         dto.setPaymentStatus(order.getPaymentStatus());
+        dto.setCustomerName(order.getUser().getFullName());
+        dto.setEmail(order.getUser().getEmail());
+        dto.setAddress(order.getAddress());
 
         // Order items
         List<OrderItemDTO> items = new ArrayList<>();
@@ -357,7 +360,7 @@ public class OrderService {
             updateSoldQuantity(cd);
         }
 
-        if ("CASH".equals(dto.getPaymentMethod())) {
+        if ("COD".equals(dto.getPaymentMethod())) {
             cartDetailRepository.deleteAll(cartDetails);
         }
         eventPublisher.publishEvent(

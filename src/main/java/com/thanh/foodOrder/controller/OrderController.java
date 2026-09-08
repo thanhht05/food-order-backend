@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -124,11 +125,11 @@ public class OrderController {
     }
 
     @PostMapping("/payment-requests/{id}/cancel")
-    public ResponseEntity<?> handleCancelPayment(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> handleCancelPayment(@PathVariable("id") Long id) {
 
         this.orderService.handelCancelPayment(id);
 
-        return ResponseEntity.ok().body("OK");
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/confirm-webhook")
