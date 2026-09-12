@@ -9,6 +9,7 @@ import lombok.Setter;
 @Getter
 public class ResponseLoginDTO {
     private String accessToken;
+    private int tokenVersion;
     private UserLogin userLogin;
 
     @Getter

@@ -262,7 +262,9 @@ public class UserService {
         userLogin.setFullname(user.getFullName());
         userLogin.setId(user.getId());
         userLogin.setRole(user.getRole());
+
         res.setUserLogin(userLogin);
+        res.setTokenVersion(user.getTokenVersion());
         return res;
     }
 }
