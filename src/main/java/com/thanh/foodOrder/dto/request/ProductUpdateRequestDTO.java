@@ -13,7 +13,7 @@ public class ProductUpdateRequestDTO {
     private String name;
     private BigDecimal price;
     private Integer quantity;
-    private int sold;
+    private Integer sold;
     private List<String> lstImg;
     private String description;
     private ProductCate productCate;

@@ -106,40 +106,52 @@ public class ProductService {
 
         Product productDb = getProductById(product.getId());
 
-        productDb.setName(product.getName());
-        productDb.setPrice(product.getPrice());
-        productDb.setDescription(product.getDescription());
-
-        int newSold = product.getSold();
-
-        if (newSold < 0) {
-            throw new CommonException("Sold quantity must be >= 0");
+        if (product.getName() != null) {
+            productDb.setName(product.getName());
         }
 
-        // if (newSold > productDb.getQuantity()) {
-        // throw new CommonException("Sold quantity cannot be greater than available
-        // quantity");
-        // }
-
-        productDb.setSold(newSold);
-        productDb.setQuantity(product.getQuantity());
-        productDb.getLstImg().clear();
-        List<ProductImage> newImgs = new ArrayList<>();
-
-        for (String imgName : product.getLstImg()) {
-            ProductImage img = new ProductImage();
-            img.setImgName(imgName);
-            img.setProduct(productDb);
-            newImgs.add(img);
+        if (product.getPrice() != null) {
+            productDb.setPrice(product.getPrice());
         }
-        productDb.getLstImg().addAll(newImgs);
 
-        if (product.getProductCate() != null && product.getProductCate().getId() != 0) {
+        if (product.getDescription() != null) {
+            productDb.setDescription(product.getDescription());
+        }
+
+        if (product.getSold() != null) {
+            if (product.getSold() < 0) {
+                throw new CommonException("Sold quantity must be >= 0");
+            }
+            productDb.setSold(product.getSold());
+        }
+
+        if (product.getQuantity() != null) {
+            productDb.setQuantity(product.getQuantity());
+        }
+
+        if (product.getLstImg() != null) {
+            productDb.getLstImg().clear();
+
+            List<ProductImage> newImgs = new ArrayList<>();
+
+            for (String imgName : product.getLstImg()) {
+                ProductImage img = new ProductImage();
+                img.setImgName(imgName);
+                img.setProduct(productDb);
+                newImgs.add(img);
+            }
+
+            productDb.getLstImg().addAll(newImgs);
+        }
+
+        if (product.getProductCate() != null
+                && product.getProductCate().getId() != 0) {
+
             Category cate = categoryService.getCategoryById(product.getProductCate().getId());
+
             if (cate != null) {
                 productDb.setCategory(cate);
             }
-
         }
 
         productRepository.save(productDb);
