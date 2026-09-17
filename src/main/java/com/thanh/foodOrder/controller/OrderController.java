@@ -52,13 +52,6 @@ public class OrderController {
         this.payOS = payOS;
     }
 
-    @GetMapping("/orders/{id}")
-    public ResponseEntity<AdminOrderResponseDTO> handleGetOrder(@PathVariable("id") Long id) {
-
-        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.getResponseOrderById(id));
-
-    }
-
     @GetMapping("/orders")
     public ResponseEntity<List<AdminOrderResponseDTO>> handleGetAllOrders(
             @RequestParam(name = "status", required = false) OrderStatus orderStatus) {

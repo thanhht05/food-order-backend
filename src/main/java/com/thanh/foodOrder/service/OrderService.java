@@ -3,17 +3,12 @@ package com.thanh.foodorder.service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +20,6 @@ import com.thanh.foodorder.domain.Product;
 import com.thanh.foodorder.domain.User;
 import com.thanh.foodorder.domain.Voucher;
 import com.thanh.foodorder.dto.CreateOrderData;
-import com.thanh.foodorder.dto.request.BuyNowRequestDTO;
 import com.thanh.foodorder.dto.request.CheckoutRequestDTO;
 import com.thanh.foodorder.dto.response.CheckOutResponseDTO;
 import com.thanh.foodorder.dto.response.order.AdminOrderResponseDTO;
@@ -33,12 +27,10 @@ import com.thanh.foodorder.dto.response.order.OrderHistoryDTO;
 import com.thanh.foodorder.dto.response.order.OrderHistoryProjection;
 import com.thanh.foodorder.dto.response.order.OrderItemDTO;
 import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
-import com.thanh.foodorder.dto.statistic.LatestOrderResponse;
 import com.thanh.foodorder.enums.OrderStatus;
 import com.thanh.foodorder.enums.PaymentStatus;
 
 import com.thanh.foodorder.repository.CartDetailRepository;
-import com.thanh.foodorder.repository.CartRepository;
 import com.thanh.foodorder.repository.OrderDetailRepository;
 import com.thanh.foodorder.repository.OrderRepository;
 import com.thanh.foodorder.specification.OrderSpecification;
@@ -59,19 +51,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartDetailRepository cartDetailRepository;
     private final OrderDetailRepository orderDetailRepository;
-    private final ProductService productService;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
             OrderDetailRepository orderDetailRepository,
-            ProductService productService, VoucherService voucherService, UserService userService,
+            VoucherService voucherService, UserService userService,
             ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.voucherService = voucherService;
         this.cartDetailRepository = cartDetailRepository;
         this.orderDetailRepository = orderDetailRepository;
-        this.productService = productService;
+
         this.userService = userService;
         this.eventPublisher = eventPublisher;
 
@@ -105,14 +96,6 @@ public class OrderService {
             return new CommonException("Order order code " + orderCode + " not found");
 
         });
-
-    }
-
-    // get order on screen admin
-    public AdminOrderResponseDTO getResponseOrderById(Long id) {
-        Order order = getOrderById(id);
-        AdminOrderResponseDTO res = AdminOrderResponseDTO.from(order);
-        return res;
 
     }
 
