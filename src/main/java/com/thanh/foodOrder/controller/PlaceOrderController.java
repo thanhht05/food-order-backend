@@ -35,14 +35,16 @@ public class PlaceOrderController {
         this.emailService = emailService;
     }
 
-    @PostMapping("orders/checkout")
-    public ResponseEntity<CheckOutResponseDTO> handleCheckout(
-            @RequestBody CheckoutRequestDTO dto) {
-        String email = JwtUtil.getCurrentUserLogin().orElse("");
-        User curUser = this.userService.getUserByEmail(email);
+    // @PostMapping("orders/checkout")
+    // public ResponseEntity<CheckOutResponseDTO> handleCheckout(
+    // @RequestBody CheckoutRequestDTO dto) {
+    // String email = JwtUtil.getCurrentUserLogin().orElse("");
+    // User curUser = this.userService.getUserByEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.handleCheckOut(dto, curUser));
-    }
+    // return
+    // ResponseEntity.status(HttpStatus.OK).body(this.orderService.handleCheckOut(dto,
+    // curUser));
+    // }
 
     @PostMapping("/orders/placeOrder")
     public ResponseEntity<OrderResponseDTO> handlePlaceOrder(@RequestBody CheckoutRequestDTO dto) {

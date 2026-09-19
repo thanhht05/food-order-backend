@@ -1,10 +1,14 @@
 package com.thanh.foodorder.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,10 +32,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.thanh.foodorder.domain.Address;
+import com.thanh.foodorder.domain.Cart;
+import com.thanh.foodorder.domain.CartDetail;
 import com.thanh.foodorder.domain.Order;
 import com.thanh.foodorder.domain.OrderDetail;
 import com.thanh.foodorder.domain.Product;
 import com.thanh.foodorder.domain.User;
+import com.thanh.foodorder.dto.request.CheckoutRequestDTO;
 import com.thanh.foodorder.dto.response.order.AdminOrderResponseDTO;
 import com.thanh.foodorder.dto.response.order.OrderResponseDTO;
 import com.thanh.foodorder.enums.OrderStatus;
@@ -39,9 +46,12 @@ import com.thanh.foodorder.enums.PaymentStatus;
 import com.thanh.foodorder.repository.CartDetailRepository;
 import com.thanh.foodorder.repository.OrderDetailRepository;
 import com.thanh.foodorder.repository.OrderRepository;
+import com.thanh.foodorder.util.event.OrderCreatedEvent;
+import com.thanh.foodorder.util.event.OrderPaidEvent;
 import com.thanh.foodorder.util.exception.CommonException;
 
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.webhooks.WebhookData;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
@@ -270,5 +280,232 @@ public class OrderServiceTest {
         verify(orderRepository).findById(order.getId());
         verify(orderDetailRepository).findByOrderId(order.getId());
 
+    }
+
+    @Test
+    void placeOrderSuccessfully() {
+
+        Cart cart = Cart.builder()
+                .id(1L)
+                .user(order.getUser())
+                .build();
+
+        Product product = Product.builder().id(1L)
+                .name("productname")
+                .price(new BigDecimal(100000))
+                .quantity(100).build();
+
+        Address shippingAddress = Address.builder()
+                .recipientName("huu thanh")
+                .phone("0898173004")
+                .province("TP Hue").ward("Phuong THuan Hoa")
+                .addressDetail("199 DIen bien phu")
+                .build();
+        CheckoutRequestDTO req = new CheckoutRequestDTO();
+        req.setCartDetailIds(List.of(1L));
+        req.setPaymentMethod("QR");
+        req.setShippingAddress(shippingAddress);
+
+        CartDetail cd1 = CartDetail.builder()
+                .cart(cart)
+                .id(1L)
+                .product(product)
+                .price(product.getPrice())
+                .quantity(1)
+                .build();
+
+        when(cartDetailRepository.findByIdIn(req.getCartDetailIds())).thenReturn(List.of(cd1));
+
+        when(orderRepository.save(any(Order.class)))
+                .thenReturn(order);
+
+        OrderDetail od = OrderDetail.builder()
+                .id(1L)
+                .order(order)
+                .product(product)
+                .quantity(1)
+                .price(product.getPrice())
+                .build();
+
+        when(orderDetailRepository.saveAll(anyList()))
+                .thenReturn(List.of(od));
+
+        // Act
+        OrderResponseDTO result = orderService.placeOrder(req, order.getUser());
+
+        // Assert
+        assertNotNull(result);
+
+        verify(orderRepository).save(any(Order.class));
+        verify(orderDetailRepository).saveAll(anyList());
+
+        verify(eventPublisher)
+                .publishEvent(any(OrderCreatedEvent.class));
+
+        verify(cartDetailRepository, never())
+                .deleteAll(anyList());
+        verify(voucherService, never()).getVoucherByCode(anyString());
+    }
+
+    @Test
+    void placeOrder_whenNoAvailableItems_shouldThrowException() {
+
+        // Arrange
+        CheckoutRequestDTO req = new CheckoutRequestDTO();
+        req.setCartDetailIds(List.of(1L));
+        req.setPaymentMethod("QR");
+
+        when(cartDetailRepository.findByIdIn(req.getCartDetailIds()))
+                .thenReturn(List.of());
+
+        // Act & Assert
+        CommonException exception = assertThrows(
+                CommonException.class,
+                () -> orderService.placeOrder(req, order.getUser()));
+
+        assertEquals(
+                "No available items to place order",
+                exception.getMessage());
+
+        verify(cartDetailRepository)
+                .findByIdIn(req.getCartDetailIds());
+
+        verify(orderRepository, never())
+                .save(any(Order.class));
+
+        verify(orderDetailRepository, never())
+                .saveAll(anyList());
+
+        verify(eventPublisher, never())
+                .publishEvent(any());
+    }
+
+    @Test
+    void placeOrder_whenCartNotBelongToUser_shouldThrowException() {
+
+        // Arrange
+
+        User user = new User();
+        user.setId(2L);
+
+        Cart cart = Cart.builder()
+                .id(1L)
+                .user(user)
+                .build();
+
+        CartDetail cd1 = CartDetail.builder()
+                .cart(cart)
+                .id(1L)
+
+                .quantity(1)
+                .build();
+
+        CheckoutRequestDTO req = new CheckoutRequestDTO();
+        req.setCartDetailIds(List.of(1L));
+        req.setPaymentMethod("QR");
+        req.setCartDetailIds(List.of(1L));
+
+        when(cartDetailRepository.findByIdIn(req.getCartDetailIds()))
+                .thenReturn(List.of(cd1));
+
+        // Act & Assert
+        CommonException exception = assertThrows(
+                CommonException.class,
+                () -> orderService.placeOrder(req, order.getUser()));
+
+        assertEquals(
+                "CartDetail does not belong to the current user",
+                exception.getMessage());
+
+        verify(cartDetailRepository)
+                .findByIdIn(req.getCartDetailIds());
+
+        verify(orderRepository, never())
+                .save(any(Order.class));
+
+        verify(orderDetailRepository, never())
+                .saveAll(anyList());
+
+        verify(eventPublisher, never())
+                .publishEvent(any());
+    }
+
+    @Test
+    void handlePaymentSuccessfully() {
+
+        // Arrange
+        Long orderCode = 123456L;
+
+        WebhookData data = new WebhookData();
+        data.setAmount(120000L);
+
+        when(orderRepository.findByOrderCode(orderCode))
+                .thenReturn(Optional.of(order));
+
+        when(orderRepository.save(any(Order.class)))
+                .thenReturn(order);
+
+        // Act
+        orderService.handlePayment(orderCode, data);
+
+        // Assert
+        assertEquals(PaymentStatus.PAID, order.getPaymentStatus());
+
+        verify(orderRepository).save(order);
+
+        verify(eventPublisher)
+                .publishEvent(any(OrderPaidEvent.class));
+    }
+
+    @Test
+    void handlePayment_Order_already_paid_shouldThrowException() {
+        Long orderCode = 123L;
+
+        order.setPaymentStatus(PaymentStatus.PAID);
+
+        when(orderRepository.findByOrderCode(orderCode)).thenReturn(Optional.of(order));
+
+        WebhookData data = new WebhookData();
+        data.setAmount(120000L);
+
+        CommonException exception = assertThrows(
+                CommonException.class,
+                () -> orderService.handlePayment(orderCode, data));
+
+        assertEquals(
+                "Order already paid",
+                exception.getMessage());
+        assertEquals(PaymentStatus.PAID, order.getPaymentStatus());
+
+        verify(orderRepository, never())
+                .save(any(Order.class));
+
+        verify(eventPublisher, never())
+                .publishEvent(OrderPaidEvent.class);
+    }
+
+    @Test
+    void handlePayment_Price_invalid_shouldThrowException() {
+        Long orderCode = 123L;
+
+        when(orderRepository.findByOrderCode(orderCode)).thenReturn(Optional.of(order));
+
+        WebhookData data = new WebhookData();
+        data.setAmount(1200001L);
+
+        CommonException exception = assertThrows(
+                CommonException.class,
+                () -> orderService.handlePayment(orderCode, data));
+
+        assertEquals(
+                "Price invalid",
+                exception.getMessage());
+        assertNotEquals(data.getAmount(), order.getTotalPrice());
+
+        verify(orderRepository, never())
+                .save(any(Order.class));
+
+        verify(eventPublisher, never())
+                .publishEvent(OrderPaidEvent.class);
     }
 }
