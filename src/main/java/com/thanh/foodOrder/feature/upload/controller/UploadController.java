@@ -1,5 +1,6 @@
 package com.thanh.foodorder.feature.upload.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,49 +13,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
+import com.thanh.foodorder.feature.upload.DTO.ImgResponseDTO;
+import com.thanh.foodorder.feature.upload.service.CloudinaryService;
 import com.thanh.foodorder.feature.upload.service.UploadFileService;
 
-
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/cloudinary")
 
 public class UploadController {
-    private final UploadFileService uploadFileService;
+    private final CloudinaryService cloudinaryService;
 
-    public UploadController(UploadFileService uploadFileService) {
-        this.uploadFileService = uploadFileService;
+    public UploadController(CloudinaryService cloudinaryService) {
+        this.cloudinaryService = cloudinaryService;
     }
 
-    // upload single file
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(
-    @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ImgResponseDTO> uploadImage(
+            @RequestParam("file") MultipartFile file) {
 
-    String path = uploadFileService.uploadFile(file);
+        ImgResponseDTO imageUrl = cloudinaryService.uploadImage(file, "food-order/products");
 
-    Map<String, String> response = new HashMap<>();
-    response.put("fileName", path);
-
-    return ResponseEntity.ok(response);
+        return ResponseEntity.ok(imageUrl);
     }
-
-    // upload multi files
-    // @PostMapping("/upload")
-    // @ApiMessage("Upload file")
-    // public ResponseEntity<?> uploadFiles(
-    //         @RequestParam("files") MultipartFile[] files) {
-
-    //     List<String> paths = new ArrayList<>();
-
-    //     for (MultipartFile file : files) {
-    //         String path = uploadFileService.uploadFile(file);
-    //         paths.add(path);
-    //     }
-
-    //     Map<String, Object> response = new HashMap<>();
-    //     response.put("fileNames", paths);
-
-    //     return ResponseEntity.ok(response);
-    // }
 
 }
