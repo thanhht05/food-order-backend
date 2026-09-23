@@ -3,7 +3,6 @@ package com.thanh.foodorder.feature.voucher.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.feature.voucher.domain.Voucher;
+import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherRequest;
+import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherResponse;
 import com.thanh.foodorder.feature.voucher.service.VoucherService;
 
 @RestController
@@ -62,4 +63,10 @@ public class VoucherController {
         return ResponseEntity.status(HttpStatus.OK).body(rs);
     }
 
+    @PostMapping("/apply-vouchers")
+    public ResponseEntity<ApplyVoucherResponse> applyVoucher(
+            @RequestBody ApplyVoucherRequest request) {
+        return ResponseEntity.ok(
+                voucherService.applyVoucher(request));
+    }
 }

@@ -12,8 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 import lombok.extern.log4j.Log4j2;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.webhooks.WebhookData;
@@ -298,15 +296,15 @@ public class OrderService {
         BigDecimal discount = BigDecimal.ZERO;
 
         if (dto.getVoucherCode() != null) {
+
             voucher = voucherService.getVoucherByCode(dto.getVoucherCode());
             voucherService.checkVoucherBeforeApply(voucher, curUser);
-
-            BigDecimal percent = BigDecimal.valueOf(voucher.getPercentDiscount());
-
-            BigDecimal discountByPercent = totalPrice
-                    .multiply(percent)
-                    .divide(BigDecimal.valueOf(100));
-            discount = discountByPercent.min(BigDecimal.valueOf(voucher.getMaxDiscount()));
+            // Tiền giảm = MIN(% giảm, maxDiscount)
+            discount = totalPrice // 600.000
+                    .multiply(BigDecimal.valueOf(voucher.getPercentDiscount())) // 600.000 * 50 = 30.000.000
+                    .divide(BigDecimal.valueOf(100)) // 30.000.000 / 100 = 300.000
+                    .min(voucher.getMaxDiscount()); // maxDiscount = 100.000 => MIN(300.000, 100.000) =>
+                                                    // 100.000=>discount = 100.000
             // Update voucher usage
             voucher.setUsageLimit(voucher.getUsageLimit() - 1);
         }

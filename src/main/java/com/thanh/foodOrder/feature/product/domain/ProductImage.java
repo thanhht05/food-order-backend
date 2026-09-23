@@ -22,7 +22,7 @@ public class ProductImage {
     @Id
     private Long id;
     private String imgName;
-    private boolean is_primary;
+    private Boolean is_primary;
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "product_id")

@@ -1,5 +1,7 @@
 package com.thanh.foodorder.feature.voucher.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collector;
@@ -11,13 +13,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
+import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.feature.cart.domain.Cart;
+import com.thanh.foodorder.feature.cart.domain.CartDetail;
+import com.thanh.foodorder.feature.cart.repository.CartDetailRepository;
+import com.thanh.foodorder.feature.cart.repository.CartRepository;
+import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.repository.OrderRepository;
 import com.thanh.foodorder.feature.user.domain.User;
+import com.thanh.foodorder.feature.user.service.UserService;
 import com.thanh.foodorder.feature.voucher.domain.Voucher;
+import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherRequest;
+import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherResponse;
 import com.thanh.foodorder.feature.voucher.repository.VoucherRepository;
 
 @Service
@@ -25,10 +35,17 @@ import com.thanh.foodorder.feature.voucher.repository.VoucherRepository;
 public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final OrderRepository orderRepository;
+    private final UserService userService;
+    private final CartRepository cartRepository;
+    private final CartDetailRepository cartDetailRepository;
 
-    public VoucherService(VoucherRepository voucherRepository, OrderRepository orderRepository) {
+    public VoucherService(VoucherRepository voucherRepository, OrderRepository orderRepository,
+            UserService userService, CartDetailRepository cartDetailRepository, CartRepository cartRepository) {
         this.voucherRepository = voucherRepository;
         this.orderRepository = orderRepository;
+        this.userService = userService;
+        this.cartDetailRepository = cartDetailRepository;
+        this.cartRepository = cartRepository;
     }
 
     public void saveVoucher(Voucher voucher) {
@@ -153,6 +170,73 @@ public class VoucherService {
 
         return this.orderRepository.existsByUserAndVoucher(user, voucher);
 
+    }
+
+    public ApplyVoucherResponse applyVoucher(
+            ApplyVoucherRequest request) {
+
+        String email = JwtUtil.getCurrentUserLogin().orElse("");
+
+        User user = userService.getUserByEmail(email);
+
+        Cart cart = cartRepository.findByUserId(user.getId());
+
+        List<CartDetail> cartDetails = cartDetailRepository.findByCart(cart);
+
+        if (cartDetails.isEmpty()) {
+            throw new CommonException("Giỏ hàng đang trống");
+        }
+
+        // Tính tổng tiền từ DB
+        BigDecimal originalTotal = BigDecimal.ZERO;
+
+        for (CartDetail cartDetail : cartDetails) {
+
+            BigDecimal price = cartDetail.getProduct().getPrice();
+
+            BigDecimal quantity = BigDecimal.valueOf(
+                    cartDetail.getQuantity());
+
+            originalTotal = originalTotal.add(
+                    price.multiply(quantity));
+        }
+
+        Voucher voucher = voucherRepository
+                .findByCode(request.getCode())
+                .orElseThrow(() -> new CommonException("Voucher không tồn tại"));
+
+        // Kiểm tra hạn
+        if (voucher.getExpiration() != null
+                && voucher.getExpiration().isBefore(LocalDate.now())) {
+
+            throw new CommonException("Voucher đã hết hạn");
+        }
+
+        // Tính discount
+        BigDecimal discount = originalTotal
+                .multiply(
+                        BigDecimal.valueOf(
+                                voucher.getPercentDiscount()))
+                .divide(
+                        BigDecimal.valueOf(100),
+                        2,
+                        RoundingMode.HALF_UP);
+
+        // Không giảm quá maxDiscount
+        if (voucher.getMaxDiscount() != null
+                && discount.compareTo(voucher.getMaxDiscount()) > 0) {
+
+            discount = voucher.getMaxDiscount();
+        }
+
+        BigDecimal finalTotal = originalTotal.subtract(discount);
+
+        return ApplyVoucherResponse.builder()
+                .code(voucher.getCode())
+                .originalTotal(originalTotal)
+                .discountAmount(discount)
+                .finalTotal(finalTotal)
+                .build();
     }
 
 }

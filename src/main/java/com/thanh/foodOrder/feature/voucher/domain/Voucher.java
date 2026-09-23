@@ -1,8 +1,8 @@
 package com.thanh.foodorder.feature.voucher.domain;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +29,7 @@ public class Voucher {
     private Long id;
     private String code;
     private int percentDiscount;
-    private int maxDiscount;
+    private BigDecimal maxDiscount;
 
     private LocalDate expiration;
     private String createdBy;

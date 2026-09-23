@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
 
-
 @Repository
 public interface CartDetailRepository extends JpaRepository<CartDetail, Long> {
     List<CartDetail> findByIdIn(List<Long> ids);
@@ -15,5 +14,7 @@ public interface CartDetailRepository extends JpaRepository<CartDetail, Long> {
     CartDetail findByCartAndProductId(Cart cart, long productId);
 
     void deleteByCartUserIdAndProductIdIn(Long userId, List<Long> productIds);
+
+    List<CartDetail> findByCart(Cart cart);
 
 }
