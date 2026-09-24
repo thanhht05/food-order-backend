@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +16,7 @@ import com.thanh.foodorder.feature.product.enums.ProductStatus;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ResponseProductDTO {
     private long id;
     private String name;
@@ -31,6 +32,9 @@ public class ResponseProductDTO {
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class ProductCate {
         private long id;
         private String name;
@@ -38,6 +42,9 @@ public class ResponseProductDTO {
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class ProductImage {
         private String name;
     }

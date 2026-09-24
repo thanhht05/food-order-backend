@@ -46,7 +46,6 @@ import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.service.UserService;
 
-
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
         @Mock
@@ -82,7 +81,7 @@ public class ProductServiceTest {
                 img.setId(1L);
                 img.setImgName("testimg.png");
                 img.setProduct(product);
-                img.set_primary(true);
+                img.setIs_primary(true);
 
                 product.setLstImg(new ArrayList<>(List.of(img)));
         }

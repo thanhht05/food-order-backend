@@ -31,17 +31,17 @@ import com.thanh.foodorder.feature.product.service.ProductService;
 import com.thanh.foodorder.feature.upload.service.UploadFileService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/products")
 public class ProductController {
-    private final UploadFileService uploadFileService;
+
     private final ProductService productService;
 
-    public ProductController(UploadFileService uploadFileService, ProductService productService) {
-        this.uploadFileService = uploadFileService;
+    public ProductController(ProductService productService) {
+
         this.productService = productService;
     }
 
-    @PostMapping("/products")
+    @PostMapping
     public ResponseEntity<ResponseProductDTO> handleCreateProduct(@RequestBody ProductRequestDTO p) {
 
         ResponseProductDTO savedProduct = productService.createProduct(p);
@@ -49,7 +49,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
-    @PutMapping(value = "/products")
+    @PutMapping
     public ResponseEntity<ResponseProductDTO> handleUpdateProduct(
             @RequestBody ProductUpdateRequestDTO product) {
 
@@ -57,28 +57,28 @@ public class ProductController {
         return ResponseEntity.ok(res);
     }
 
-    @PutMapping("/products/{productId}/status")
+    @PutMapping("/{productId}/status")
     public ResponseEntity<Void> putMethodName(@PathVariable(value = "productId") Long productId) {
         this.productService.updateProductStatus(productId);
 
         return ResponseEntity.ok(null);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> handleDeletProduct(@PathVariable(value = "id") Long id) {
 
         this.productService.handleDeleteProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ResponseProductDTO> handelGetProductById(@PathVariable("id") Long id) {
 
         Product product = this.productService.getProductById(id);
         return ResponseEntity.status(HttpStatus.OK).body(this.productService.convertToProductDTO(product));
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public ResponseEntity<ResultPaginationDTO> getHomePage(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "category", required = false) List<String> category,

@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import com.thanh.foodorder.core.response.RestResponse;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
 
-
 @RestControllerAdvice
 public class FormatResResponse implements ResponseBodyAdvice {
 

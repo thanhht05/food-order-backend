@@ -3,7 +3,6 @@ package com.thanh.foodorder.feature.category.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -55,7 +54,7 @@ public class CategoryController {
     }
 
     @GetMapping("/categories/{id}")
-    public ResponseEntity<Category> handleGetCategory(@PathVariable Long id) {
+    public ResponseEntity<Category> handleGetCategory(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(this.categoryService.getCategoryById(id));
     }
 

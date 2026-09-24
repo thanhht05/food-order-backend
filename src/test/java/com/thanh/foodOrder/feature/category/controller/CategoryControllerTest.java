@@ -18,40 +18,34 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.feature.category.domain.Category;
 import com.thanh.foodorder.feature.category.service.CategoryService;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(CategoryController.class)
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 class CategoryControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private CategoryService categoryService;
-
-    @InjectMocks
-    private CategoryController categoryController;
-
+    @Autowired
     private ObjectMapper objectMapper;
     private Category category;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(categoryController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build();
+
         objectMapper = new ObjectMapper();
 
         category = new Category();
@@ -68,8 +62,8 @@ class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(category)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Pizza"));
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.name").value("Pizza"));
 
         verify(categoryService, times(1)).createCategory(any(Category.class));
     }
@@ -83,8 +77,8 @@ class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(category)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Pizza"));
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.name").value("Pizza"));
 
         verify(categoryService, times(1)).updateCategory(any(Category.class));
     }
@@ -107,8 +101,8 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/v1/categories/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Pizza"));
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.name").value("Pizza"));
 
         verify(categoryService, times(1)).getCategoryById(1L);
     }
@@ -130,9 +124,9 @@ class CategoryControllerTest {
         mockMvc.perform(get("/api/v1/categories")
                 .param("name", "Pizza"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.meta.page").value(1))
-                .andExpect(jsonPath("$.meta.pageSize").value(10))
-                .andExpect(jsonPath("$.results[0].name").value("Pizza"));
+                .andExpect(jsonPath("$.data.meta.page").value(1))
+                .andExpect(jsonPath("$.data.meta.pageSize").value(10))
+                .andExpect(jsonPath("$.data.results[0].name").value("Pizza"));
 
         verify(categoryService, times(1)).getAllCate(any(Pageable.class), eq("Pizza"));
     }
