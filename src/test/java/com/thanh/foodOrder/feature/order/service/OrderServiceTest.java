@@ -8,12 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +32,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
-
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.webhooks.WebhookData;
@@ -43,6 +49,8 @@ import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.domain.OrderDetail;
 import com.thanh.foodorder.feature.order.dto.AdminOrderResponseDTO;
 import com.thanh.foodorder.feature.order.dto.CheckoutRequestDTO;
+import com.thanh.foodorder.feature.order.dto.OrderHistoryDTO;
+import com.thanh.foodorder.feature.order.dto.OrderHistoryProjection;
 import com.thanh.foodorder.feature.order.dto.OrderResponseDTO;
 import com.thanh.foodorder.feature.order.enums.OrderStatus;
 import com.thanh.foodorder.feature.order.enums.PaymentStatus;
@@ -508,5 +516,114 @@ public class OrderServiceTest {
 
                 verify(eventPublisher, never())
                                 .publishEvent(OrderPaidEvent.class);
+        }
+
+        @AfterEach
+        void tearDown() {
+                SecurityContextHolder.clearContext();
+        }
+
+        @Test
+        void updateOrder_successfully() {
+                Order updateReq = new Order();
+                updateReq.setId(1L);
+                updateReq.setOrderStatus(OrderStatus.CONFIRMED);
+
+                when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+                when(orderRepository.save(any(Order.class))).thenReturn(order);
+                when(orderDetailRepository.findByOrderId(1L)).thenReturn(Collections.emptyList());
+
+                OrderResponseDTO response = orderService.updateOrder(updateReq);
+
+                assertNotNull(response);
+                assertEquals(OrderStatus.CONFIRMED.name(), response.getStatus());
+                assertEquals(OrderStatus.CONFIRMED, order.getOrderStatus());
+                verify(orderRepository).save(order);
+                verify(orderDetailRepository).findByOrderId(1L);
+        }
+
+        @Test
+        void updateOrder_notFound_shouldThrowException() {
+                Order updateReq = new Order();
+                updateReq.setId(999L);
+                updateReq.setOrderStatus(OrderStatus.CONFIRMED);
+
+                when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+                CommonException exception = assertThrows(CommonException.class,
+                                () -> orderService.updateOrder(updateReq));
+
+                assertEquals("Order with id 999 not found", exception.getMessage());
+                verify(orderRepository, never()).save(any(Order.class));
+        }
+
+        @Test
+        void getOrderHistoryByUser_whenNoOrders_shouldReturnEmptyList() {
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                Authentication auth = new UsernamePasswordAuthenticationToken("test@gmail.com", null,
+                                Collections.emptyList());
+                context.setAuthentication(auth);
+                SecurityContextHolder.setContext(context);
+
+                User user = order.getUser();
+                Cart cart = new Cart();
+                cart.setId(10L);
+                user.setCart(cart);
+
+                when(userService.getUserByEmail("test@gmail.com")).thenReturn(user);
+                when(orderRepository.findOrderHistoryByUserId(user.getId())).thenReturn(Collections.emptyList());
+
+                OrderHistoryDTO result = orderService.getOrderHistoryByUser();
+
+                assertNotNull(result);
+                assertEquals(user.getId(), result.getUserId());
+                assertEquals(user.getFullName(), result.getFullName());
+                assertEquals(10L, result.getCartId());
+                assertTrue(result.getOrderInfo().isEmpty());
+        }
+
+        @Test
+        void getOrderHistoryByUser_withOrders_shouldReturnGroupedHistory() {
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                Authentication auth = new UsernamePasswordAuthenticationToken("test@gmail.com", null,
+                                Collections.emptyList());
+                context.setAuthentication(auth);
+                SecurityContextHolder.setContext(context);
+
+                User user = order.getUser();
+                Cart cart = new Cart();
+                cart.setId(10L);
+                user.setCart(cart);
+
+                OrderHistoryProjection row1 = mock(OrderHistoryProjection.class);
+                when(row1.getOrderId()).thenReturn(1L);
+                when(row1.getOrderDate()).thenReturn(Instant.now());
+                when(row1.getOrderStatus()).thenReturn("PENDING");
+                when(row1.getPaymentStatus()).thenReturn("UNPAID");
+                when(row1.getPaymentMethod()).thenReturn("PAYOS");
+                when(row1.getTotalPrice()).thenReturn(120000.0);
+                when(row1.getProductId()).thenReturn(10L);
+                when(row1.getProductName()).thenReturn("Burger");
+                when(row1.getPrice()).thenReturn(60000.0);
+                when(row1.getQuantity()).thenReturn(2L);
+                when(row1.getRecipientName()).thenReturn("Thanh Huu");
+                when(row1.getPhone()).thenReturn("0123456789");
+                when(row1.getProvince()).thenReturn("Thua Thien Hue");
+                when(row1.getWard()).thenReturn("Phu Hoi");
+                when(row1.getAddressDetail()).thenReturn("123 Nguyen Hue");
+                when(row1.getPaymentLinkId()).thenReturn("pay-link-123");
+
+                when(userService.getUserByEmail("test@gmail.com")).thenReturn(user);
+                when(orderRepository.findOrderHistoryByUserId(user.getId())).thenReturn(List.of(row1));
+
+                OrderHistoryDTO result = orderService.getOrderHistoryByUser();
+
+                assertNotNull(result);
+                assertEquals(user.getId(), result.getUserId());
+                assertEquals(1, result.getOrderInfo().size());
+                assertEquals(1L, result.getOrderInfo().get(0).getOrderId());
+                assertEquals(OrderStatus.PENDING, result.getOrderInfo().get(0).getOrderStatus());
+                assertEquals(1, result.getOrderInfo().get(0).getProducts().size());
+                assertEquals("Burger", result.getOrderInfo().get(0).getProducts().get(0).getProductName());
         }
 }
