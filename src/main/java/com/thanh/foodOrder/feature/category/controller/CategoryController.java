@@ -22,6 +22,8 @@ import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.feature.category.domain.Category;
 import com.thanh.foodorder.feature.category.service.CategoryService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/v1")
 
@@ -32,6 +34,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/categories")
     @ApiMessage("Create a category")
     public ResponseEntity<Category> handleCreateCategory(@Valid @RequestBody Category category) {
@@ -39,6 +42,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.categoryService.createCategory(category));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/categories")
     @ApiMessage("Update a category ")
     public ResponseEntity<Category> handleUpdateCategory(@Valid @RequestBody Category category) {
@@ -46,6 +50,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(this.categoryService.updateCategory(category));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/categories/{id}")
     @ApiMessage("Delete a category")
     public ResponseEntity<Void> handleDeleteCate(@PathVariable("id") Long id) {

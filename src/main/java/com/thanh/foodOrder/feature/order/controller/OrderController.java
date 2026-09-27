@@ -37,6 +37,8 @@ import com.thanh.foodorder.feature.order.dto.OrderResponseDTO;
 import com.thanh.foodorder.feature.order.enums.OrderStatus;
 import com.thanh.foodorder.feature.order.service.OrderService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/v1")
 public class OrderController {
@@ -48,6 +50,7 @@ public class OrderController {
         this.payOS = payOS;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/orders")
     public ResponseEntity<List<AdminOrderResponseDTO>> handleGetAllOrders(
             @RequestParam(name = "status", required = false) OrderStatus orderStatus) {

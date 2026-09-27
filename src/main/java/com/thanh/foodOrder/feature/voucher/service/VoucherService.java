@@ -28,6 +28,7 @@ import com.thanh.foodorder.feature.user.service.UserService;
 import com.thanh.foodorder.feature.voucher.domain.Voucher;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherRequest;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherResponse;
+import com.thanh.foodorder.feature.voucher.enums.VoucherStatus;
 import com.thanh.foodorder.feature.voucher.repository.VoucherRepository;
 
 @Service
@@ -77,6 +78,9 @@ public class VoucherService {
             log.warn("Voucher  {} already exists", voucher.getCode());
             throw new CommonException("Voucher " + voucher.getCode() + " already exists");
         }
+        if (voucher.getStatus() == null) {
+            voucher.setStatus(VoucherStatus.ACTIVE);
+        }
         log.info("Voucher created successfully with code: {}", voucher.getCode());
 
         return this.voucherRepository.save(voucher);
@@ -100,7 +104,25 @@ public class VoucherService {
         voucherDb.setExpiration(voucher.getExpiration());
         voucherDb.setPercentDiscount(voucher.getPercentDiscount());
         voucherDb.setMaxDiscount(voucher.getMaxDiscount());
+        if (voucher.getStatus() != null) {
+            voucherDb.setStatus(voucher.getStatus());
+        }
         return this.voucherRepository.save(voucherDb);
+    }
+
+    public Voucher updateVoucherStatus(Long voucherId, VoucherStatus status) {
+        Voucher voucher = getVoucherById(voucherId);
+
+        if (status != null) {
+            voucher.setStatus(status);
+        } else {
+            if (VoucherStatus.ACTIVE.equals(voucher.getStatus())) {
+                voucher.setStatus(VoucherStatus.INACTIVE);
+            } else {
+                voucher.setStatus(VoucherStatus.ACTIVE);
+            }
+        }
+        return this.voucherRepository.save(voucher);
     }
 
     public void delteVoucherById(Long id) {
@@ -131,7 +153,7 @@ public class VoucherService {
 
         List<Voucher> vouchers = voucherPage.getContent().stream()
                 .map(voucher -> new Voucher(voucher.getId(), voucher.getCode(), voucher.getPercentDiscount(),
-                        voucher.getMaxDiscount(), voucher.getExpiration(), voucher.getCreatedBy(),
+                        voucher.getMaxDiscount(), voucher.getStatus(), voucher.getExpiration(), voucher.getCreatedBy(),
                         voucher.getUpdatedBy(), voucher.getCreatedAt(), voucher.getUpdatedAt(),
                         voucher.getUsageLimit()))
                 .collect(Collectors.toList());
@@ -152,13 +174,14 @@ public class VoucherService {
     }
 
     public void checkVoucherBeforeApply(Voucher voucher, User user) {
+        if (VoucherStatus.INACTIVE.equals(voucher.getStatus())) {
+            throw new CommonException("Voucher " + voucher.getCode() + " is inactive");
+        }
         if (checkVoucherExpired(voucher)) {
             throw new CommonException("Voucher " + voucher.getCode() + " is expired");
-
         }
         if (checkUsageVoucher(voucher)) {
             throw new CommonException("Voucher " + voucher.getCode() + " has been fully used.");
-
         }
         if (orderRepository.existsByUserAndVoucher(user, voucher)) {
             throw new CommonException(
@@ -204,6 +227,10 @@ public class VoucherService {
         Voucher voucher = voucherRepository
                 .findByCode(request.getCode())
                 .orElseThrow(() -> new CommonException("Voucher không tồn tại"));
+
+        if (VoucherStatus.INACTIVE.equals(voucher.getStatus())) {
+            throw new CommonException("Voucher không còn hoạt động");
+        }
 
         // Kiểm tra hạn
         if (voucher.getExpiration() != null

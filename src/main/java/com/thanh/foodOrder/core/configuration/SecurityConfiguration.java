@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,13 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 import jakarta.servlet.http.HttpServletResponse;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.user.service.UserService;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
@@ -51,26 +52,39 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
-        String[] whiteList = {
-                "/api/v1/products/**",
-                "/api/v1/categories/**",
-                "/api/v1/auth/login",
-                "/api/v1/auth/register",
-                "/api/v1/auth/refreshToken",
-                "/api/v1/orders/pay",
-                "/api/v1/ai/**",
-                "/upload/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/v3/api-docs/**",
-                "/ws/**",
-                "/api/v1/payos_transfer_handler",
-                "/api/v1/confirm-webhook"
-        };
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(whiteList).permitAll()
+                        // 1. Cho phép xem sản phẩm và danh mục công khai (chỉ GET)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
+
+                        // 2. Các endpoint xác thực công khai
+                        .requestMatchers(
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/refreshToken")
+                        .permitAll()
+
+                        // 3. Webhook PayOS (server-to-server callback)
+                        .requestMatchers(
+                                "/api/v1/payos_transfer_handler",
+                                "/api/v1/confirm-webhook")
+                        .permitAll()
+
+                        // 4. WebSocket & Swagger Docs
+                        .requestMatchers(
+                                "/ws/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**")
+                        .permitAll()
+
+                        // 5. Chat AI hỗ trợ khách hàng
+                        .requestMatchers("/api/v1/ai/**").permitAll()
+
+                        // 6. Mọi request khác đều phải được xác thực (phân quyền chi tiết tại
+                        // Controller bằng @PreAuthorize)
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
@@ -79,7 +93,7 @@ public class SecurityConfiguration {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler(customLogoutSuccessHandler));
-        ;
+
         return http.build();
     }
 

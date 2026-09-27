@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import com.thanh.foodorder.core.util.JwtUtil;
+import com.thanh.foodorder.feature.voucher.enums.VoucherStatus;
 
 @Entity
 @Table(name = "vouchers")
@@ -31,6 +34,9 @@ public class Voucher {
     private int percentDiscount;
     private BigDecimal maxDiscount;
 
+    @Enumerated(EnumType.STRING)
+    private VoucherStatus status;
+
     private LocalDate expiration;
     private String createdBy;
     private String updatedBy;
@@ -43,6 +49,9 @@ public class Voucher {
     public void handleBeforeCreated() {
         this.createdAt = Instant.now();
         this.createdBy = JwtUtil.getCurrentUserLogin().orElse("");
+        if (this.status == null) {
+            this.status = VoucherStatus.ACTIVE;
+        }
     }
 
     @PreUpdate

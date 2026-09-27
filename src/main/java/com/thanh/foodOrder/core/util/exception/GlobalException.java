@@ -13,7 +13,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-
 import io.jsonwebtoken.ExpiredJwtException;
 import com.thanh.foodorder.core.response.RestResponse;
 
@@ -48,6 +47,15 @@ public class GlobalException {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<RestResponse<Object>> handleAccessDeniedException(Exception exception) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.FORBIDDEN.value());
+        res.setError("Forbidden");
+        res.setMessage("Access denied: You do not have permission to access this resource");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

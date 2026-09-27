@@ -21,11 +21,20 @@ public class UserDetailsCustomService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.thanh.foodorder.feature.user.domain.User user = this.userService.getUserByEmail(username);
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        User user2 = new User(user.getEmail(), user.getPassword(), authorities);
-        return user2;
-
+        try {
+            com.thanh.foodorder.feature.user.domain.User user = this.userService.getUserByEmail(username);
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            if (user.getRole() != null && user.getRole().getName() != null && !user.getRole().getName().isBlank()) {
+                String roleName = user.getRole().getName();
+                if (!roleName.startsWith("ROLE_")) {
+                    roleName = "ROLE_" + roleName;
+                }
+                authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleName));
+            }
+            return new User(user.getEmail(), user.getPassword(), authorities);
+        } catch (Exception e) {
+            throw new UsernameNotFoundException("User not found with email: " + username, e);
+        }
     }
 
 }

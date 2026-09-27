@@ -14,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +35,7 @@ import com.thanh.foodorder.feature.user.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1")
+@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -64,6 +66,7 @@ public class UserController {
 
     // }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     @ApiMessage("Create a user")
     public ResponseEntity<ResponseUserDTO> handleCreateUser(@Valid @RequestBody User user) {

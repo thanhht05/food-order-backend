@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,8 @@ import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.feature.voucher.domain.Voucher;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherRequest;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherResponse;
+import com.thanh.foodorder.feature.voucher.dto.UpdateVoucherStatusDTO;
+import com.thanh.foodorder.feature.voucher.enums.VoucherStatus;
 import com.thanh.foodorder.feature.voucher.service.VoucherService;
 
 @RestController
@@ -28,30 +31,49 @@ public class VoucherController {
         this.voucherService = voucherService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/vouchers")
     @ApiMessage("Create a voucher")
     public ResponseEntity<Voucher> handleCreateVoucher(@RequestBody Voucher voucher) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.voucherService.createVoucher(voucher));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/vouchers")
+    @ApiMessage("Update a voucher ")
     public ResponseEntity<Voucher> handleUpdateVoucer(@RequestBody Voucher voucher) {
 
         return ResponseEntity.status(HttpStatus.OK).body(this.voucherService.updatVoucher(voucher));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/vouchers/{id}/status")
+    @ApiMessage("Update voucher status")
+    public ResponseEntity<Voucher> handleUpdateVoucherStatus(
+            @PathVariable("id") Long id,
+            @RequestParam(name = "status", required = false) VoucherStatus statusParam,
+            @RequestBody(required = false) UpdateVoucherStatusDTO dto) {
+        VoucherStatus targetStatus = (statusParam != null) ? statusParam : ((dto != null) ? dto.getStatus() : null);
+        Voucher updatedVoucher = this.voucherService.updateVoucherStatus(id, targetStatus);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedVoucher);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/vouchers/{id}")
+    @ApiMessage("Delete a voucher")
     public ResponseEntity<Void> handleDeleteVoucher(@PathVariable("id") Long id) {
         this.voucherService.delteVoucherById(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/vouchers/{id}")
     public ResponseEntity<Voucher> handleGetVoucherById(@PathVariable("id") Long id) {
         Voucher voucher = this.voucherService.getVoucherById(id);
         return ResponseEntity.status(HttpStatus.OK).body(voucher);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/vouchers")
     public ResponseEntity<ResultPaginationDTO> handleGetAllVouchers(
             @RequestParam(name = "page", defaultValue = "1", required = false) Integer page,

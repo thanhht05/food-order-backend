@@ -28,7 +28,7 @@ import com.thanh.foodorder.feature.product.dto.ProductRequestDTO;
 import com.thanh.foodorder.feature.product.dto.ProductUpdateRequestDTO;
 import com.thanh.foodorder.feature.product.dto.ResponseProductDTO;
 import com.thanh.foodorder.feature.product.service.ProductService;
-import com.thanh.foodorder.feature.upload.service.UploadFileService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -41,6 +41,7 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseProductDTO> handleCreateProduct(@RequestBody ProductRequestDTO p) {
 
@@ -49,6 +50,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<ResponseProductDTO> handleUpdateProduct(
             @RequestBody ProductUpdateRequestDTO product) {
@@ -57,6 +59,7 @@ public class ProductController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{productId}/status")
     public ResponseEntity<Void> putMethodName(@PathVariable(value = "productId") Long productId) {
         this.productService.updateProductStatus(productId);
@@ -64,6 +67,7 @@ public class ProductController {
         return ResponseEntity.ok(null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> handleDeletProduct(@PathVariable(value = "id") Long id) {
 

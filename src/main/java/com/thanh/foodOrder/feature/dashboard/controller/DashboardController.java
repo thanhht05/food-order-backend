@@ -3,7 +3,6 @@ package com.thanh.foodorder.feature.dashboard.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,8 +16,11 @@ import com.thanh.foodorder.feature.dashboard.dto.RevenueByMonthResponse;
 import com.thanh.foodorder.feature.dashboard.dto.TopProductResponse;
 import com.thanh.foodorder.feature.dashboard.service.DashboardService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/v1")
+@PreAuthorize("hasRole('ADMIN')")
 public class DashboardController {
     private final DashboardService dashboardService;
 
