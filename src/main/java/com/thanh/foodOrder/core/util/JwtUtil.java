@@ -4,12 +4,12 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -21,7 +21,8 @@ import com.thanh.foodorder.feature.user.domain.User;
 
 @Component
 public class JwtUtil {
-    public String SECRET_KEY = "769e1dd6cb50f9a08e0794db8292ae8e9fd126280c5d017ceb62e314d89a3f547c208704f643fe196e951987a2cf1b41";
+    @Value("${JWT.SECRET.KEY}")
+    public String SECRET_KEY;
     private long JWT_EXPIRATION = 1 * 60 * 60 * 1000; // 1hours
     // private long JWT_EXPIRATION = 60000; // 1minute
     private long REFRESHTOKEN_EXPIRATION = 2 * 24 * 60 * 60 * 1000; // 2days

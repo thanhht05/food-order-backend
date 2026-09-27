@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.feature.upload.DTO.ImgResponseDTO;
 import com.thanh.foodorder.feature.upload.service.CloudinaryService;
-import com.thanh.foodorder.feature.upload.service.UploadFileService;
 
 @RestController
 @RequestMapping("/api/v1/cloudinary")
