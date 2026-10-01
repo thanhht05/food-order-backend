@@ -15,12 +15,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
+import com.thanh.foodorder.core.util.UtilMethod;
 import com.thanh.foodorder.feature.ai.dto.ProductAiResponse;
 import com.thanh.foodorder.feature.ai.dto.ProductSearchCriteria;
 import com.thanh.foodorder.feature.category.domain.Category;
@@ -263,15 +263,7 @@ public class ProductService {
 
         Page<Product> pages = productRepository.findAll(spec, pageable);
 
-        ResultPaginationDTO rs = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotalElements(pages.getTotalElements());
-
-        rs.setMeta(meta);
+        ResultPaginationDTO rs = UtilMethod.toPagination(pageable, pages);
 
         List<ResponseProductDTO> responseProductDTOs = new ArrayList<>();
 

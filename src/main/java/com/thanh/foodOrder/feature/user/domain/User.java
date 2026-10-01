@@ -2,6 +2,7 @@ package com.thanh.foodorder.feature.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,7 +20,6 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.order.domain.Order;
@@ -53,7 +53,7 @@ public class User {
    @Column(nullable = false)
    private Integer tokenVersion = 0;
 
-   @ManyToOne()
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "role_id")
    private Role role;
 

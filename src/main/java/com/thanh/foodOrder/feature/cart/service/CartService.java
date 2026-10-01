@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
@@ -252,42 +251,7 @@ public class CartService {
 
             return response;
         }
-        List<CartDetail> cartDetails = cart.getCartDetails();
-
-        List<CartDetailUserDTO> lst = new ArrayList<>();
-        int totalQuantity = 0;
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (CartDetail cd : cartDetails) {
-            CartDetailUserDTO dto = new CartDetailUserDTO();
-            dto.setCartDetailId(cd.getId());
-            dto.setQuantity(cd.getQuantity());
-
-            CartDetailUserDTO.ProductInnerCartDetail p = new CartDetailUserDTO.ProductInnerCartDetail();
-            Product product = cd.getProduct();
-            p.setId(product.getId());
-            p.setName(product.getName());
-            p.setCategoryName(product.getCategory().getName());
-            p.setImg(product.getLstImg().get(0).getImgName());
-            p.setPrice(product.getPrice());
-            p.setQuantity(product.getQuantity());
-
-            dto.setProductsInnerCartDetail(p);
-            lst.add(dto);
-
-            // Tổng quantity
-            totalQuantity += cd.getQuantity();
-
-            // price * quantity
-            BigDecimal itemTotal = product.getPrice()
-                    .multiply(BigDecimal.valueOf(cd.getQuantity()));
-
-            totalPrice = totalPrice.add(itemTotal);
-        }
-        CartResponeDTO response = new CartResponeDTO();
-        response.setLst(lst);
-        response.setTotalQuantity(totalQuantity);
-        response.setTotalPrice(totalPrice);
-        return response;
+        return mapToResponse(cart);
     }
 
     private CartResponeDTO mapToResponse(Cart cart) {
@@ -295,7 +259,17 @@ public class CartService {
         int totalQuantity = 0;
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        for (CartDetail cd : cart.getCartDetails()) {
+        if (cart == null) {
+            CartResponeDTO response = new CartResponeDTO();
+            response.setLst(lst);
+            response.setTotalQuantity(0);
+            response.setTotalPrice(BigDecimal.ZERO);
+            return response;
+        }
+
+        List<CartDetail> cartDetails = this.cartDetailRepository.findByCartWithDetails(cart);
+
+        for (CartDetail cd : cartDetails) {
 
             totalQuantity += cd.getQuantity();
             BigDecimal amount = cd.getPrice().multiply(BigDecimal.valueOf(cd.getQuantity()));
@@ -313,16 +287,13 @@ public class CartService {
             item.setName(p.getName());
             item.setPrice(p.getPrice());
             item.setQuantity(cd.getQuantity());
-            item.setCategoryName(p.getCategory().getName());
-            item.setImg(p.getLstImg().get(0).getImgName());
-
-            // tránh null ảnh
-            if (p.getLstImg() != null && !p.getLstImg().isEmpty()) {
-                item.setImg(p.getLstImg().get(0).getImgName());
-            }
 
             if (p.getCategory() != null) {
                 item.setCategoryName(p.getCategory().getName());
+            }
+
+            if (p.getLstImg() != null && !p.getLstImg().isEmpty()) {
+                item.setImg(p.getLstImg().get(0).getImgName());
             }
             dto.setProductsInnerCartDetail(item);
 

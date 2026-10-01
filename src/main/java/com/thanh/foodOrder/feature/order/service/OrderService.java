@@ -162,7 +162,7 @@ public class OrderService {
 
     public OrderResponseDTO getOrderDetail(Long id) {
         Order order = getOrderById(id);
-        List<OrderDetail> orderDetails = this.orderDetailRepository.findByOrderId(id);
+        List<OrderDetail> orderDetails = this.orderDetailRepository.findByOrderIdWithProduct(id);
 
         OrderResponseDTO res = mapToOrderResponseDTO(order, orderDetails);
         return res;
@@ -231,51 +231,6 @@ public class OrderService {
         }
         return totalPrice;
     }
-
-    /*
-     * public CheckOutResponseDTO handleCheckOut(CheckoutRequestDTO dto, User
-     * curUser) {
-     * 
-     * List<CartDetail> cartDetails =
-     * cartDetailRepository.findByIdIn(dto.getCartDetailIds());
-     * 
-     * // 1. Validate
-     * validBeforePlaceOrder(dto, curUser, cartDetails);
-     * 
-     * // 2. Caculate price
-     * BigDecimal totalPrice = caculateTotalPrice(cartDetails);
-     * BigDecimal discount = BigDecimal.ZERO;
-     * BigDecimal finalPrice = totalPrice;
-     * 
-     * // 3. If have an voucher then CHECK
-     * if (dto.getVoucherCode() != null) {
-     * Voucher voucher = voucherService.getVoucherByCode(dto.getVoucherCode());
-     * voucherService.checkVoucherBeforeApply(voucher, curUser);
-     * BigDecimal percent = BigDecimal.valueOf(voucher.getPercentDiscount());
-     * 
-     * // totalPrice * percent / 100
-     * BigDecimal discountByPercent = totalPrice
-     * .multiply(percent)
-     * .divide(BigDecimal.valueOf(100));
-     * // Lấy số nhỏ hơn giữa giảm theo % và maxDiscount
-     * discount =
-     * discountByPercent.min(BigDecimal.valueOf(voucher.getMaxDiscount()));
-     * finalPrice = totalPrice.subtract(discount);
-     * }
-     * 
-     * // 4. Retuen preview for user
-     * CheckOutResponseDTO res = new CheckOutResponseDTO();
-     * for (CartDetail cd : cartDetails) {
-     * Long cartDetailId = cd.getId();
-     * res.getCartDetailIds().add(cartDetailId);
-     * }
-     * res.setTotalPrice(totalPrice);
-     * res.setDiscount(discount);
-     * res.setFinalPrice(finalPrice);
-     * 
-     * return res;
-     * }
-     */
 
     public void updateSoldQuantity(CartDetail cd) {
         cd.getProduct().setSold(cd.getProduct().getSold() + 1);
@@ -384,13 +339,12 @@ public class OrderService {
                     .price(cd.getPrice())
                     .note(note).build();
 
-            orderDetailRepository.save(od);
             // Update inventory
             Product p = cd.getProduct();
             p.setQuantity(p.getQuantity() - cd.getQuantity());
             orderDetailsToSave.add(od);
         }
-        return orderDetailsToSave;
+        return orderDetailRepository.saveAll(orderDetailsToSave);
     }
 
     public void clearCart(Order order) {

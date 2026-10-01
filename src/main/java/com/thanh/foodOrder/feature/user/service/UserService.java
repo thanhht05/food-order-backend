@@ -1,6 +1,5 @@
 package com.thanh.foodorder.feature.user.service;
 
-
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
+import com.thanh.foodorder.core.util.UtilMethod;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
@@ -157,16 +157,7 @@ public class UserService {
             users = this.userRepository.findByFullNameAndEmailContainingIgnoreCase(fullName, email, pageable);
         }
 
-        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-
-        meta.setPage(pageable.getPageNumber() + 1); // get current page number
-        meta.setPageSize(pageable.getPageSize()); // get page-size
-        meta.setPages(users.getTotalPages()); // get total pages
-        meta.setTotalElements(users.getTotalElements()); // get total elements in database
-
-        resultPaginationDTO.setMeta(meta);
+        ResultPaginationDTO resultPaginationDTO = UtilMethod.toPagination(pageable, users);
 
         List<ResponseUserDTO> userDTOs = users.getContent().stream().map(user -> this.convertUserToResUserDTO(user))
                 .collect(Collectors.toList());
