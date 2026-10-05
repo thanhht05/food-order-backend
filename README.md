@@ -155,8 +155,6 @@ Through this project, I gained practical experience in:
 - Implementing cloud-based image storage
 - Writing unit tests with JUnit 5 and Mockito
 - Managing frontend state with Redux Toolkit
-- Containerizing applications with Docker
-- Deploying applications using Nginx and VPS
 - Debugging and integrating multiple services in a full-stack application
 
 ---
