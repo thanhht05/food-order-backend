@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -21,7 +20,6 @@ import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
 import com.thanh.foodorder.feature.cart.repository.CartDetailRepository;
 import com.thanh.foodorder.feature.cart.repository.CartRepository;
-import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.repository.OrderRepository;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.service.UserService;

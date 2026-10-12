@@ -19,11 +19,8 @@ import com.thanh.foodorder.core.response.RestResponse;
 @RestControllerAdvice
 public class GlobalException {
 
-    @ExceptionHandler(value = {
-            CommonException.class,
-            RuntimeException.class
-    })
-    public ResponseEntity<RestResponse<Object>> handleException(Exception exception) {
+    @ExceptionHandler(CommonException.class)
+    public ResponseEntity<RestResponse<Object>> handleCommonException(Exception exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError("Business logic error");
@@ -31,6 +28,21 @@ public class GlobalException {
         res.setMessage(exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<RestResponse<Object>> handleException(
+            Exception exception) {
+
+        RestResponse<Object> res = new RestResponse<>();
+
+        res.setStatusCode(500);
+        res.setError("Internal server error");
+        res.setMessage("Something went wrong");
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(res);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

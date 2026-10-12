@@ -8,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Configure the converters to use the ISO format for dates by default.
+ * Đoạn code này dùng để cấu hình cách Spring MVC chuyển đổi String ↔ LocalDate,
+ * LocalDateTime, LocalTime khi nhận dữ liệu từ request.
  */
 @Configuration
 public class DateTimeFormatConfiguration implements WebMvcConfigurer {
@@ -16,5 +18,6 @@ public class DateTimeFormatConfiguration implements WebMvcConfigurer {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setUseIsoFormat(true);
         registrar.registerFormatters(registry);
+
     }
 }

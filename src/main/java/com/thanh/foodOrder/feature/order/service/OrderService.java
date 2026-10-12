@@ -25,7 +25,6 @@ import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.domain.OrderDetail;
 import com.thanh.foodorder.feature.order.dto.AdminOrderResponseDTO;
 import com.thanh.foodorder.feature.order.dto.CheckoutRequestDTO;
-import com.thanh.foodorder.feature.order.dto.CheckOutResponseDTO;
 import com.thanh.foodorder.feature.order.dto.CreateOrderData;
 import com.thanh.foodorder.feature.order.dto.OrderHistoryDTO;
 import com.thanh.foodorder.feature.order.dto.OrderHistoryProjection;
