@@ -5,16 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.order.dto.CheckoutRequestDTO;
-import com.thanh.foodorder.feature.order.dto.CheckOutResponseDTO;
 import com.thanh.foodorder.feature.order.dto.OrderResponseDTO;
-import com.thanh.foodorder.feature.order.service.EmailService;
 import com.thanh.foodorder.feature.order.service.OrderService;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.service.UserService;

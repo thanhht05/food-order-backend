@@ -64,6 +64,9 @@ class AuthControllerTest {
         @MockitoBean
         private JwtUtil jwtUtil;
 
+        @MockitoBean
+        private com.thanh.foodorder.feature.auth.service.OAuth2Service oAuth2Service;
+
         private User sampleUser;
         private Role sampleRole;
 

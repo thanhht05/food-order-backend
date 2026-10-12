@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
 import com.thanh.foodorder.feature.ai.dto.AiChatResponse;
 import com.thanh.foodorder.feature.ai.dto.GroqMessage;
 import com.thanh.foodorder.feature.ai.dto.GroqRequest;
@@ -16,7 +15,6 @@ import com.thanh.foodorder.feature.ai.dto.GroqResponse;
 import com.thanh.foodorder.feature.ai.dto.ProductAiResponse;
 import com.thanh.foodorder.feature.ai.dto.ProductSearchCriteria;
 import com.thanh.foodorder.feature.product.service.ProductService;
-import com.thanh.foodorder.feature.user.domain.User;
 
 @Service
 public class AiService {

@@ -3,7 +3,6 @@ package com.thanh.foodorder.feature.user.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.feature.auth.dto.ResponseRoleDTO;
@@ -20,7 +18,7 @@ import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.service.RoleService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/roles")
 
 public class RoleController {
     private final RoleService roleService;
@@ -29,7 +27,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping("/roles")
+    @PostMapping()
     @ApiMessage("Create a new role")
     public ResponseEntity<ResponseRoleDTO> handleCreateRole(
             @RequestBody Role role) {
@@ -37,7 +35,7 @@ public class RoleController {
         return ResponseEntity.ok().body(this.roleService.createRole(role));
     }
 
-    @PutMapping("/roles")
+    @PutMapping()
     @ApiMessage("Update a role")
     public ResponseEntity<ResponseRoleDTO> handleUpdateRole(@RequestBody Role role) {
         return ResponseEntity.ok().body(this.roleService.updateRole(role));
@@ -57,7 +55,7 @@ public class RoleController {
 
     }
 
-    @GetMapping("/roles")
+    @GetMapping()
     public ResponseEntity<ResultPaginationDTO> handleGetAllRole(Pageable pageable) {
 
         return ResponseEntity.ok().body(this.roleService.getAllRole(pageable));

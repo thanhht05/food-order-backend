@@ -291,8 +291,7 @@ public class OrderService {
 
         // 4. Create OrderDetail
 
-        List<OrderDetail> orderDetailsToSave = createOrderDetal(orderSaved, cartDetails, dto.getNote());
-        List<OrderDetail> savedOrderDetails = orderDetailRepository.saveAll(orderDetailsToSave);
+        List<OrderDetail> savedOrderDetails = createOrderDetal(orderSaved, cartDetails, dto.getNote());
         orderSaved.setOrderDetails(savedOrderDetails);
 
         // update sold

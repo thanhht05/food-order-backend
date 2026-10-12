@@ -1,7 +1,6 @@
 package com.thanh.foodorder.core.util.event;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import com.thanh.foodorder.feature.chat.domain.Message;

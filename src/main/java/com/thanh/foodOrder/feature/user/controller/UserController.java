@@ -2,17 +2,11 @@ package com.thanh.foodorder.feature.user.controller;
 
 import jakarta.validation.Valid;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.Sort;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
-import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ResponseUserDTO;
 import com.thanh.foodorder.feature.user.service.RoleService;

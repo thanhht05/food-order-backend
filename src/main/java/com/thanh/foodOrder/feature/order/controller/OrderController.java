@@ -60,7 +60,6 @@ public class OrderController {
 
     @PutMapping("/orders")
     public ResponseEntity<OrderResponseDTO> handleUpdateOrder(@RequestBody Order order) {
-        // TODO: process PUT request
 
         return ResponseEntity.status(HttpStatus.OK).body(this.orderService.updateOrder(order));
     }

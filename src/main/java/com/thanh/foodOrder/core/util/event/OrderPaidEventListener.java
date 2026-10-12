@@ -2,7 +2,6 @@ package com.thanh.foodorder.core.util.event;
 
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Map;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import lombok.RequiredArgsConstructor;
 import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.domain.OrderDetail;
-import com.thanh.foodorder.feature.order.dto.AdminOrderResponseDTO;
 import com.thanh.foodorder.feature.order.service.EmailService;
 
 // Lắng nghe sự kiện

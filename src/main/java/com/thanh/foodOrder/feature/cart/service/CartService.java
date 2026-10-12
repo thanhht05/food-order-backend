@@ -2,13 +2,9 @@ package com.thanh.foodorder.feature.cart.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +15,8 @@ import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
 import com.thanh.foodorder.feature.cart.dto.AddToCartResponseDTO;
 import com.thanh.foodorder.feature.cart.dto.CartDetailUserDTO;
-import com.thanh.foodorder.feature.cart.dto.CartItemRequestDTO;
 import com.thanh.foodorder.feature.cart.dto.CartRequestDTO;
 import com.thanh.foodorder.feature.cart.dto.CartResponeDTO;
-import com.thanh.foodorder.feature.cart.dto.MergeCartRequest;
 import com.thanh.foodorder.feature.cart.repository.CartDetailRepository;
 import com.thanh.foodorder.feature.cart.repository.CartRepository;
 import com.thanh.foodorder.feature.product.domain.Product;

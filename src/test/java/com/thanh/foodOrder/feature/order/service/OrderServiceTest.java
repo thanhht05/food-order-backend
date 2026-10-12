@@ -276,7 +276,7 @@ public class OrderServiceTest {
                 orderDetail.setProduct(p);
 
                 when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-                when(orderDetailRepository.findByOrderId(order.getId())).thenReturn(List.of(orderDetail));
+                when(orderDetailRepository.findByOrderIdWithProduct(order.getId())).thenReturn(List.of(orderDetail));
 
                 OrderResponseDTO res = orderService.getOrderDetail(order.getId());
 
@@ -287,7 +287,7 @@ public class OrderServiceTest {
                 assertEquals("nameProduct", res.getItems().get(0).getProductName());
 
                 verify(orderRepository).findById(order.getId());
-                verify(orderDetailRepository).findByOrderId(order.getId());
+                verify(orderDetailRepository).findByOrderIdWithProduct(order.getId());
 
         }
 
