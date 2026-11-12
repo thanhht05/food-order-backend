@@ -2,6 +2,8 @@ package com.thanh.foodorder.feature.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,7 +39,6 @@ public class User {
    private String fullName;
    @NotBlank(message = "Email cannot be  empty")
    private String email;
-   @NotBlank(message = "Password cannot be  empty")
    private String password;
    private String phone;
    private String createdBy;
@@ -46,6 +47,19 @@ public class User {
    @Column(name = "created_at")
    private Instant createdAt;
    private Instant updatedAt;
+
+   @Enumerated(EnumType.STRING)
+   @Column(name = "auth_provider")
+   private AuthProvider authProvider = AuthProvider.LOCAL;
+
+   @Column(name = "provider_id")
+   private String providerId;
+
+   @Column(name = "avatar_url", length = 500)
+   private String avatarUrl;
+
+   @Column(name = "is_email_verified")
+   private Boolean isEmailVerified = false;
 
    @Column(columnDefinition = "TEXT")
 

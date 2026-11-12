@@ -19,7 +19,9 @@ import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.UtilMethod;
+import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
+import com.thanh.foodorder.feature.user.domain.AuthProvider;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
@@ -119,6 +121,56 @@ public class UserService {
             log.warn("User with email: {} not found", email);
             throw new CommonException("User with " + email + " not found");
         });
+    }
+
+    public User processGoogleUser(GoogleUserInfo googleUserInfo) {
+        log.info("Processing Google user login: {}", googleUserInfo.getEmail());
+
+        // 1. Tìm user theo providerId và AuthProvider.GOOGLE
+        Optional<User> userByProvider = this.userRepository.findByProviderIdAndAuthProvider(
+                googleUserInfo.getSub(), AuthProvider.GOOGLE);
+
+        if (userByProvider.isPresent()) {
+            User existingUser = userByProvider.get();
+            if (googleUserInfo.getName() != null && !googleUserInfo.getName().isBlank()) {
+                existingUser.setFullName(googleUserInfo.getName());
+            }
+            if (googleUserInfo.getPicture() != null && !googleUserInfo.getPicture().isBlank()) {
+                existingUser.setAvatarUrl(googleUserInfo.getPicture());
+            }
+            existingUser.setIsEmailVerified(true);
+            return this.userRepository.save(existingUser);
+        }
+
+        // 2. Nếu chưa có theo providerId, kiểm tra theo email
+        Optional<User> userByEmail = this.userRepository.findByEmail(googleUserInfo.getEmail());
+        if (userByEmail.isPresent()) {
+            User existingUser = userByEmail.get();
+            log.info("Linking existing email {} with Google Provider", googleUserInfo.getEmail());
+            existingUser.setProviderId(googleUserInfo.getSub());
+            existingUser.setAuthProvider(AuthProvider.GOOGLE);
+            if (googleUserInfo.getPicture() != null && !googleUserInfo.getPicture().isBlank()) {
+                existingUser.setAvatarUrl(googleUserInfo.getPicture());
+            }
+            existingUser.setIsEmailVerified(true);
+            return this.userRepository.save(existingUser);
+        }
+
+        // 3. User mới hoàn toàn -> Tạo mới
+        log.info("Creating new User from Google OAuth for email: {}", googleUserInfo.getEmail());
+        User newUser = new User();
+        newUser.setEmail(googleUserInfo.getEmail());
+        newUser.setFullName(googleUserInfo.getName() != null ? googleUserInfo.getName() : googleUserInfo.getEmail());
+        newUser.setAvatarUrl(googleUserInfo.getPicture());
+        newUser.setProviderId(googleUserInfo.getSub());
+        newUser.setAuthProvider(AuthProvider.GOOGLE);
+        newUser.setIsEmailVerified(true);
+        newUser.setPassword(null);
+
+        Role defaultRole = this.roleService.getDefaultCustomerRole();
+        newUser.setRole(defaultRole);
+
+        return this.userRepository.save(newUser);
     }
 
     public ResultPaginationDTO getAllUser(int page, int size, String fullName, String email, String sort) {

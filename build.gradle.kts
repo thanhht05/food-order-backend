@@ -26,6 +26,7 @@ repositories {
 
 dependencies {
 	implementation ("vn.payos:payos-java:2.0.1")
+	implementation("com.google.api-client:google-api-client:2.7.0")
 
 	implementation ("com.cloudinary:cloudinary-http5:2.0.0")
     implementation ("com.cloudinary:cloudinary-taglib:2.0.0")

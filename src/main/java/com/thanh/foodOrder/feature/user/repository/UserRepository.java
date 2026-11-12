@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+import com.thanh.foodorder.feature.user.domain.AuthProvider;
 import com.thanh.foodorder.feature.user.domain.User;
 
 @Repository
@@ -16,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @EntityGraph(attributePaths = { "role" })
     Optional<User> findByEmail(String email);
+
+    @EntityGraph(attributePaths = { "role" })
+    Optional<User> findByProviderIdAndAuthProvider(String providerId, AuthProvider authProvider);
 
     @EntityGraph(attributePaths = { "role" })
     Optional<User> findByEmailAndRefreshToken(String email, String refreshToken);

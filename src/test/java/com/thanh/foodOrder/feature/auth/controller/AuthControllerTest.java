@@ -35,8 +35,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
+import com.thanh.foodorder.feature.auth.dto.RequestGoogleLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.RequestLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
+import com.thanh.foodorder.feature.auth.service.GoogleAuthService;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
@@ -65,7 +68,7 @@ class AuthControllerTest {
         private JwtUtil jwtUtil;
 
         @MockitoBean
-        private com.thanh.foodorder.feature.auth.service.OAuth2Service oAuth2Service;
+        private GoogleAuthService googleAuthService;
 
         private User sampleUser;
         private Role sampleRole;
@@ -439,6 +442,84 @@ class AuthControllerTest {
                                         .andExpect(jsonPath("$.message").value("Mật khẩu cũ không chính xác"));
 
                         verify(userService, times(1)).userChangePassword(any(ChangePasswordRequest.class));
+                }
+        }
+
+        @Nested
+        @DisplayName("POST /api/v1/auth/google")
+        class HandleGoogleLoginTest {
+
+                @Test
+                @DisplayName("POST /api/v1/auth/google - Success with valid Google ID token")
+                void testGoogleLogin_Success() throws Exception {
+                        RequestGoogleLoginDTO requestDTO = new RequestGoogleLoginDTO();
+                        requestDTO.setIdToken("valid.google.idtoken");
+
+                        GoogleUserInfo googleUserInfo = GoogleUserInfo.builder()
+                                        .sub("123456789")
+                                        .email("googleuser@example.com")
+                                        .name("Google User")
+                                        .picture("https://avatar.url")
+                                        .emailVerified(true)
+                                        .build();
+
+                        when(googleAuthService.verifyGoogleToken("valid.google.idtoken")).thenReturn(googleUserInfo);
+                        when(userService.processGoogleUser(googleUserInfo)).thenReturn(sampleUser);
+                        when(jwtUtil.generateToken(eq(sampleUser), any(ResponseLoginDTO.class)))
+                                        .thenReturn("mocked-google-access-token");
+                        when(jwtUtil.generateRefreshToken(eq(sampleUser), any(ResponseLoginDTO.class)))
+                                        .thenReturn("mocked-google-refresh-token");
+                        doNothing().when(userService).updateUserRefreshToken(eq(sampleUser.getEmail()),
+                                        eq("mocked-google-refresh-token"));
+
+                        mockMvc.perform(post("/api/v1/auth/google")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(requestDTO)))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.statusCode").value(200))
+                                        .andExpect(jsonPath("$.message").value("Google Login"))
+                                        .andExpect(jsonPath("$.data.accessToken").value("mocked-google-access-token"))
+                                        .andExpect(jsonPath("$.data.userLogin.email").value("user@example.com"))
+                                        .andExpect(cookie().exists("refreshToken"))
+                                        .andExpect(cookie().value("refreshToken", "mocked-google-refresh-token"))
+                                        .andExpect(cookie().httpOnly("refreshToken", true))
+                                        .andExpect(cookie().secure("refreshToken", true));
+
+                        verify(googleAuthService, times(1)).verifyGoogleToken("valid.google.idtoken");
+                        verify(userService, times(1)).processGoogleUser(googleUserInfo);
+                        verify(userService, times(1)).updateUserRefreshToken("user@example.com",
+                                        "mocked-google-refresh-token");
+                }
+
+                @Test
+                @DisplayName("POST /api/v1/auth/google - Failure when Google token is invalid")
+                void testGoogleLogin_InvalidToken() throws Exception {
+                        RequestGoogleLoginDTO requestDTO = new RequestGoogleLoginDTO();
+                        requestDTO.setIdToken("invalid.google.token");
+
+                        when(googleAuthService.verifyGoogleToken("invalid.google.token"))
+                                        .thenThrow(new CommonException("Xác thực Google ID Token thất bại"));
+
+                        mockMvc.perform(post("/api/v1/auth/google")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(requestDTO)))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.statusCode").value(400))
+                                        .andExpect(jsonPath("$.message").value("Xác thực Google ID Token thất bại"));
+
+                        verify(googleAuthService, times(1)).verifyGoogleToken("invalid.google.token");
+                }
+
+                @Test
+                @DisplayName("POST /api/v1/auth/google - Failure when idToken is blank (validation)")
+                void testGoogleLogin_BlankIdToken() throws Exception {
+                        RequestGoogleLoginDTO requestDTO = new RequestGoogleLoginDTO();
+                        requestDTO.setIdToken("");
+
+                        mockMvc.perform(post("/api/v1/auth/google")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(requestDTO)))
+                                        .andExpect(status().isBadRequest());
                 }
         }
 }

@@ -30,7 +30,8 @@ public class UserDetailsCustomService implements UserDetailsService {
                 }
                 authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleName));
             }
-            return new User(user.getEmail(), user.getPassword(), authorities);
+            String password = user.getPassword() != null ? user.getPassword() : "";
+            return new User(user.getEmail(), password, authorities);
         } catch (Exception e) {
             throw new UsernameNotFoundException("User not found with email: " + username, e);
         }

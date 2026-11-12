@@ -117,4 +117,13 @@ class SecurityFilterIntegrationTest {
         mockMvc.perform(put("/api/v1/vouchers/1/status"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/google - Anonymous request should be permitted by Security Filter")
+    void testPostAuthGoogle_PermitAll() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/google")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"idToken\": \"\"}"))
+                .andExpect(status().isBadRequest()); // reaches controller validation, not rejected by security filter
+    }
 }

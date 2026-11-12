@@ -60,7 +60,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/refreshToken")
+                                "/api/v1/auth/refreshToken",
+                                "/api/v1/auth/google")
                         .permitAll()
 
                         // 3. Webhook PayOS (server-to-server callback)

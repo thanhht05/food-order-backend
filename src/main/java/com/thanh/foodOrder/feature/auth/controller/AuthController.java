@@ -20,11 +20,15 @@ import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.auth.dto.RequestLoginDTO;
+import com.thanh.foodorder.feature.auth.dto.RequestGoogleLoginDTO;
+import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
+import com.thanh.foodorder.feature.auth.service.GoogleAuthService;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
 import com.thanh.foodorder.feature.user.dto.ResponseUserDTO;
 import com.thanh.foodorder.feature.user.service.UserService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,11 +36,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final GoogleAuthService googleAuthService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil,
+            GoogleAuthService googleAuthService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.googleAuthService = googleAuthService;
     }
 
     @PostMapping("/auth/register")
@@ -86,6 +93,40 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setSecure(true);
         response.addCookie(cookie);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @PostMapping("/auth/google")
+    @ApiMessage("Google Login")
+    public ResponseEntity<ResponseLoginDTO> handleGoogleLogin(
+            @Valid @RequestBody RequestGoogleLoginDTO googleLoginDTO,
+            HttpServletResponse response) {
+
+        GoogleUserInfo googleUserInfo = this.googleAuthService.verifyGoogleToken(googleLoginDTO.getIdToken());
+        User user = this.userService.processGoogleUser(googleUserInfo);
+
+        ResponseLoginDTO res = new ResponseLoginDTO();
+        ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
+        userLogin.setEmail(user.getEmail());
+        userLogin.setFullname(user.getFullName());
+        userLogin.setId(user.getId());
+        userLogin.setRole(user.getRole());
+        res.setUserLogin(userLogin);
+
+        String accessToken = jwtUtil.generateToken(user, res);
+        String refreshToken = jwtUtil.generateRefreshToken(user, res);
+
+        this.userService.updateUserRefreshToken(user.getEmail(), refreshToken);
+
+        res.setAccessToken(accessToken);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(2 * 24 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+
         return ResponseEntity.ok().body(res);
     }
 

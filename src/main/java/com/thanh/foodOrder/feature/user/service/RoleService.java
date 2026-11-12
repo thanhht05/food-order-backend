@@ -30,6 +30,14 @@ public class RoleService {
         });
     }
 
+    public Role getDefaultCustomerRole() {
+        return this.roleRepository.findByName("USER")
+                .or(() -> this.roleRepository.findByName("CUSTOMER"))
+                .or(() -> this.roleRepository.findByName("ROLE_USER"))
+                .or(() -> this.roleRepository.findAll().stream().findFirst())
+                .orElse(null);
+    }
+
     public ResponseRoleDTO createRole(Role role) {
         log.info("Creating role with name: {}", role.getName());
         if (this.roleRepository.existsByName(role.getName())) {

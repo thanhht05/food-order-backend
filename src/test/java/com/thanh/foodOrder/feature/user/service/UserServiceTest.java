@@ -26,7 +26,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.JwtUtil;
+import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
+import com.thanh.foodorder.feature.user.domain.AuthProvider;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
@@ -319,5 +321,95 @@ public class UserServiceTest {
                         verify(userRepository).save(user);
 
                 }
+        }
+
+        @Test
+        void processGoogleUser_ExistingUserByProviderId() {
+                GoogleUserInfo googleUserInfo = GoogleUserInfo.builder()
+                                .sub("google-sub-123")
+                                .email("googleuser@example.com")
+                                .name("Updated Name")
+                                .picture("https://avatar.url/new.png")
+                                .emailVerified(true)
+                                .build();
+
+                User existingUser = new User();
+                existingUser.setId(10L);
+                existingUser.setEmail("googleuser@example.com");
+                existingUser.setProviderId("google-sub-123");
+                existingUser.setAuthProvider(AuthProvider.GOOGLE);
+
+                when(userRepository.findByProviderIdAndAuthProvider("google-sub-123", AuthProvider.GOOGLE))
+                                .thenReturn(Optional.of(existingUser));
+                when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                User result = userService.processGoogleUser(googleUserInfo);
+
+                assertEquals("Updated Name", result.getFullName());
+                assertEquals("https://avatar.url/new.png", result.getAvatarUrl());
+                assertEquals(true, result.getIsEmailVerified());
+                verify(userRepository).save(existingUser);
+        }
+
+        @Test
+        void processGoogleUser_ExistingUserByEmail_LinkAccount() {
+                GoogleUserInfo googleUserInfo = GoogleUserInfo.builder()
+                                .sub("google-sub-456")
+                                .email("localuser@example.com")
+                                .name("Local User")
+                                .picture("https://avatar.url/pic.png")
+                                .emailVerified(true)
+                                .build();
+
+                User localUser = new User();
+                localUser.setId(20L);
+                localUser.setEmail("localuser@example.com");
+                localUser.setAuthProvider(AuthProvider.LOCAL);
+
+                when(userRepository.findByProviderIdAndAuthProvider("google-sub-456", AuthProvider.GOOGLE))
+                                .thenReturn(Optional.empty());
+                when(userRepository.findByEmail("localuser@example.com"))
+                                .thenReturn(Optional.of(localUser));
+                when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                User result = userService.processGoogleUser(googleUserInfo);
+
+                assertEquals("google-sub-456", result.getProviderId());
+                assertEquals(AuthProvider.GOOGLE, result.getAuthProvider());
+                assertEquals("https://avatar.url/pic.png", result.getAvatarUrl());
+                assertEquals(true, result.getIsEmailVerified());
+                verify(userRepository).save(localUser);
+        }
+
+        @Test
+        void processGoogleUser_NewUser() {
+                GoogleUserInfo googleUserInfo = GoogleUserInfo.builder()
+                                .sub("google-sub-789")
+                                .email("newuser@example.com")
+                                .name("New User")
+                                .picture("https://avatar.url/new.png")
+                                .emailVerified(true)
+                                .build();
+
+                Role defaultRole = new Role();
+                defaultRole.setId(2L);
+                defaultRole.setName("CUSTOMER");
+
+                when(userRepository.findByProviderIdAndAuthProvider("google-sub-789", AuthProvider.GOOGLE))
+                                .thenReturn(Optional.empty());
+                when(userRepository.findByEmail("newuser@example.com"))
+                                .thenReturn(Optional.empty());
+                when(roleService.getDefaultCustomerRole()).thenReturn(defaultRole);
+                when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                User result = userService.processGoogleUser(googleUserInfo);
+
+                assertEquals("newuser@example.com", result.getEmail());
+                assertEquals("New User", result.getFullName());
+                assertEquals("google-sub-789", result.getProviderId());
+                assertEquals(AuthProvider.GOOGLE, result.getAuthProvider());
+                assertEquals(null, result.getPassword());
+                assertEquals(defaultRole, result.getRole());
+                verify(userRepository).save(any(User.class));
         }
 }
