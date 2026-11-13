@@ -31,6 +31,9 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userService = userService;
     }
 
+    /** Request attribute chứa mã lỗi xác thực (AuthErrorCode) cho JwtAuthenticationEntryPoint. */
+    public static final String AUTH_ERROR_ATTR = "AUTH_ERROR_CODE";
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
 
@@ -81,14 +84,20 @@ public class JwtFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 User user = userService.getUserByEmail(username);
 
-                boolean isVailid = jwtUtil.validateToken(token, username, user.getTokenVersion());
-                if (isVailid) {
+                boolean versionOk = jwtUtil.validateToken(token, username, user.getTokenVersion());
+                boolean sessionOk = jwtUtil.isSessionActive(token, user.getActiveSessionId());
+                if (versionOk && sessionOk) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    // Không chặn cứng tại đây để endpoint permitAll vẫn hoạt động.
+                    // JwtAuthenticationEntryPoint sẽ đọc mã lỗi khi endpoint yêu cầu đăng nhập.
+                    request.setAttribute(AUTH_ERROR_ATTR,
+                            !versionOk ? AuthErrorCode.PASSWORD_CHANGED : AuthErrorCode.LOGGED_IN_ELSEWHERE);
                 }
             }
 

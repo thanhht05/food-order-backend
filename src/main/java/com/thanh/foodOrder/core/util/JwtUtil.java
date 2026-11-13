@@ -41,6 +41,7 @@ public class JwtUtil {
                 .setSubject(user.getEmail())
                 .claim("user", userInsideToken)
                 .claim("tokenVersion", user.getTokenVersion())
+                .claim("sessionId", user.getActiveSessionId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION)) // now + expiration
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -57,7 +58,7 @@ public class JwtUtil {
                 .setSubject(user.getEmail())
                 .claim("user", userInsideToken)
                 .claim("tokenVersion", user.getTokenVersion())
-
+                .claim("sessionId", user.getActiveSessionId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESHTOKEN_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -98,6 +99,21 @@ public class JwtUtil {
 
     public Integer extractTokenVersion(String token) {
         return getClaims(token).get("tokenVersion", Integer.class);
+    }
+
+    public String extractSessionId(String token) {
+        return getClaims(token).get("sessionId", String.class);
+    }
+
+    /**
+     * Kiểm tra token có thuộc phiên đăng nhập đang hoạt động không (single active session).
+     * currentSessionId == null: tài khoản chưa đăng nhập lại kể từ khi áp dụng tính năng → hợp lệ.
+     */
+    public boolean isSessionActive(String token, String currentSessionId) {
+        if (currentSessionId == null) {
+            return true;
+        }
+        return currentSessionId.equals(extractSessionId(token));
     }
 
     private Claims getClaims(String token) {

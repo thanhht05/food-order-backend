@@ -221,6 +221,12 @@ public class UserService {
         this.userRepository.save(user);
     }
 
+    /** Lưu phiên đăng nhập mới: refreshToken + activeSessionId (đã gán sẵn trên entity). */
+    public void updateUserSession(User user, String refreshToken) {
+        user.setRefreshToken(refreshToken);
+        this.userRepository.save(user);
+    }
+
     public User fetchUserByEmailAndRefreshToken(String email, String refreshToken) {
         // Breakpoint 1: Kiểm tra giá trị email và refreshToken truyền vào hàm
         Optional<User> userOptional = this.userRepository.findByEmailAndRefreshToken(email, refreshToken);

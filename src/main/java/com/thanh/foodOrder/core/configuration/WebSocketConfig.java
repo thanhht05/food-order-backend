@@ -27,7 +27,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // Prefix cho các channel mà server sẽ gửi message xuống client
-        registry.enableSimpleBroker("/topic");
+        // /queue: kênh riêng từng user (vd: /user/queue/session cho single active session)
+        registry.enableSimpleBroker("/topic", "/queue");
+        registry.setUserDestinationPrefix("/user");
 
         // Prefix cho các request từ client gửi lên server
         registry.setApplicationDestinationPrefixes("/app");

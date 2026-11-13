@@ -31,6 +31,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+
+        Object authError = request.getAttribute(JwtFilter.AUTH_ERROR_ATTR);
+        if (authError instanceof AuthErrorCode code) {
+            res.setError(code.getCode());
+            res.setMessage(code.getMessage());
+            mapper.writeValue(response.getWriter(), res);
+            return;
+        }
+
         res.setMessage("Token is expired or invalid");
         String errorMessage = Optional.ofNullable(authException.getCause())
                 .map(Throwable::getMessage)

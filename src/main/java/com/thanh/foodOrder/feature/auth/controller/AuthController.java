@@ -24,6 +24,7 @@ import com.thanh.foodorder.feature.auth.dto.RequestGoogleLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
 import com.thanh.foodorder.feature.auth.service.GoogleAuthService;
+import com.thanh.foodorder.feature.auth.service.LoginSessionService;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
 import com.thanh.foodorder.feature.user.dto.ResponseUserDTO;
@@ -37,13 +38,15 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final GoogleAuthService googleAuthService;
+    private final LoginSessionService loginSessionService;
 
     public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil,
-            GoogleAuthService googleAuthService) {
+            GoogleAuthService googleAuthService, LoginSessionService loginSessionService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.googleAuthService = googleAuthService;
+        this.loginSessionService = loginSessionService;
     }
 
     @PostMapping("/auth/register")
@@ -69,6 +72,9 @@ public class AuthController {
 
         User user = this.userService.getUserByEmail(loginDTO.getUsername());
 
+        // single active session: tạo phiên mới, báo phiên cũ (nếu có) bị thay thế
+        this.loginSessionService.startNewSession(user);
+
         // generate accessToken
         ResponseLoginDTO res = new ResponseLoginDTO();
         ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
@@ -82,8 +88,8 @@ public class AuthController {
         // generate refreshToken
         String refreshToken = jwtUtil.generateRefreshToken(user, res);
 
-        // update user with refreshToken
-        this.userService.updateUserRefreshToken(loginDTO.getUsername(), refreshToken);
+        // update user with refreshToken + activeSessionId
+        this.userService.updateUserSession(user, refreshToken);
 
         res.setAccessToken(accessToken);
 
@@ -105,6 +111,9 @@ public class AuthController {
         GoogleUserInfo googleUserInfo = this.googleAuthService.verifyGoogleToken(googleLoginDTO.getIdToken());
         User user = this.userService.processGoogleUser(googleUserInfo);
 
+        // single active session: tạo phiên mới, báo phiên cũ (nếu có) bị thay thế
+        this.loginSessionService.startNewSession(user);
+
         ResponseLoginDTO res = new ResponseLoginDTO();
         ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
         userLogin.setEmail(user.getEmail());
@@ -116,7 +125,7 @@ public class AuthController {
         String accessToken = jwtUtil.generateToken(user, res);
         String refreshToken = jwtUtil.generateRefreshToken(user, res);
 
-        this.userService.updateUserRefreshToken(user.getEmail(), refreshToken);
+        this.userService.updateUserSession(user, refreshToken);
 
         res.setAccessToken(accessToken);
 

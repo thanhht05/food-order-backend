@@ -3,6 +3,7 @@ package com.thanh.foodorder.feature.auth.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import com.thanh.foodorder.feature.auth.dto.RequestGoogleLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.RequestLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.ResponseLoginDTO;
 import com.thanh.foodorder.feature.auth.service.GoogleAuthService;
+import com.thanh.foodorder.feature.auth.service.LoginSessionService;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.domain.User;
 import com.thanh.foodorder.feature.user.dto.ChangePasswordRequest;
@@ -69,6 +71,9 @@ class AuthControllerTest {
 
         @MockitoBean
         private GoogleAuthService googleAuthService;
+
+        @MockitoBean
+        private LoginSessionService loginSessionService;
 
         private User sampleUser;
         private Role sampleRole;
@@ -161,7 +166,7 @@ class AuthControllerTest {
                                         .thenReturn("mock-access-token-123");
                         when(jwtUtil.generateRefreshToken(eq(sampleUser), any(ResponseLoginDTO.class)))
                                         .thenReturn("mock-refresh-token-456");
-                        doNothing().when(userService).updateUserRefreshToken("user@example.com",
+                        doNothing().when(userService).updateUserSession(sampleUser,
                                         "mock-refresh-token-456");
 
                         mockMvc.perform(post("/api/v1/auth/login")
@@ -183,7 +188,8 @@ class AuthControllerTest {
                         verify(authenticationManager, times(1))
                                         .authenticate(any(UsernamePasswordAuthenticationToken.class));
                         verify(userService, times(1)).getUserByEmail("user@example.com");
-                        verify(userService, times(1)).updateUserRefreshToken("user@example.com",
+                        verify(loginSessionService, times(1)).startNewSession(sampleUser);
+                        verify(userService, times(1)).updateUserSession(sampleUser,
                                         "mock-refresh-token-456");
                 }
 
@@ -206,6 +212,8 @@ class AuthControllerTest {
 
                         verify(authenticationManager, times(1))
                                         .authenticate(any(UsernamePasswordAuthenticationToken.class));
+                        // Sai mật khẩu không được thay thế phiên đang hoạt động
+                        verify(loginSessionService, never()).startNewSession(any(User.class));
                 }
 
                 @Test
@@ -469,7 +477,7 @@ class AuthControllerTest {
                                         .thenReturn("mocked-google-access-token");
                         when(jwtUtil.generateRefreshToken(eq(sampleUser), any(ResponseLoginDTO.class)))
                                         .thenReturn("mocked-google-refresh-token");
-                        doNothing().when(userService).updateUserRefreshToken(eq(sampleUser.getEmail()),
+                        doNothing().when(userService).updateUserSession(eq(sampleUser),
                                         eq("mocked-google-refresh-token"));
 
                         mockMvc.perform(post("/api/v1/auth/google")
@@ -487,7 +495,8 @@ class AuthControllerTest {
 
                         verify(googleAuthService, times(1)).verifyGoogleToken("valid.google.idtoken");
                         verify(userService, times(1)).processGoogleUser(googleUserInfo);
-                        verify(userService, times(1)).updateUserRefreshToken("user@example.com",
+                        verify(loginSessionService, times(1)).startNewSession(sampleUser);
+                        verify(userService, times(1)).updateUserSession(sampleUser,
                                         "mocked-google-refresh-token");
                 }
 

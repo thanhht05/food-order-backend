@@ -67,6 +67,11 @@ public class User {
    @Column(nullable = false)
    private Integer tokenVersion = 0;
 
+   // Phiên đăng nhập đang hoạt động (single active session). null = chưa áp dụng.
+   // Tách biệt với tokenVersion (chỉ dùng cho đổi mật khẩu).
+   @Column(name = "active_session_id", length = 36)
+   private String activeSessionId;
+
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "role_id")
    private Role role;
