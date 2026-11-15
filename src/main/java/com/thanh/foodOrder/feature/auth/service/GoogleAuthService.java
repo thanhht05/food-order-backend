@@ -10,6 +10,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +37,7 @@ public class GoogleAuthService {
 
             if (idToken == null) {
                 log.warn("Invalid Google ID token supplied");
-                throw new CommonException("Xác thực Google ID Token thất bại hoặc token đã hết hạn");
+                throw new CommonException(ErrorCode.GOOGLE_TOKEN_INVALID);
             }
 
             GoogleIdToken.Payload payload = idToken.getPayload();
@@ -60,7 +61,7 @@ public class GoogleAuthService {
             throw e;
         } catch (Exception e) {
             log.error("Error verifying Google ID token: {}", e.getMessage(), e);
-            throw new CommonException("Lỗi xác thực Google ID Token: " + e.getMessage());
+            throw new CommonException(ErrorCode.GOOGLE_TOKEN_INVALID, "Error verifying Google ID Token: " + e.getMessage());
         }
     }
 }

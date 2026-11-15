@@ -239,7 +239,7 @@ public class VoucherServiceTest {
                     voucherService.applyVoucher(request);
                 });
 
-                assertEquals("Voucher không còn hoạt động", ex.getMessage());
+                assertEquals("Voucher is inactive", ex.getMessage());
             }
         }
     }

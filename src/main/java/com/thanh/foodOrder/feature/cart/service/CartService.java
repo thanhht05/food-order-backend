@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
@@ -186,7 +187,7 @@ public class CartService {
 
         Cart cart = user.getCart();
         if (cart == null) {
-            throw new CommonException("Cart not found");
+            throw new CommonException(ErrorCode.CART_NOT_FOUND);
         }
         cart.getCartDetails().removeIf(
                 cd -> cd.getProduct().getId().equals(productId));

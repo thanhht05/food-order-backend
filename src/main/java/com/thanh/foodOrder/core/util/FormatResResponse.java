@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import com.thanh.foodorder.core.response.RestResponse;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
+import com.thanh.foodorder.core.util.annotation.SuccessCode;
 
 @RestControllerAdvice
 public class FormatResResponse implements ResponseBodyAdvice {
@@ -37,7 +38,16 @@ public class FormatResResponse implements ResponseBodyAdvice {
         } else {
             ApiMessage apiMessage = returnType.getMethodAnnotation(ApiMessage.class);
 
-            String message = apiMessage != null ? apiMessage.value() : "Call api success";
+            String message = (apiMessage != null && !apiMessage.value().isEmpty())
+                    ? apiMessage.value()
+                    : (apiMessage != null ? apiMessage.code().getDefaultMessage() : "Call api success");
+            SuccessCode successCode = apiMessage != null
+                    ? (apiMessage.code() != SuccessCode.CALL_API_SUCCESS
+                            ? apiMessage.code()
+                            : SuccessCode.fromMessage(apiMessage.value()))
+                    : SuccessCode.CALL_API_SUCCESS;
+
+            formatResResponse.setCode(successCode.getCode());
             formatResResponse.setMessage(message);
             formatResResponse.setData(body);
         }

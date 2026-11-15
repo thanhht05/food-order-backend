@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.feature.category.domain.Category;
 import com.thanh.foodorder.feature.category.repository.CategoryRepository;
 import com.thanh.foodorder.feature.category.specification.CategorySpecification;
@@ -31,7 +32,8 @@ public class CategoryService {
     public Category createCategory(Category category) {
         if (checkExistsByName(category.getName())) {
             log.warn("Name {} already exists", category.getName());
-            throw new CommonException("Name " + category.getName() + " already exists");
+            throw new CommonException(ErrorCode.CATEGORY_ALREADY_EXISTS,
+                    "Name " + category.getName() + " already exists");
         }
 
         log.info("Category created successfully ");
@@ -42,7 +44,7 @@ public class CategoryService {
     public Category getCategoryById(Long id) {
         return this.categoryRepository.findById(id).orElseThrow(() -> {
             log.warn("Category with id: {} not found", id);
-            return new CommonException("Category with id " + id + " not found");
+            return new CommonException(ErrorCode.CATEGORY_NOT_FOUND, "Category with id " + id + " not found");
 
         });
     }
@@ -51,7 +53,7 @@ public class CategoryService {
         Category category = this.categoryRepository.findByNameIgnoreCase(name);
         if (category == null) {
             log.warn("Category with name: {} not found", name);
-            throw new CommonException("Category with name " + name + " not found");
+            throw new CommonException(ErrorCode.CATEGORY_NOT_FOUND, "Category with name " + name + " not found");
         }
         return category;
     }
@@ -70,7 +72,8 @@ public class CategoryService {
         if (!existingCategory.getName().equals(category.getName())
                 && checkExistsByName(category.getName())) {
             log.warn("Name {} already exists", category.getName());
-            throw new CommonException("Name " + category.getName() + " already exists");
+            throw new CommonException(ErrorCode.CATEGORY_ALREADY_EXISTS,
+                    "Name " + category.getName() + " already exists");
         }
 
         existingCategory.setName(category.getName());

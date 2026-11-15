@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.UtilMethod;
 import com.thanh.foodorder.feature.auth.dto.GoogleUserInfo;
@@ -44,7 +45,7 @@ public class UserService {
     public User getUserById(Long id) {
         return this.userRepository.findById(id).orElseThrow(() -> {
             log.warn("User with id: {} not found", id);
-            return new CommonException("User with id " + id + " not found");
+            return new CommonException(ErrorCode.USER_NOT_FOUND, "User with id " + id + " not found");
         });
     }
 
@@ -58,7 +59,7 @@ public class UserService {
 
         if (checkExistsByEmail(user.getEmail())) {
             log.warn("Email {} already exists", user.getEmail());
-            throw new CommonException("Email " + user.getEmail() + " already exists");
+            throw new CommonException(ErrorCode.EMAIL_ALREADY_EXISTS, "Email " + user.getEmail() + " already exists");
         }
         String hashPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
@@ -119,7 +120,7 @@ public class UserService {
     public User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email).orElseThrow(() -> {
             log.warn("User with email: {} not found", email);
-            throw new CommonException("User with " + email + " not found");
+            throw new CommonException(ErrorCode.USER_NOT_FOUND, "User with " + email + " not found");
         });
     }
 
@@ -236,7 +237,7 @@ public class UserService {
         boolean isPresent = userOptional.isPresent();
         if (!isPresent) {
             log.warn("User with email: {} and refreshToken not found", email);
-            throw new CommonException("User with email and refreshToken not found");
+            throw new CommonException(ErrorCode.REFRESH_TOKEN_REVOKED, "User with email and refreshToken not found");
         }
 
         // Breakpoint 3: Xem toàn bộ object user lấy ra từ DB
@@ -292,10 +293,10 @@ public class UserService {
         User user = getUserByEmail(email);
 
         if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
-            throw new CommonException("Old password incorrect");
+            throw new CommonException(ErrorCode.OLD_PASSWORD_INCORRECT);
         }
         if (!req.getConfirmPassword().equals(req.getNewPassword())) {
-            throw new CommonException("Confirm password incorrect");
+            throw new CommonException(ErrorCode.CONFIRM_PASSWORD_INCORRECT);
         }
 
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));

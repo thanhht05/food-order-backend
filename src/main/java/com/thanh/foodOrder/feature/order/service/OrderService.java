@@ -18,6 +18,7 @@ import vn.payos.model.webhooks.WebhookData;
 import com.thanh.foodorder.core.util.event.OrderCreatedEvent;
 import com.thanh.foodorder.core.util.event.OrderPaidEvent;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
 import com.thanh.foodorder.feature.cart.repository.CartDetailRepository;
@@ -84,7 +85,7 @@ public class OrderService {
 
         return this.orderRepository.findById(id).orElseThrow(() -> {
             log.warn("Order with id: {} not found", id);
-            return new CommonException("Order with id " + id + " not found");
+            return new CommonException(ErrorCode.ORDER_NOT_FOUND, "Order with id " + id + " not found");
         });
 
     }
@@ -92,7 +93,7 @@ public class OrderService {
     public Order getOrderByOrderCode(Long orderCode) {
         return orderRepository.findByOrderCode(orderCode).orElseThrow(() -> {
             log.warn("Order with order code: {} not found", orderCode);
-            return new CommonException("Order order code " + orderCode + " not found");
+            return new CommonException(ErrorCode.ORDER_NOT_FOUND, "Order order code " + orderCode + " not found");
 
         });
 
@@ -120,12 +121,12 @@ public class OrderService {
 
         // Kiểm tra đã thanh toán
         if (isPayment(order)) {
-            throw new CommonException("Order already paid");
+            throw new CommonException(ErrorCode.ORDER_ALREADY_PAID);
         }
 
         // Kiểm tra số tiền
         if (order.getTotalPrice().longValue() != data.getAmount()) {
-            throw new CommonException("Price invalid");
+            throw new CommonException(ErrorCode.ORDER_PRICE_INVALID);
         }
 
         // Cập nhật payment status
@@ -140,7 +141,7 @@ public class OrderService {
     public Order getOrderByPaymentLink(String id) {
         return orderRepository.findByPaymentLinkId(id).orElseThrow(() -> {
             log.warn("Order with paymentLinkId: {} not found", id);
-            return new CommonException("Order with " + id + " not found");
+            return new CommonException(ErrorCode.ORDER_NOT_FOUND, "Order with " + id + " not found");
 
         });
     }
@@ -204,7 +205,7 @@ public class OrderService {
 
         // If no items are available for checkout, stop the process
         if (cartDetails.isEmpty()) {
-            throw new CommonException("No available items to place order");
+            throw new CommonException(ErrorCode.NO_AVAILABLE_ITEMS);
         }
 
         // 2. Validate CartDetail ownership and quantity
@@ -212,12 +213,12 @@ public class OrderService {
 
             // Check whether the cart detail belongs to the current user
             if (!cd.getCart().getUser().getId().equals(curUser.getId())) {
-                throw new CommonException("CartDetail does not belong to the current user");
+                throw new CommonException(ErrorCode.CART_ITEM_UNAUTHORIZED);
             }
 
             // Validate item quantity
             if (cd.getQuantity() <= 0) {
-                throw new CommonException("Item quantity is invalid");
+                throw new CommonException(ErrorCode.INVALID_ITEM_QUANTITY);
             }
         }
     }

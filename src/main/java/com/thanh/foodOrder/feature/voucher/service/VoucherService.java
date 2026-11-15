@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.feature.cart.domain.Cart;
 import com.thanh.foodorder.feature.cart.domain.CartDetail;
 import com.thanh.foodorder.feature.cart.repository.CartDetailRepository;
@@ -54,14 +55,14 @@ public class VoucherService {
     public Voucher getVoucherById(Long id) {
         return this.voucherRepository.findById(id).orElseThrow(() -> {
             log.warn("Voucher with id: {} not found", id);
-            return new CommonException("Voucher with id " + id + " not found");
+            return new CommonException(ErrorCode.VOUCHER_NOT_FOUND, "Voucher with id " + id + " not found");
         });
     }
 
     public Voucher getVoucherByCode(String code) {
         return this.voucherRepository.findByCode(code).orElseThrow(() -> {
             log.warn("Voucher with code: {} not found", code);
-            return new CommonException("Voucher with code " + code + " not found");
+            return new CommonException(ErrorCode.VOUCHER_NOT_FOUND, "Voucher with code " + code + " not found");
         });
     }
 
@@ -74,7 +75,8 @@ public class VoucherService {
 
         if (checkVoucherExistsByCode(voucher.getCode())) {
             log.warn("Voucher  {} already exists", voucher.getCode());
-            throw new CommonException("Voucher " + voucher.getCode() + " already exists");
+            throw new CommonException(ErrorCode.VOUCHER_ALREADY_EXISTS,
+                    "Voucher " + voucher.getCode() + " already exists");
         }
         if (voucher.getStatus() == null) {
             voucher.setStatus(VoucherStatus.ACTIVE);
@@ -91,11 +93,12 @@ public class VoucherService {
 
             if (checkVoucherExistsByCode(voucher.getCode())) {
                 log.warn("Voucher  {} already exists", voucher.getCode());
-                throw new CommonException("Voucher " + voucher.getCode() + " already exists");
+                throw new CommonException(ErrorCode.VOUCHER_ALREADY_EXISTS,
+                        "Voucher " + voucher.getCode() + " already exists");
             }
         }
         if (voucher.getExpiration().isBefore(LocalDate.now())) {
-            throw new CommonException("Expiration date must be in the future");
+            throw new CommonException(ErrorCode.VOUCHER_EXPIRATION_PAST);
         }
 
         voucherDb.setCode(voucher.getCode());
@@ -173,16 +176,19 @@ public class VoucherService {
 
     public void checkVoucherBeforeApply(Voucher voucher, User user) {
         if (VoucherStatus.INACTIVE.equals(voucher.getStatus())) {
-            throw new CommonException("Voucher " + voucher.getCode() + " is inactive");
+            throw new CommonException(ErrorCode.VOUCHER_INACTIVE,
+                    "Voucher " + voucher.getCode() + " is inactive");
         }
         if (checkVoucherExpired(voucher)) {
-            throw new CommonException("Voucher " + voucher.getCode() + " is expired");
+            throw new CommonException(ErrorCode.VOUCHER_EXPIRED,
+                    "Voucher " + voucher.getCode() + " is expired");
         }
         if (checkUsageVoucher(voucher)) {
-            throw new CommonException("Voucher " + voucher.getCode() + " has been fully used.");
+            throw new CommonException(ErrorCode.VOUCHER_FULLY_USED,
+                    "Voucher " + voucher.getCode() + " has been fully used.");
         }
         if (orderRepository.existsByUserAndVoucher(user, voucher)) {
-            throw new CommonException(
+            throw new CommonException(ErrorCode.VOUCHER_ALREADY_USED_BY_USER,
                     "Voucher " + voucher.getCode() + " has already been used by this user.");
         }
     }
@@ -205,7 +211,7 @@ public class VoucherService {
         List<CartDetail> cartDetails = cartDetailRepository.findByCart(cart);
 
         if (cartDetails.isEmpty()) {
-            throw new CommonException("Giỏ hàng đang trống");
+            throw new CommonException(ErrorCode.CART_EMPTY);
         }
 
         // Tính tổng tiền từ DB
@@ -224,17 +230,17 @@ public class VoucherService {
 
         Voucher voucher = voucherRepository
                 .findByCode(request.getCode())
-                .orElseThrow(() -> new CommonException("Voucher không tồn tại"));
+                .orElseThrow(() -> new CommonException(ErrorCode.VOUCHER_NOT_FOUND));
 
         if (VoucherStatus.INACTIVE.equals(voucher.getStatus())) {
-            throw new CommonException("Voucher không còn hoạt động");
+            throw new CommonException(ErrorCode.VOUCHER_INACTIVE);
         }
 
         // Kiểm tra hạn
         if (voucher.getExpiration() != null
                 && voucher.getExpiration().isBefore(LocalDate.now())) {
 
-            throw new CommonException("Voucher đã hết hạn");
+            throw new CommonException(ErrorCode.VOUCHER_EXPIRED);
         }
 
         // Tính discount

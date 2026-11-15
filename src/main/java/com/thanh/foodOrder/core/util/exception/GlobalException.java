@@ -19,11 +19,13 @@ import com.thanh.foodorder.core.response.RestResponse;
 public class GlobalException {
 
     @ExceptionHandler(CommonException.class)
-    public ResponseEntity<RestResponse<Object>> handleCommonException(Exception exception) {
+    public ResponseEntity<RestResponse<Object>> handleCommonException(CommonException exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError("Business logic error");
-
+        ErrorCode errorCode = exception.getErrorCode() != null
+                ? exception.getErrorCode()
+                : ErrorCode.BUSINESS_LOGIC;
+        res.setError(errorCode.getCode());
         res.setMessage(exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
@@ -36,8 +38,8 @@ public class GlobalException {
         RestResponse<Object> res = new RestResponse<>();
 
         res.setStatusCode(500);
-        res.setError("Internal server error");
-        res.setMessage("Something went wrong");
+        res.setError(ErrorCode.INTERNAL_SERVER.getCode());
+        res.setMessage(ErrorCode.INTERNAL_SERVER.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -50,7 +52,7 @@ public class GlobalException {
         BindingResult bindingResult = exception.getBindingResult();
         final List<FieldError> fieldErrors = bindingResult.getFieldErrors();
         RestResponse<Object> res = new RestResponse<>();
-        res.setError(exception.getBody().getDetail());
+        res.setError(ErrorCode.VALIDATION_ERROR.getCode());
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         List<String> errors = fieldErrors.stream().map(f -> f.getDefaultMessage()).collect(Collectors.toList());
 
@@ -64,8 +66,8 @@ public class GlobalException {
     public ResponseEntity<RestResponse<Object>> handleAccessDeniedException(Exception exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.FORBIDDEN.value());
-        res.setError("Forbidden");
-        res.setMessage("Access denied: You do not have permission to access this resource");
+        res.setError(ErrorCode.ACCESS_DENIED.getCode());
+        res.setMessage(ErrorCode.ACCESS_DENIED.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
     }
 
@@ -73,8 +75,8 @@ public class GlobalException {
     public ResponseEntity<RestResponse<Object>> handleBadCredentialsException(Exception exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError(exception.getMessage());
-        res.setMessage("Username or password incorrect");
+        res.setError(ErrorCode.BAD_CREDENTIALS.getCode());
+        res.setMessage(ErrorCode.BAD_CREDENTIALS.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
@@ -82,7 +84,7 @@ public class GlobalException {
     public ResponseEntity<RestResponse<Object>> handleExpiredJwt(Exception exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError(HttpStatus.BAD_REQUEST.toString());
+        res.setError(ErrorCode.REFRESH_TOKEN_EXPIRED.getCode());
         res.setMessage("Refresh token is expired");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 

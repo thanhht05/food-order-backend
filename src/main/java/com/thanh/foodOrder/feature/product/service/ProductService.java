@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.core.util.UtilMethod;
 import com.thanh.foodorder.feature.ai.dto.ProductAiResponse;
@@ -53,7 +54,7 @@ public class ProductService {
     public Product getProductById(Long id) {
         return this.productRepository.findById(id).orElseThrow(() -> {
             log.warn("Product with id: {} not found", id);
-            return new CommonException("Product with id " + id + " not found");
+            return new CommonException(ErrorCode.PRODUCT_NOT_FOUND, "Product with id " + id + " not found");
         });
     }
 
@@ -68,7 +69,7 @@ public class ProductService {
                 productReq.getName(), category);
 
         if (isDuplicate) {
-            throw new CommonException(
+            throw new CommonException(ErrorCode.PRODUCT_ALREADY_EXISTS,
                     "Product '" + productReq.getName() + "' already exists in this category");
         }
 
@@ -118,7 +119,7 @@ public class ProductService {
 
         if (product.getSold() != null) {
             if (product.getSold() < 0) {
-                throw new CommonException("Sold quantity must be >= 0");
+                throw new CommonException(ErrorCode.INVALID_SOLD_QUANTITY);
             }
             productDb.setSold(product.getSold());
         }
@@ -318,7 +319,7 @@ public class ProductService {
     public void checkQuantityProductBeforeAddToCart(Product product, int quantity) {
 
         if (product.getQuantity() < quantity) {
-            throw new CommonException(
+            throw new CommonException(ErrorCode.PRODUCT_OUT_OF_STOCK,
                     "Product " + product.getId() + " does not have enough stock");
         }
     }

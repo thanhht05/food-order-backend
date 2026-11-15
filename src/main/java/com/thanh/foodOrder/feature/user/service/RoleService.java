@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.feature.auth.dto.ResponseRoleDTO;
 import com.thanh.foodorder.feature.user.domain.Role;
 import com.thanh.foodorder.feature.user.repository.RoleRepository;
@@ -25,7 +26,7 @@ public class RoleService {
     public Role getRoleById(long id) {
         return this.roleRepository.findById(id).orElseThrow(() -> {
             log.warn("Role with id: {} not found", id);
-            return new CommonException("Role with id " + id + " not found");
+            return new CommonException(ErrorCode.ROLE_NOT_FOUND, "Role with id " + id + " not found");
 
         });
     }
@@ -42,7 +43,7 @@ public class RoleService {
         log.info("Creating role with name: {}", role.getName());
         if (this.roleRepository.existsByName(role.getName())) {
             log.warn("Role name: {} already exists", role.getName());
-            throw new CommonException("Role " + role.getName() + " already exists");
+            throw new CommonException(ErrorCode.ROLE_ALREADY_EXISTS, "Role " + role.getName() + " already exists");
         }
         Role savedRole = this.roleRepository.save(role);
         log.info("Role created successfully with id {}", role.getId());

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
 import com.thanh.foodorder.core.util.exception.CommonException;
+import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
 import com.thanh.foodorder.feature.auth.dto.RequestLoginDTO;
 import com.thanh.foodorder.feature.auth.dto.RequestGoogleLoginDTO;
@@ -162,24 +163,24 @@ public class AuthController {
 
         // 1. Kiểm tra cookie hợp lệ trước tiên
         if (refreshToken == null || refreshToken.isBlank() || "defaultToken".equals(refreshToken)) {
-            throw new CommonException("Cookie does not exist");
+            throw new CommonException(ErrorCode.COOKIE_NOT_FOUND);
         }
 
         // 2. Trích xuất email (cần đảm bảo jwtUtil xử lý parse an toàn)
         String email = jwtUtil.extractUsername(refreshToken);
         if (email == null) {
-            throw new CommonException("Invalid refresh token");
+            throw new CommonException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 3. Tìm user trong DB và kiểm tra null
         User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
         if (userDb == null) {
-            throw new CommonException("User not found or refresh token revoked");
+            throw new CommonException(ErrorCode.REFRESH_TOKEN_REVOKED);
         }
 
         // 4. Validate token version & hạn sử dụng
         if (!jwtUtil.validRefreshToken(refreshToken, userDb.getTokenVersion())) {
-            throw new CommonException("Refresh token invalid or expired");
+            throw new CommonException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
         // 5. Tạo response & cập nhật token mới
