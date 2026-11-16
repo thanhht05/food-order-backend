@@ -64,7 +64,10 @@ public enum ErrorCode {
 
     // 7. Chat & AI
     CONVERSATION_NOT_FOUND("ERR_CONVERSATION_NOT_FOUND", "Conversation not found"),
-    AI_PARSE_FAILED("ERR_AI_PARSE_FAILED", "Failed to parse user request");
+    AI_PARSE_FAILED("ERR_AI_PARSE_FAILED", "Failed to parse user request"),
+
+    // 8. Rate Limiting
+    TOO_MANY_REQUESTS("ERR_TOO_MANY_REQUESTS", "Too many requests. Please try again later.");
 
     private final String code;
     private final String message;

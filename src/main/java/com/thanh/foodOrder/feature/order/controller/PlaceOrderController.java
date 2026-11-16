@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.thanh.foodorder.core.util.JwtUtil;
+import com.thanh.foodorder.core.util.annotation.RateLimit;
 import com.thanh.foodorder.feature.order.dto.CheckoutRequestDTO;
 import com.thanh.foodorder.feature.order.dto.OrderResponseDTO;
 import com.thanh.foodorder.feature.order.service.OrderService;
@@ -27,6 +28,7 @@ public class PlaceOrderController {
     }
 
     @PostMapping("/orders/placeOrder")
+    @RateLimit(capacity = 2, refillTokens = 2, durationInSeconds = 10)
     public ResponseEntity<OrderResponseDTO> handlePlaceOrder(@RequestBody CheckoutRequestDTO dto) {
         String email = JwtUtil.getCurrentUserLogin().orElse("");
         User curUser = this.userService.getUserByEmail(email);

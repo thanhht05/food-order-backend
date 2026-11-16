@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.thanh.foodorder.core.response.ResultPaginationDTO;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
+import com.thanh.foodorder.core.util.annotation.RateLimit;
 import com.thanh.foodorder.feature.voucher.domain.Voucher;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherRequest;
 import com.thanh.foodorder.feature.voucher.dto.ApplyVoucherResponse;
@@ -86,6 +87,7 @@ public class VoucherController {
     }
 
     @PostMapping("/apply-vouchers")
+    @RateLimit(capacity = 10, refillTokens = 10, durationInSeconds = 60)
     public ResponseEntity<ApplyVoucherResponse> applyVoucher(
             @RequestBody ApplyVoucherRequest request) {
         return ResponseEntity.ok(

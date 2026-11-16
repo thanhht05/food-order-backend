@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.thanh.foodorder.core.util.annotation.ApiMessage;
+import com.thanh.foodorder.core.util.annotation.RateLimit;
 import com.thanh.foodorder.core.util.exception.CommonException;
 import com.thanh.foodorder.core.util.exception.ErrorCode;
 import com.thanh.foodorder.core.util.JwtUtil;
@@ -51,12 +52,14 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
+    @RateLimit(capacity = 3, refillTokens = 3, durationInSeconds = 60)
     public ResponseEntity<ResponseUserDTO> handleRegister(@RequestBody User user) {
 
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.createUser(user));
     }
 
     @PostMapping("/auth/login")
+    @RateLimit(capacity = 5, refillTokens = 5, durationInSeconds = 60)
     @ApiMessage("Login ")
     public ResponseEntity<ResponseLoginDTO> handleLogin(@RequestBody RequestLoginDTO loginDTO,
             HttpServletResponse response) {
