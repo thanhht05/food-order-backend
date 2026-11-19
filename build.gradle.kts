@@ -4,7 +4,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.thanh.foodOrder"
+group = "com.thanh.foodorder"
 version = "0.0.1-SNAPSHOT"
 description = "Food Order Management System using Spring Boot"
 
