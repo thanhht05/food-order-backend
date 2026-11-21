@@ -117,20 +117,39 @@ public class OrderService {
     @Transactional
     public void handlePayment(Long orderCode, WebhookData data) {
 
-        Order order = getOrderByOrderCode(orderCode);
-
-        // Verify payment status
-        if (isPayment(order)) {
-            throw new CommonException(ErrorCode.ORDER_ALREADY_PAID);
+        // 1. PayOS test webhook check (during URL verification on my.payos.vn)
+        if (orderCode == null || orderCode == 123L
+                || (data != null && data.getDescription() != null
+                        && (data.getDescription().toLowerCase().contains("thu nghiem")
+                                || data.getDescription().toLowerCase().contains("thử nghiệm")
+                                || data.getDescription().toLowerCase().contains("test")))) {
+            log.info("Received PayOS test webhook: orderCode={}", orderCode);
+            return;
         }
 
-        // Verify transaction amount
+        // 2. Safely look up order by orderCode (don't throw 400 if order does not exist)
+        Optional<Order> orderOpt = orderRepository.findByOrderCode(orderCode);
+        if (orderOpt.isEmpty()) {
+            log.warn("PayOS webhook orderCode not found in DB: {}", orderCode);
+            return;
+        }
+
+        Order order = orderOpt.get();
+
+        // 3. Idempotent check: if already paid, acknowledge and return
+        if (isPayment(order)) {
+            log.info("Order with orderCode: {} is already paid", orderCode);
+            return;
+        }
+
+        // 4. Verify transaction amount
         if (order.getTotalPrice().longValue() != data.getAmount()) {
             throw new CommonException(ErrorCode.ORDER_PRICE_INVALID);
         }
 
-        // Update order payment status
+        // 5. Update order payment status
         order.setPaymentStatus(PaymentStatus.PAID);
+        order.setOrderStatus(OrderStatus.CONFIRMED);
 
         Order orderSaved = this.orderRepository.save(order);
         eventPublisher.publishEvent(

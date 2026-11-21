@@ -178,7 +178,7 @@ public class OrderController {
         } catch (CommonException e) {
 
             return ResponseEntity
-                    .badRequest()
+                    .ok()
                     .body(e.getMessage());
 
         } catch (Exception e) {
