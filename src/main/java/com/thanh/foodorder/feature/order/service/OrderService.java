@@ -301,9 +301,8 @@ public class OrderService {
             updateSoldQuantity(cd);
         }
 
-        if ("COD".equals(dto.getPaymentMethod())) {
-            cartDetailRepository.deleteAll(cartDetails);
-        }
+        // Clear cart details upon order creation for all payment methods
+        cartDetailRepository.deleteAll(cartDetails);
         eventPublisher.publishEvent(
                 new OrderCreatedEvent(orderSaved));
 
