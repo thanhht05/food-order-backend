@@ -40,6 +40,9 @@ public class OrderController {
     private final OrderService orderService;
     private final PayOS payOS;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
+
     public OrderController(OrderService orderService, PayOS payOS) {
         this.orderService = orderService;
         this.payOS = payOS;
@@ -90,8 +93,8 @@ public class OrderController {
                     .description("Order #" + order.getId())
                     .amount(order.getTotalPrice().longValue())
                     .item(item)
-                    .returnUrl("http://localhost:5173/payment/success")
-                    .cancelUrl("http://localhost:5173/payment/cancel")
+                    .returnUrl(frontendUrl + "/payment/success")
+                    .cancelUrl(frontendUrl + "/payment/cancel")
                     .expiredAt(Instant.now()
                             .plus(30, ChronoUnit.MINUTES)
                             .getEpochSecond())
