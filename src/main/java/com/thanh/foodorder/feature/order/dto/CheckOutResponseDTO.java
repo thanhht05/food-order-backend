@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CheckOutResponseDTO {
-    private List<Long> cartDetailIds = new ArrayList<>(); // các dòng trong giỏ
+    private List<Long> cartDetailIds = new ArrayList<>(); // cart item IDs
     private BigDecimal totalPrice;
     private BigDecimal discount;
     private BigDecimal finalPrice;

@@ -119,17 +119,17 @@ public class OrderService {
 
         Order order = getOrderByOrderCode(orderCode);
 
-        // Kiểm tra đã thanh toán
+        // Verify payment status
         if (isPayment(order)) {
             throw new CommonException(ErrorCode.ORDER_ALREADY_PAID);
         }
 
-        // Kiểm tra số tiền
+        // Verify transaction amount
         if (order.getTotalPrice().longValue() != data.getAmount()) {
             throw new CommonException(ErrorCode.ORDER_PRICE_INVALID);
         }
 
-        // Cập nhật payment status
+        // Update order payment status
         order.setPaymentStatus(PaymentStatus.PAID);
 
         Order orderSaved = this.orderRepository.save(order);
@@ -254,7 +254,7 @@ public class OrderService {
 
             voucher = voucherService.getVoucherByCode(dto.getVoucherCode());
             voucherService.checkVoucherBeforeApply(voucher, curUser);
-            // Tiền giảm = MIN(% giảm, maxDiscount)
+            // Discount amount = MIN(percentage discount, maxDiscount)
             discount = totalPrice // 600.000
                     .multiply(BigDecimal.valueOf(voucher.getPercentDiscount())) // 600.000 * 50 = 30.000.000
                     .divide(BigDecimal.valueOf(100)) // 30.000.000 / 100 = 300.000

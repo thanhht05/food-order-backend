@@ -1,9 +1,9 @@
 package com.thanh.foodorder.core.util.annotation;
 
 /**
- * Tập trung toàn bộ mã thành công (Success Code) của API về một nơi duy nhất.
- * Được trả về kèm trong RestResponse để Frontend (axios interceptor) tự động dịch
- * sang ngôn ngữ hiện tại (vie.json / en.json).
+ * Centralized API Success Codes.
+ * Returned in RestResponse so frontend (axios interceptor) can localize messages
+ * based on user language (vie.json / en.json).
  */
 public enum SuccessCode {
     CALL_API_SUCCESS("SUC_CALL_API", "Call api success"),

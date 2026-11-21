@@ -24,13 +24,13 @@ class RateLimitServiceTest {
         int refillTokens = 5;
         int durationSeconds = 60;
 
-        // 5 request đầu tiên phải thành công
+        // First 5 requests should succeed
         for (int i = 1; i <= capacity; i++) {
             boolean allowed = rateLimitService.tryConsume(testKey, capacity, refillTokens, durationSeconds);
             assertTrue(allowed, "Request thứ " + i + " phải được cho phép");
         }
 
-        // Request thứ 6 vượt quá capacity phải bị chặn ngay lập tức
+        // 6th request exceeding capacity must be blocked immediately
         boolean rejected = rateLimitService.tryConsume(testKey, capacity, refillTokens, durationSeconds);
         assertFalse(rejected, "Request thứ 6 phải bị chặn (Rate Limit exceeded)");
     }
@@ -41,12 +41,12 @@ class RateLimitServiceTest {
         String ip1Key = "LOGIN:10.0.0.1";
         String ip2Key = "LOGIN:10.0.0.2";
 
-        // Dùng hết 2 token của IP1
+        // Consume all 2 tokens for IP1
         assertTrue(rateLimitService.tryConsume(ip1Key, 2, 2, 60));
         assertTrue(rateLimitService.tryConsume(ip1Key, 2, 2, 60));
-        assertFalse(rateLimitService.tryConsume(ip1Key, 2, 2, 60)); // IP1 bị chặn
+        assertFalse(rateLimitService.tryConsume(ip1Key, 2, 2, 60)); // IP1 is rate-limited
 
-        // IP2 vẫn còn token và thực hiện bình thường
+        // IP2 still has available tokens and proceeds normally
         assertTrue(rateLimitService.tryConsume(ip2Key, 2, 2, 60), "IP2 không bị ảnh hưởng bởi IP1");
     }
 }

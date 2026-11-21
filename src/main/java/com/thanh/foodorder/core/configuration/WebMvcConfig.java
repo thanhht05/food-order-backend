@@ -5,7 +5,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Đăng ký RateLimitInterceptor vào pipeline của Spring MVC.
+ * Registers RateLimitInterceptor in the Spring MVC pipeline.
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {

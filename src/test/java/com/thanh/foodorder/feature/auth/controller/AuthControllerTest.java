@@ -212,7 +212,7 @@ class AuthControllerTest {
 
                         verify(authenticationManager, times(1))
                                         .authenticate(any(UsernamePasswordAuthenticationToken.class));
-                        // Sai mật khẩu không được thay thế phiên đang hoạt động
+                        // Incorrect password should not replace the active session
                         verify(loginSessionService, never()).startNewSession(any(User.class));
                 }
 

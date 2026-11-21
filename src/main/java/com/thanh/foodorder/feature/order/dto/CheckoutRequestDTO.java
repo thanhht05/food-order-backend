@@ -10,7 +10,7 @@ import com.thanh.foodorder.feature.user.domain.Address;
 @Getter
 @Setter
 public class CheckoutRequestDTO {
-    private List<Long> cartDetailIds; // các dòng trong giỏ
+    private List<Long> cartDetailIds; // cart item IDs
     private String voucherCode;
     private String note;
     private String paymentMethod;

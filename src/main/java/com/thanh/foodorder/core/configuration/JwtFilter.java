@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userService = userService;
     }
 
-    /** Request attribute chứa mã lỗi xác thực (AuthErrorCode) cho JwtAuthenticationEntryPoint. */
+    /** Request attribute containing authentication error code (AuthErrorCode) for JwtAuthenticationEntryPoint. */
     public static final String AUTH_ERROR_ATTR = "AUTH_ERROR_CODE";
 
     @Override
@@ -59,27 +59,27 @@ public class JwtFilter extends OncePerRequestFilter {
         System.out.println("SERVLET PATH = " + request.getServletPath());
 
         try {
-            // 1. Ưu tiên lấy token từ Header (cho các request HTTP thông thường)
+            // 1. Extract token from Authorization header for standard HTTP requests
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
             }
-            // 2. Nếu không có ở Header, thử lấy từ Parameter (cho WebSocket
+            // 2. If not in header, try query parameter for WebSocket handshake
             // /ws/info?token=...)
             else if (request.getParameter("token") != null) {
                 token = request.getParameter("token");
             }
-            // (Tùy chọn) Dự phòng nếu truyền bằng access_token
+            // Fallback query parameter if passed via access_token
             else if (request.getParameter("access_token") != null) {
                 token = request.getParameter("access_token");
             }
 
-            // 3. Nếu lấy được token, tiến hành extract username
+            // 3. Extract username once token is retrieved
             if (token != null) {
                 username = jwtUtil.extractUsername(token); // if token invalid throws exception
             }
 
-            // 4. Validate và set SecurityContext
+            // 4. Validate token and set SecurityContext
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 User user = userService.getUserByEmail(username);
@@ -94,8 +94,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
-                    // Không chặn cứng tại đây để endpoint permitAll vẫn hoạt động.
-                    // JwtAuthenticationEntryPoint sẽ đọc mã lỗi khi endpoint yêu cầu đăng nhập.
+                    // Do not block requests here so permitAll endpoints continue to work.
+                    // JwtAuthenticationEntryPoint reads error code when endpoint requires authentication.
                     request.setAttribute(AUTH_ERROR_ATTR,
                             !versionOk ? AuthErrorCode.PASSWORD_CHANGED : AuthErrorCode.LOGGED_IN_ELSEWHERE);
                 }

@@ -14,7 +14,7 @@ import com.thanh.foodorder.feature.order.domain.Order;
 import com.thanh.foodorder.feature.order.domain.OrderDetail;
 import com.thanh.foodorder.feature.order.service.EmailService;
 
-// Lắng nghe sự kiện
+// Listen for order payment event
 @Component
 @RequiredArgsConstructor
 public class OrderPaidEventListener {
@@ -33,7 +33,7 @@ public class OrderPaidEventListener {
         // notifyAdmin(order);
     }
 
-    // // thông báo cho khách hàng khi thanh toán thành công
+    
     // private void notifyCustomer(Order order) {
 
     // Map<String, String> payload = Map.of(
@@ -44,7 +44,7 @@ public class OrderPaidEventListener {
     // payload);
     // }
 
-    // Thông báo cho admin khi có đơn hàng mới
+    // Notify admin of newly paid order
     // private void notifyAdmin(Order order) {
 
     // AdminOrderResponseDTO response = AdminOrderResponseDTO.from(order);
@@ -56,7 +56,7 @@ public class OrderPaidEventListener {
 
     private void sendEmail(Order order) {
 
-        String subject = "Hóa đơn #" + order.getId();
+        String subject = "Invoice #" + order.getId();
 
         String html = buildInvoiceHtml(order);
 
@@ -69,8 +69,8 @@ public class OrderPaidEventListener {
     private String buildInvoiceHtml(Order order) {
         StringBuilder itemsHtml = new StringBuilder();
 
-        // Vòng lặp duyệt qua danh sách các món ăn khách đặt để build thành các dòng
-        // trong bảng <tr>
+        // Iterate through ordered items to build table rows
+        // in HTML invoice table
         for (OrderDetail item : order.getOrderDetails()) {
             itemsHtml.append("<tr>")
                     .append("<td style='padding: 8px; border-bottom: 1px solid #ddd;'>")
@@ -85,7 +85,7 @@ public class OrderPaidEventListener {
                     .append("</tr>");
         }
 
-        // Toàn bộ khung giao diện hóa đơn HTML
+        // HTML email invoice template
         return "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;'>"
                 + "  <h2 style='color: #ff4757; text-align: center;'>CẢM ƠN BẠN ĐÃ ĐẶT HÀNG!</h2>"
                 + "  <p>Xin chào <strong>" + order.getUser().getFullName() + "</strong>,</p>"

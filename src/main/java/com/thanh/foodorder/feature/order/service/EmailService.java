@@ -21,13 +21,13 @@ public class EmailService {
     public void sendOrderInvoiceEmail(String toEmail, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
-            // Tham số true định nghĩa mail này hỗ trợ đa phương tiện / HTML
+            // Enable multipart / HTML email support
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
             helper.setSubject(subject);
-            helper.setText(htmlBody, true); // true ở đây nghĩa là gửi định dạng HTML
+            helper.setText(htmlBody, true); // Enable HTML formatting
 
             javaMailSender.send(message);
             System.out.println("Hóa đơn đơn hàng đã được gửi tới: " + toEmail);

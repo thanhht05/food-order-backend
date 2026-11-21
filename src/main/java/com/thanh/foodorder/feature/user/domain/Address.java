@@ -17,8 +17,8 @@ public class Address {
     private String recipientName;
     private String phone;
 
-    private String province; // Thành phố Huế
-    private String ward; // Phường Thuận Hóa
-    private String addressDetail; // 199 Điện Biên Phủ
+    private String province; // e.g. Thua Thien Hue
+    private String ward; // e.g. Thuan Hoa
+    private String addressDetail; // e.g. 199 Dien Bien Phu
 
 }

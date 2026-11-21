@@ -214,7 +214,7 @@ public class VoucherService {
             throw new CommonException(ErrorCode.CART_EMPTY);
         }
 
-        // Tính tổng tiền từ DB
+        // Calculate order subtotal from database
         BigDecimal originalTotal = BigDecimal.ZERO;
 
         for (CartDetail cartDetail : cartDetails) {
@@ -236,14 +236,14 @@ public class VoucherService {
             throw new CommonException(ErrorCode.VOUCHER_INACTIVE);
         }
 
-        // Kiểm tra hạn
+        // Check voucher expiration date
         if (voucher.getExpiration() != null
                 && voucher.getExpiration().isBefore(LocalDate.now())) {
 
             throw new CommonException(ErrorCode.VOUCHER_EXPIRED);
         }
 
-        // Tính discount
+        // Calculate discount amount
         BigDecimal discount = originalTotal
                 .multiply(
                         BigDecimal.valueOf(
@@ -253,7 +253,7 @@ public class VoucherService {
                         2,
                         RoundingMode.HALF_UP);
 
-        // Không giảm quá maxDiscount
+        // Cap discount at maxDiscount limit
         if (voucher.getMaxDiscount() != null
                 && discount.compareTo(voucher.getMaxDiscount()) > 0) {
 

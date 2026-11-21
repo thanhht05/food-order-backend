@@ -18,20 +18,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Frontend ReactJS sẽ kết nối đến endpoint này
+        // WebSocket endpoint for React frontend connection
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*").withSockJS(); // Cho phép React gọi chéo domain (CORS)
+                .setAllowedOriginPatterns("*").withSockJS(); // Enable cross-origin access (CORS)
 
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Prefix cho các channel mà server sẽ gửi message xuống client
-        // /queue: kênh riêng từng user (vd: /user/queue/session cho single active session)
+        // Prefix for server-to-client outbound channels
+        // /queue: user-specific private destination (e.g. /user/queue/session for single active session)
         registry.enableSimpleBroker("/topic", "/queue");
         registry.setUserDestinationPrefix("/user");
 
-        // Prefix cho các request từ client gửi lên server
+        // Prefix for client-to-server inbound destinations
         registry.setApplicationDestinationPrefixes("/app");
     }
 

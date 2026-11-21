@@ -80,7 +80,7 @@ public class OrderController {
         try {
             Order order = this.orderService.getOrderById(requestBody.getOrderId());
 
-            // Tạo orderCode cho PayOS
+            // Generate orderCode for PayOS
 
             long orderCode = System.currentTimeMillis() / 1000;
 
@@ -139,8 +139,7 @@ public class OrderController {
     // @RequestBody Object body) {
 
     // try {
-    // // 1. Verify webhook từ PayOS
-    // WebhookData data = payOS.webhooks().verify(body);
+        // WebhookData data = payOS.webhooks().verify(body);
 
     // return ResponseEntity.ok().body(data);
 
@@ -165,13 +164,13 @@ public class OrderController {
             @RequestBody Object body) {
 
         try {
-            // 1. Verify webhook từ PayOS
+            // 1. Verify PayOS webhook data
             WebhookData data = payOS.webhooks().verify(body);
 
-            // 2. Lấy orderCode
+            // 2. Extract orderCode
             Long orderCode = data.getOrderCode();
 
-            // 3. Gọi service xử lý payment
+            // 3. Process payment status update
             orderService.handlePayment(orderCode, data);
 
             return ResponseEntity.ok().build();

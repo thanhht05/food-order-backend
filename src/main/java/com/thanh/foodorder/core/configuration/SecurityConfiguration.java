@@ -52,11 +52,11 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Cho phép xem sản phẩm và danh mục công khai (chỉ GET)
+                        // 1. Public read-only access for products and categories
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
 
-                        // 2. Các endpoint xác thực công khai
+                        // 2. Public authentication endpoints
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
@@ -78,11 +78,11 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**")
                         .permitAll()
 
-                        // 5. Chat AI hỗ trợ khách hàng
+                        // 5. Customer support AI chat
                         .requestMatchers("/api/v1/ai/**").permitAll()
 
-                        // 6. Mọi request khác đều phải được xác thực (phân quyền chi tiết tại
-                        // Controller bằng @PreAuthorize)
+                        // 6. All other requests require authentication (fine-grained control via
+                        // @PreAuthorize in controllers)
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))

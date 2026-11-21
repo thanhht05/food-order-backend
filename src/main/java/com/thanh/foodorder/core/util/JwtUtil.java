@@ -106,8 +106,8 @@ public class JwtUtil {
     }
 
     /**
-     * Kiểm tra token có thuộc phiên đăng nhập đang hoạt động không (single active session).
-     * currentSessionId == null: tài khoản chưa đăng nhập lại kể từ khi áp dụng tính năng → hợp lệ.
+     * Validates if token belongs to active session (single active session).
+     * currentSessionId == null: account has not logged in since feature deployment -> valid.
      */
     public boolean isSessionActive(String token, String currentSessionId) {
         if (currentSessionId == null) {

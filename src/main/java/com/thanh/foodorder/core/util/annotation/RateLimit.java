@@ -6,24 +6,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation đánh dấu giới hạn tần suất gọi API (Rate Limiting) theo địa chỉ IP.
+ * Annotation to apply Rate Limiting to specific endpoints based on client IP.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RateLimit {
 
     /**
-     * Số request tối đa được phép gọi trong chu kỳ (Dung lượng token bucket).
+     * Maximum requests allowed in the refill period (Bucket capacity).
      */
     int capacity() default 10;
 
     /**
-     * Số token được nạp lại trong mỗi chu kỳ.
+     * Number of refill tokens per period.
      */
     int refillTokens() default 10;
 
     /**
-     * Chu kỳ nạp token tính bằng giây (mặc định 60 giây = 1 phút).
+     * Refill duration in seconds (defaults to 60 seconds / 1 minute).
      */
     int durationInSeconds() default 60;
 }

@@ -71,12 +71,12 @@ public class UserServiceTest {
                 // simulate email not exists
                 when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
 
-                // Giả lập mã hóa password
-                // encode("123456") -> "hashed_password": Không cần encoder thật.
+                // Mock password encoder
+                // encode("123456") -> "hashed_password": mock without actual encoder
                 when(passwordEncoder.encode("123456"))
                                 .thenReturn("hashed_password");
 
-                // Giả lập lưu vào Database
+                // Mock database persistence
                 User savedUser = new User();
                 savedUser.setId(1L);
                 savedUser.setEmail("test@gmail.com");
@@ -161,7 +161,7 @@ public class UserServiceTest {
                 assertEquals("test", results.get(0).getFullName());
 
                 // Verify repository
-                // Kiểm tra xem userRepository.findAll() có được gọi hay chưa.
+                // Verify that userRepository.findAll() was invoked
                 verify(userRepository).findAll(any(Pageable.class));
 
         }

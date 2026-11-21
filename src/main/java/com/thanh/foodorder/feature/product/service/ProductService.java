@@ -162,8 +162,10 @@ public class ProductService {
 
         // category
         ResponseProductDTO.ProductCate cate = new ResponseProductDTO.ProductCate();
-        cate.setId(product.getCategory().getId());
-        cate.setName(product.getCategory().getName());
+        if (product.getCategory() != null) {
+            cate.setId(product.getCategory().getId());
+            cate.setName(product.getCategory().getName());
+        }
 
         // convert list image
         List<ResponseProductDTO.ProductImage> lstImg = new ArrayList<>();
@@ -224,7 +226,7 @@ public class ProductService {
             User user = this.userService.getUserByEmail(email);
 
             if (user != null && user.getRole().getId() == 1) {
-                // ADMIN xem sản all phẩm
+                // ADMIN: view all products
 
                 spec = Specification.allOf(
                         ProductSpecification.hasKeyword(keyword),
@@ -233,7 +235,7 @@ public class ProductService {
                         ProductSpecification.priceTo(to));
             } else {
 
-                // USER // → chỉ xem sản phẩm ACTIVE
+                // USER: view active products only
 
                 spec = Specification.allOf(
                         ProductSpecification.hasKeyword(keyword),
@@ -246,7 +248,7 @@ public class ProductService {
             }
 
         } else {
-            // Chưa đăng nhập → chỉ xem sản phẩm ACTIVE
+            // Anonymous: view active products only
 
             spec = Specification.allOf(
                     ProductSpecification.hasKeyword(keyword),
@@ -268,8 +270,10 @@ public class ProductService {
             ResponseProductDTO.ProductCate productCate = new ResponseProductDTO.ProductCate();
             List<ResponseProductDTO.ProductImage> imgsDto = new ArrayList<>();
 
-            productCate.setId(p.getCategory().getId());
-            productCate.setName(p.getCategory().getName());
+            if (p.getCategory() != null) {
+                productCate.setId(p.getCategory().getId());
+                productCate.setName(p.getCategory().getName());
+            }
 
             List<ProductImage> images = (p.getLstImg() != null) ? p.getLstImg() : new ArrayList<>();
 

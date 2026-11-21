@@ -50,7 +50,7 @@ public class CartService {
 
         String email = JwtUtil.getCurrentUserLogin().orElseThrow();
         User user = userService.getUserByEmail(email);
-        // 1. Lấy cart
+        // 1. Retrieve cart
         Cart cart = user.getCart();
         if (cart == null) {
             cart = new Cart();
@@ -63,19 +63,19 @@ public class CartService {
         // check inventory of product
         this.productService.checkQuantityProductBeforeAddToCart(product,
                 request.getQuantity());
-        // 3. Check product đã có trong cart chưa
+        // 3. Check if product already exists in cart
         Optional<CartDetail> existingItem = cart.getCartDetails()
                 .stream()
                 .filter(cd -> cd.getProduct().getId().equals(product.getId()))
                 .findFirst();
 
         if (existingItem.isPresent()) {
-            // 4. Nếu có rồi → cộng thêm quantity
+            // 4. If already in cart -> increment quantity
             CartDetail cartDetail = existingItem.get();
             cartDetail.setQuantity(
                     cartDetail.getQuantity() + request.getQuantity());
         } else {
-            // 5. Nếu chưa có → tạo mới
+            // 5. If not in cart -> create new cart detail
             CartDetail cartDetail = new CartDetail();
             cartDetail.setCart(cart);
             cartDetail.setProduct(product);
@@ -129,8 +129,7 @@ public class CartService {
     // public CartDetailsResponseDTO mergeCart(Long userId, MergeCartRequest
     // request) {
 
-    // // 1. Lấy user + cart
-    // User user = userService.getUserById(userId);
+        // User user = userService.getUserById(userId);
 
     // Cart cart = cartRepository.findByUserId(userId);
     // if (cart == null) {
@@ -138,8 +137,7 @@ public class CartService {
     // cart.setUser(user);
     // }
 
-    // // 2. Map cart hiện tại
-    // Map<Long, CartDetail> dbMap = new HashMap<>();
+        // Map<Long, CartDetail> dbMap = new HashMap<>();
     // for (CartDetail cd : cart.getCartDetails()) {
     // dbMap.put(cd.getProduct().getId(), cd);
     // }
@@ -155,13 +153,11 @@ public class CartService {
     // continue;
 
     // if (dbMap.containsKey(productId)) {
-    // // 👉 đã có → cộng
-    // CartDetail existing = dbMap.get(productId);
+        // CartDetail existing = dbMap.get(productId);
     // existing.setQuantity(existing.getQuantity() + quantity);
 
     // } else {
-    // // 👉 chưa có → thêm mới
-    // Product product = productService.getProductById(productId);
+        // Product product = productService.getProductById(productId);
 
     // CartDetail newItem = new CartDetail();
     // newItem.setCart(cart);
@@ -169,12 +165,10 @@ public class CartService {
     // newItem.setQuantity(quantity);
     // newItem.setPrice(product.getPrice());
 
-    // cart.getCartDetails().add(newItem); // 🔥 quan trọng
-    // }
+        // }
     // }
 
-    // // 4. Save 1 lần duy nhất
-    // cartRepository.save(cart);
+        // cartRepository.save(cart);
 
     // // 5. Build response
     // return mapToResponse(cart);
@@ -220,7 +214,7 @@ public class CartService {
             cartDetailRepository.save(cartItem);
 
         }
-        // chưa có → add mới
+        // Not in cart -> add new item
         else {
             CartDetail newItem = new CartDetail();
             newItem.setCart(cart);

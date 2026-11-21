@@ -26,16 +26,16 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
             Authentication authentication)
             throws IOException, ServletException {
 
-        // TODO: blacklist token nếu dùng JWT
+        // TODO: blacklist token if using JWT
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // nếu dùng HTTPS
+        cookie.setSecure(true); // if using HTTPS
         cookie.setPath("/");
-        cookie.setMaxAge(0); // xóa cookie
+        cookie.setMaxAge(0); // clear cookie
 
         response.addCookie(cookie);
 
-        // tạo response chuẩn project
+        // Create standard project response
         RestResponse<Object> rest = new RestResponse<>();
         rest.setStatusCode(HttpStatus.OK.value());
         rest.setError(null);

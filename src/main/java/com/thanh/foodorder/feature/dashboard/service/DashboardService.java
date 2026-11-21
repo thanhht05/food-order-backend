@@ -42,18 +42,18 @@ public class DashboardService {
     }
 
     public List<RevenueByMonthResponse> getRevenueByMonth() {
-        // 1. Khởi tạo Map 12 tháng với doanh thu mặc định là 0
+        // 1. Initialize 12-month map with 0 default revenue
         Map<Integer, BigDecimal> monthMap = new HashMap<>();
         for (int month = 1; month <= 12; month++) {
             monthMap.put(month, BigDecimal.ZERO);
         }
 
-        // 2. Lấy dữ liệu từ DB và ghi đè vào Map
+        // 2. Fetch monthly revenue from database and populate map
         List<RevenueByMonthResponse> dbData = dashboardRepository.getRevenueByMonth();
         for (RevenueByMonthResponse item : dbData) {
             monthMap.put(item.month(), item.revenue());
         }
-        // 3. Chuyển Map thành List kết quả từ tháng 1 đến 12
+        // 3. Convert map into ordered result list from month 1 to 12
         List<RevenueByMonthResponse> result = new ArrayList<>();
         for (int month = 1; month <= 12; month++) {
             result.add(new RevenueByMonthResponse(month, monthMap.get(month)));

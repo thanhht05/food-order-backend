@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Interceptor kiểm tra hạn mức gọi API dựa trên annotation @RateLimit và Client IP.
+ * Interceptor that enforces API rate limits based on @RateLimit annotation and Client IP.
  */
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
@@ -66,7 +66,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * Lấy IP thực tế của Client (hỗ trợ qua Proxy / Load Balancer / Cloudflare).
+     * Resolves client IP address (supports proxies, load balancers, Cloudflare).
      */
     private String getClientIp(HttpServletRequest request) {
         String[] headers = {
@@ -81,7 +81,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         for (String header : headers) {
             String ip = request.getHeader(header);
             if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                // Nếu header chứa chuỗi nhiều IP (do qua nhiều proxy), lấy IP đầu tiên
+                // If header contains multiple IPs (forwarded through proxies), take the first one
                 if (ip.contains(",")) {
                     ip = ip.split(",")[0].trim();
                 }
@@ -92,7 +92,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * Gửi phản hồi chuẩn HTTP 429 Too Many Requests theo format RestResponse của hệ thống.
+     * Sends standard HTTP 429 Too Many Requests response using system RestResponse format.
      */
     private void sendRateLimitError(HttpServletResponse response, int retryAfterSeconds) throws IOException {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());

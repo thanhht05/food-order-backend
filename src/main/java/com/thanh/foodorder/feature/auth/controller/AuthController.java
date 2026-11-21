@@ -76,7 +76,7 @@ public class AuthController {
 
         User user = this.userService.getUserByEmail(loginDTO.getUsername());
 
-        // single active session: tạo phiên mới, báo phiên cũ (nếu có) bị thay thế
+        // Single active session: issue new session, notify previous session if active
         this.loginSessionService.startNewSession(user);
 
         // generate accessToken
@@ -115,7 +115,7 @@ public class AuthController {
         GoogleUserInfo googleUserInfo = this.googleAuthService.verifyGoogleToken(googleLoginDTO.getIdToken());
         User user = this.userService.processGoogleUser(googleUserInfo);
 
-        // single active session: tạo phiên mới, báo phiên cũ (nếu có) bị thay thế
+        // Single active session: issue new session, notify previous session if active
         this.loginSessionService.startNewSession(user);
 
         ResponseLoginDTO res = new ResponseLoginDTO();
@@ -164,29 +164,29 @@ public class AuthController {
             @CookieValue(name = "refreshToken", defaultValue = "defaultToken") String refreshToken,
             HttpServletResponse response) {
 
-        // 1. Kiểm tra cookie hợp lệ trước tiên
+        // 1. Validate refresh token cookie
         if (refreshToken == null || refreshToken.isBlank() || "defaultToken".equals(refreshToken)) {
             throw new CommonException(ErrorCode.COOKIE_NOT_FOUND);
         }
 
-        // 2. Trích xuất email (cần đảm bảo jwtUtil xử lý parse an toàn)
+        // 2. Extract email from token
         String email = jwtUtil.extractUsername(refreshToken);
         if (email == null) {
             throw new CommonException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 3. Tìm user trong DB và kiểm tra null
+        // 3. Find user in database and verify existence
         User userDb = this.userService.fetchUserByEmailAndRefreshToken(email, refreshToken);
         if (userDb == null) {
             throw new CommonException(ErrorCode.REFRESH_TOKEN_REVOKED);
         }
 
-        // 4. Validate token version & hạn sử dụng
+        // 4. Validate token version and expiration
         if (!jwtUtil.validRefreshToken(refreshToken, userDb.getTokenVersion())) {
             throw new CommonException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        // 5. Tạo response & cập nhật token mới
+        // 5. Create response and generate new access token
         ResponseLoginDTO res = new ResponseLoginDTO();
         ResponseLoginDTO.UserLogin userLogin = new ResponseLoginDTO.UserLogin();
         userLogin.setEmail(userDb.getEmail());
@@ -201,7 +201,7 @@ public class AuthController {
         String newRefreshToken = jwtUtil.generateRefreshToken(userDb, res);
         this.userService.updateUserRefreshToken(email, newRefreshToken);
 
-        // 6. Set lại cookie mới
+        // 6. Update refresh token cookie
         Cookie cookie = new Cookie("refreshToken", newRefreshToken);
         cookie.setPath("/");
         cookie.setHttpOnly(true);

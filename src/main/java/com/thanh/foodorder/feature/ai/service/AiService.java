@@ -71,7 +71,7 @@ public class AiService {
         }
 
         /*
-         * đã có product:
+         * Given products:
          * {
          * Long id,
          * String name,
@@ -79,7 +79,7 @@ public class AiService {
          * String category,
          * String description
          * }
-         * và user prompt: User Prompt -> "Tôi muốn ăn gà cay dưới 100k"
+         * and user prompt: User Prompt -> "I want spicy chicken under 100k"
          */
 
         private String generateRecommendation(
@@ -145,7 +145,7 @@ public class AiService {
                 return content;
         }
 
-        private ProductSearchCriteria extractCriteria(String userMessage) { // Nhờ AI chuyển từ user prompt DTO
+        private ProductSearchCriteria extractCriteria(String userMessage) { // AI query extraction into DTO
                                                                             // SeatchCriteria
 
                 String systemPrompt = """
@@ -194,7 +194,7 @@ public class AiService {
                                 .content();
 
                 try {
-                        // objectMapper.readValue dùng để chuyển dữ liệu JSON thành Java Object.
+                        // Deserialize JSON response into Java object
                         return objectMapper.readValue(
                                         json,
                                         ProductSearchCriteria.class);

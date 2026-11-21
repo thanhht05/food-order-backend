@@ -127,7 +127,7 @@ public class UserService {
     public User processGoogleUser(GoogleUserInfo googleUserInfo) {
         log.info("Processing Google user login: {}", googleUserInfo.getEmail());
 
-        // 1. Tìm user theo providerId và AuthProvider.GOOGLE
+        // 1. Find user by providerId and AuthProvider.GOOGLE
         Optional<User> userByProvider = this.userRepository.findByProviderIdAndAuthProvider(
                 googleUserInfo.getSub(), AuthProvider.GOOGLE);
 
@@ -143,7 +143,7 @@ public class UserService {
             return this.userRepository.save(existingUser);
         }
 
-        // 2. Nếu chưa có theo providerId, kiểm tra theo email
+        // 2. If not found by providerId, look up by email
         Optional<User> userByEmail = this.userRepository.findByEmail(googleUserInfo.getEmail());
         if (userByEmail.isPresent()) {
             User existingUser = userByEmail.get();
@@ -157,7 +157,7 @@ public class UserService {
             return this.userRepository.save(existingUser);
         }
 
-        // 3. User mới hoàn toàn -> Tạo mới
+        // 3. New user -> Register new account
         log.info("Creating new User from Google OAuth for email: {}", googleUserInfo.getEmail());
         User newUser = new User();
         newUser.setEmail(googleUserInfo.getEmail());
@@ -222,26 +222,23 @@ public class UserService {
         this.userRepository.save(user);
     }
 
-    /** Lưu phiên đăng nhập mới: refreshToken + activeSessionId (đã gán sẵn trên entity). */
+    /** Persist updated login session: refreshToken + activeSessionId. */
     public void updateUserSession(User user, String refreshToken) {
         user.setRefreshToken(refreshToken);
         this.userRepository.save(user);
     }
 
     public User fetchUserByEmailAndRefreshToken(String email, String refreshToken) {
-        // Breakpoint 1: Kiểm tra giá trị email và refreshToken truyền vào hàm
-        Optional<User> userOptional = this.userRepository.findByEmailAndRefreshToken(email, refreshToken);
+                Optional<User> userOptional = this.userRepository.findByEmailAndRefreshToken(email, refreshToken);
 
-        // Breakpoint 2: Kiểm tra xem DB có tìm thấy bản ghi không
-        // (userOptional.isPresent())
+                // (userOptional.isPresent())
         boolean isPresent = userOptional.isPresent();
         if (!isPresent) {
             log.warn("User with email: {} and refreshToken not found", email);
             throw new CommonException(ErrorCode.REFRESH_TOKEN_REVOKED, "User with email and refreshToken not found");
         }
 
-        // Breakpoint 3: Xem toàn bộ object user lấy ra từ DB
-        User user = userOptional.get();
+                User user = userOptional.get();
         return user;
     }
 

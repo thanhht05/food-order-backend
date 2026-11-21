@@ -96,11 +96,11 @@ public class ProductServiceTest {
                 dto.setPrice(BigDecimal.valueOf(12000));
                 dto.setQuantity(100);
 
-                // categoryService trả về cate
+                // categoryService returns category
                 when(categoryService.getCategoryByName("testCate"))
                                 .thenReturn(cate);
 
-                // Product đã tồn tại
+                // Product already exists
                 when(productRepository.existsByNameAndCategory(
                                 eq("cafe"),
                                 any(Category.class)))
@@ -129,11 +129,11 @@ public class ProductServiceTest {
 
                 dto.setLstImg(imgs);
 
-                // categoryService trả về cate
+                // categoryService returns category
                 when(categoryService.getCategoryByName("testCate"))
                                 .thenReturn(cate);
 
-                // Product đã tồn tại
+                // Product already exists
                 when(productRepository.existsByNameAndCategory(
                                 eq("cafe"),
                                 any(Category.class)))
@@ -383,7 +383,7 @@ public class ProductServiceTest {
                 product2.setSold(100);
                 product2.setCategory(cate);
 
-                // Repository giả lập kết quả đã được sort
+                // Repository mocks sorted results
                 List<Product> productList = List.of(
                                 product2, // sold = 100
                                 product // sold = 0
@@ -420,7 +420,7 @@ public class ProductServiceTest {
                                         10,
                                         "sold,desc");
 
-                        // Assert kết quả
+                        // Assert results
                         List<ResponseProductDTO> results = (List<ResponseProductDTO>) result.getResults();
 
                         assertEquals(2, results.size());

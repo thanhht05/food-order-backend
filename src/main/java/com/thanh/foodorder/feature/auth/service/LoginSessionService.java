@@ -11,11 +11,11 @@ import com.thanh.foodorder.feature.user.domain.User;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Quản lý đăng nhập đơn phiên (single active session):
- * mỗi tài khoản chỉ có 1 phiên hoạt động. Phiên mới thay thế phiên cũ
- * và phiên cũ được thông báo real-time qua kênh WebSocket riêng của user.
+ * Manages single active session:
+ * each account has at most one active session. New session supersedes old,
+ * and previous session is notified in real time via private WebSocket destination.
  *
- * Tách biệt với tokenVersion (chỉ dùng cho đổi mật khẩu).
+ * Separated from tokenVersion (which is reserved for password resets).
  */
 @Service
 @Log4j2
@@ -32,10 +32,10 @@ public class LoginSessionService {
     }
 
     /**
-     * Tạo phiên mới cho user (chỉ gán vào entity, caller chịu trách nhiệm save)
-     * và gửi thông báo tới phiên cũ (nếu có).
+     * Creates new session for user (assigned to entity, caller persists)
+     * and dispatches termination alert to previous session (if any).
      *
-     * @return sessionId mới
+     * @return new sessionId
      */
     public String startNewSession(User user) {
         String newSessionId = UUID.randomUUID().toString();
@@ -57,7 +57,7 @@ public class LoginSessionService {
                             "type", EVENT_SESSION_REPLACED,
                             "timestamp", System.currentTimeMillis()));
         } catch (Exception e) {
-            // Không để lỗi WebSocket làm hỏng đăng nhập; phiên cũ vẫn bị chặn ở JwtFilter.
+            // Prevent WebSocket delivery failure from breaking login; old session remains blocked at JwtFilter.
             log.warn("Cannot send SESSION_REPLACED to {}: {}", email, e.getMessage());
         }
     }

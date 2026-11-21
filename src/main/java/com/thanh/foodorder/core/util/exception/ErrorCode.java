@@ -1,9 +1,9 @@
 package com.thanh.foodorder.core.util.exception;
 
 /**
- * Tập trung toàn bộ mã lỗi của hệ thống vào một nơi duy nhất (theo mẫu AuthErrorCode).
- * Trường `code` được trả về trong `RestResponse.error` để Frontend (axios interceptor)
- * tự động dịch sang ngôn ngữ hiện tại (vie.json / en.json) mà không cần sửa từng trang.
+ * Centralized system Error Codes.
+ * The `code` field is returned in `RestResponse.error` so frontend (axios interceptor)
+ * can automatically localize messages based on user language (vie.json / en.json).
  */
 public enum ErrorCode {
     // 1. System & Common

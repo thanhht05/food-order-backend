@@ -1,15 +1,15 @@
 package com.thanh.foodorder.core.configuration;
 
 /**
- * Mã lỗi xác thực trả về trong trường "error" của response 401,
- * để frontend phân biệt lý do phiên đăng nhập bị vô hiệu.
+ * Authentication error code returned in the "error" field of 401 responses,
+ * allowing the frontend to distinguish why a session was invalidated.
  */
 public enum AuthErrorCode {
-    /** Tài khoản đã đăng nhập ở trình duyệt/thiết bị khác (single active session). */
+    /** Account logged in from another browser/device (single active session). */
     LOGGED_IN_ELSEWHERE("ERR_LOGGED_IN_ELSEWHERE",
             "Tài khoản của bạn vừa được đăng nhập ở một trình duyệt khác."),
 
-    /** Mật khẩu đã thay đổi (tokenVersion tăng). */
+    /** Password was changed (tokenVersion incremented). */
     PASSWORD_CHANGED("ERR_PASSWORD_CHANGED",
             "Mật khẩu đã được thay đổi. Vui lòng đăng nhập lại.");
 
