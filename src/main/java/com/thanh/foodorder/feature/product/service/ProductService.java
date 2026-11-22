@@ -78,6 +78,7 @@ public class ProductService {
         product.setQuantity(productReq.getQuantity());
         product.setDescription(productReq.getDescription());
         product.setCategory(category);
+        product.setStatus(ProductStatus.ACTIVE);
 
         log.info("Product created successfully");
 

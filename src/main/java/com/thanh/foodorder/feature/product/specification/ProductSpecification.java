@@ -1,12 +1,14 @@
 package com.thanh.foodorder.feature.product.specification;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 import com.thanh.foodorder.feature.product.domain.Product;
 import com.thanh.foodorder.feature.product.enums.ProductStatus;
-
+import jakarta.persistence.criteria.Predicate;
 
 public class ProductSpecification {
     public static Specification<Product> hasKeyword(String keyword) {
@@ -16,7 +18,7 @@ public class ProductSpecification {
             }
             return cb.like(
                     cb.lower(root.get("name")),
-                    "%" + keyword.toLowerCase() + "%");
+                    "%" + keyword.toLowerCase().trim() + "%");
         };
     }
 
@@ -25,9 +27,37 @@ public class ProductSpecification {
             if (categories == null || categories.isEmpty()) {
                 return null;
             }
-            return root.get("category")
-                    .get("name")
-                    .in(categories);
+
+            List<String> cleanCategories = categories.stream()
+                    .filter(c -> c != null && !c.isBlank())
+                    .flatMap(c -> Arrays.stream(c.split(",")))
+                    .map(String::trim)
+                    .filter(c -> !c.isEmpty())
+                    .toList();
+
+            if (cleanCategories.isEmpty()) {
+                return null;
+            }
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            List<String> lowerNames = cleanCategories.stream()
+                    .map(String::toLowerCase)
+                    .toList();
+            predicates.add(cb.lower(root.get("category").get("name")).in(lowerNames));
+
+            List<Long> ids = new ArrayList<>();
+            for (String c : cleanCategories) {
+                try {
+                    ids.add(Long.parseLong(c));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            if (!ids.isEmpty()) {
+                predicates.add(root.get("category").get("id").in(ids));
+            }
+
+            return cb.or(predicates.toArray(new Predicate[0]));
         };
     }
 
@@ -53,6 +83,12 @@ public class ProductSpecification {
         return (root, query, cb) -> {
             if (status == null) {
                 return null;
+            }
+
+            if (status == ProductStatus.ACTIVE) {
+                return cb.or(
+                        cb.equal(root.get("status"), ProductStatus.ACTIVE),
+                        cb.isNull(root.get("status")));
             }
 
             return cb.equal(root.get("status"), status);

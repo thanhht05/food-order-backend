@@ -75,6 +75,9 @@ public class Product {
     public void handleBeforeCreated() {
         this.createdAt = Instant.now();
         this.createdBy = JwtUtil.getCurrentUserLogin().orElse("");
+        if (this.status == null) {
+            this.status = ProductStatus.ACTIVE;
+        }
     }
 
     @PreUpdate
