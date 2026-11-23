@@ -1,0 +1,81 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  # -------------------------------------------------------------
+  # GIAI ĐOẠN 1: CONTINUOUS INTEGRATION (Kiểm tra & Test)
+  # -------------------------------------------------------------
+  ci-test:
+    name: Build & Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 21 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: 🔑 Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: 🧪 Run Unit Tests
+        run: ./gradlew test --no-daemon
+
+      - name: 🔨 Dry-run Build Boot JAR
+        run: ./gradlew bootJar --no-daemon -x test
+
+  # -------------------------------------------------------------
+  # GIAI ĐOẠN 2: CONTINUOUS DEPLOYMENT (Triển khai lên VPS)
+  # -------------------------------------------------------------
+  cd-deploy:
+    name: Deploy Backend to Azure VPS
+    needs: ci-test
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 SSH to VPS and Deploy Backend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          timeout: 10m
+          script: |
+            set -e
+            echo "=== [BACKEND] BẮT ĐẦU TRIỂN KHAI TỰ ĐỘNG ==="
+            
+            # Ưu tiên chạy deploy script nếu đã tạo trên VPS, nếu chưa sẽ chạy lệnh trực tiếp
+            if [ -f /opt/food-order/deploy.sh ]; then
+              echo ">> Thực thi /opt/food-order/deploy.sh backend..."
+              /opt/food-order/deploy.sh backend
+            else
+              PROJECT_DIR="${{ secrets.VPS_PROJECT_DIR }}"
+              if [ -z "$PROJECT_DIR" ]; then PROJECT_DIR="/opt/food-order"; fi
+              
+              echo ">> Đồng bộ mã nguồn backend..."
+              cd "$PROJECT_DIR/food-order-backend"
+              git fetch origin main
+              git reset --hard origin/main
+              
+              echo ">> Rebuild container backend..."
+              cd "$PROJECT_DIR"
+              docker-compose up -d --build --no-deps backend
+              
+              echo ">> Dọn dẹp Docker Image rác..."
+              docker image prune -f
+            fi
+            
+            echo "=== [BACKEND] TRIỂN KHAI THÀNH CÔNG! ==="
