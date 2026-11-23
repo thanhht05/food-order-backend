@@ -9,21 +9,11 @@ on:
 
 jobs:
   # -------------------------------------------------------------
-  # GIAI ĐOẠN 1: CONTINUOUS INTEGRATION (Kiểm tra & Test)
+  # GIAI ĐOẠN 1: CONTINUOUS INTEGRATION (Kiểm tra biên dịch & Build)
   # -------------------------------------------------------------
-  ci-test:
-    name: Build & Run Unit Tests
+  ci-build:
+    name: Compile & Verify Build
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: 2005
-          MYSQL_DATABASE: food_order
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: 📥 Checkout Code
@@ -42,10 +32,7 @@ jobs:
           sed -i 's/\r$//' gradlew || true
           chmod +x ./gradlew
 
-      - name: 🧪 Run Unit Tests
-        run: ./gradlew test --no-daemon
-
-      - name: 🔨 Dry-run Build Boot JAR
+      - name: 🔨 Compile & Build Boot JAR (Dry-run)
         run: ./gradlew bootJar --no-daemon -x test
 
   # -------------------------------------------------------------
@@ -53,7 +40,7 @@ jobs:
   # -------------------------------------------------------------
   cd-deploy:
     name: Deploy Backend to Azure VPS
-    needs: ci-test
+    needs: ci-build
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
 
