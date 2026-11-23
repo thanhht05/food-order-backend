@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +30,10 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userService = userService;
     }
 
-    /** Request attribute containing authentication error code (AuthErrorCode) for JwtAuthenticationEntryPoint. */
+    /**
+     * Request attribute containing authentication error code (AuthErrorCode) for
+     * JwtAuthenticationEntryPoint.
+     */
     public static final String AUTH_ERROR_ATTR = "AUTH_ERROR_CODE";
 
     @Override
@@ -40,10 +42,6 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         boolean skip = path.equals("/api/v1/confirm-webhook");
-
-        System.out.println("URI = " + request.getRequestURI());
-        System.out.println("SERVLET PATH = " + path);
-        System.out.println("SKIP JWT = " + skip);
 
         return path.equals("/api/v1/confirm-webhook") || path.equals(
                 "/api/v1/payos_transfer_handler");
@@ -55,8 +53,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = null;
         String username = null;
-        System.out.println("URI = " + request.getRequestURI());
-        System.out.println("SERVLET PATH = " + request.getServletPath());
 
         try {
             // 1. Extract token from Authorization header for standard HTTP requests
@@ -95,7 +91,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
                     // Do not block requests here so permitAll endpoints continue to work.
-                    // JwtAuthenticationEntryPoint reads error code when endpoint requires authentication.
+                    // JwtAuthenticationEntryPoint reads error code when endpoint requires
+                    // authentication.
                     request.setAttribute(AUTH_ERROR_ATTR,
                             !versionOk ? AuthErrorCode.PASSWORD_CHANGED : AuthErrorCode.LOGGED_IN_ELSEWHERE);
                 }
